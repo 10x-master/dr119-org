@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dr.119 본사 관리자 (Super Admin)</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="admin.html"><span class="logo-cross" aria-hidden="true"></span>Dr.<b>119</b> <small>HQ Admin</small></a>
+      <nav class="tabs" role="tablist" aria-label="관리 메뉴">
+        <button role="tab" class="tab" aria-selected="true" aria-controls="tab-orders" id="t-orders">주문 접수함 <span class="count" id="badge-received">0</span></button>
+        <button role="tab" class="tab" aria-selected="false" aria-controls="tab-billing" id="t-billing">월간 총판 정산</button>
+        <button role="tab" class="tab" aria-selected="false" aria-controls="tab-margins" id="t-margins">마진 세팅</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ===================== 1. 주문 접수함 ===================== -->
+    <section id="tab-orders" role="tabpanel" aria-labelledby="t-orders" class="panel">
+      <div class="panel-head">
+        <h1>주문 접수함</h1>
+        <div class="filters">
+          <label>상태
+            <select id="f-status">
+              <option value="">전체</option>
+              <option value="RECEIVED">접수</option>
+              <option value="CONFIRMED">공임 확정·배차</option>
+              <option value="COMPLETED">설치 완료</option>
+              <option value="SHIPPED">발송 완료</option>
+              <option value="CANCELLED">취소</option>
+            </select>
+          </label>
+          <label>옵션
+            <select id="f-type">
+              <option value="">전체</option>
+              <option value="DOCTOR_VISIT">방문 설치</option>
+              <option value="SELF_PICKUP">직접 수령</option>
+            </select>
+          </label>
+          <input type="search" id="f-q" placeholder="연락처·접수번호·agent 검색">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="grid" id="orders-table">
+          <thead>
+            <tr>
+              <th>접수일시</th><th>접수번호</th><th>사진</th><th>연락처</th><th>옵션</th>
+              <th>유입 QR (agent_id)</th><th>배정 총판</th><th class="num">설치 공임비</th><th>상태</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="empty" id="orders-empty" hidden>접수된 주문이 없습니다. <a href="index.html?agent_id=SEOUL_01" target="_blank" rel="noopener">고객 접수 페이지</a>에서 테스트 접수해 보세요.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 2. 월간 총판 정산 ===================== -->
+    <section id="tab-billing" role="tabpanel" aria-labelledby="t-billing" class="panel" hidden>
+      <div class="panel-head">
+        <h1>월간 총판 정산 (Billing)</h1>
+        <div class="filters">
+          <label>정산월 <input type="month" id="bill-month"></label>
+          <button class="btn primary" id="btn-csv" type="button">⬇ 세금계산서용 CSV</button>
+        </div>
+      </div>
+      <p class="hint">지급 예정금 = 설치 공임비 합계 + 부가 수수료 합계 − 본사 차감액 · 공임비 확정일(KST) 기준 월 집계 · 하위 닥터 정산은 총판 자체 처리(시스템 제외)</p>
+      <div class="kpis" id="bill-kpis"></div>
+      <div class="table-wrap">
+        <table class="grid" id="billing-table">
+          <thead>
+            <tr>
+              <th>총판</th><th class="num">설치 건수</th><th class="num">고객 결제 총액</th><th class="num">화물비 (본사)</th>
+              <th class="num">설치 공임비</th><th class="num">부가 수수료</th><th class="num">차감액 (−)</th><th>차감 사유</th><th class="num">지급 예정금</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== 3. 마진 세팅 ===================== -->
+    <section id="tab-margins" role="tabpanel" aria-labelledby="t-margins" class="panel" hidden>
+      <div class="panel-head"><h1>크로스셀링 마진 세팅</h1></div>
+      <div class="cols">
+        <article class="card">
+          <h2>아이템별 총판 쉐어링 마진율</h2>
+          <form id="margin-form">
+            <table class="grid compact" id="margin-table">
+              <thead><tr><th>아이템 ID</th><th>아이템명</th><th class="num">총판 마진율 (%)</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="row-actions">
+              <button type="button" class="btn" id="btn-add-item">+ 아이템 추가</button>
+              <button type="submit" class="btn primary">마진율 저장</button>
+            </div>
+            <p class="form-msg" id="margin-msg" role="status"></p>
+          </form>
+        </article>
+
+        <article class="card">
+          <h2>부가 계약 등록 <small>(보험·정수기·정기구독 등)</small></h2>
+          <p class="hint">식당 연락처를 선택하면 최초 유입 QR(agent_id)이 자동 귀속됩니다. 수수료는 그 agent의 소속 총판에 매월 지급됩니다.</p>
+          <form id="contract-form" class="form-grid">
+            <label>식당 연락처
+              <input list="customer-list" id="c-phone" required placeholder="010-0000-0000">
+              <datalist id="customer-list"></datalist>
+            </label>
+            <label>귀속 agent_id (자동)
+              <input id="c-agent" readonly placeholder="연락처 선택 시 자동">
+            </label>
+            <label>아이템
+              <select id="c-item" required></select>
+            </label>
+            <label>월 금액 (원)
+              <input type="number" id="c-amount" min="0" step="1" required>
+            </label>
+            <label>시작월
+              <input type="month" id="c-start" required>
+            </label>
+            <button type="submit" class="btn primary">계약 등록</button>
+            <p class="form-msg" id="contract-msg" role="status"></p>
+          </form>
+        </article>
+      </div>
+
+      <article class="card">
+        <h2>부가 계약 목록</h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="contract-table">
+            <thead><tr><th>계약ID</th><th>식당</th><th>agent_id → 총판</th><th>아이템</th><th class="num">월 금액</th><th class="num">마진율</th><th class="num">월 총판 수수료</th><th>시작월</th><th>상태</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>파트너(총판·영업 QR) 등록 현황</h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="partner-table">
+            <thead><tr><th>agent_id</th><th>이름</th><th>구분</th><th>소속 총판</th><th>QR 랜딩 URL</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- ===================== 주문 상세 + 정액제 계산기 ===================== -->
+  <dialog id="order-dialog" class="drawer" aria-labelledby="od-title">
+    <form method="dialog" class="drawer-head">
+      <h2 id="od-title">주문 상세</h2>
+      <button class="icon-btn" value="close" aria-label="닫기">✕</button>
+    </form>
+    <div class="drawer-body" id="od-body"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="dr119-core.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

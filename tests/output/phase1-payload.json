@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "order_id": "DR-20261114-L3CZQ",
+  "created_at": "2026-11-14T09:59:54.172Z",
+  "customer": {
+    "phone": "010-1234-5678"
+  },
+  "service": {
+    "type": "DOCTOR_VISIT",
+    "label": "전문 닥터 방문 설치 (정액 40만 원)",
+    "fixed_price": 400000,
+    "freight_payment": "INCLUDED"
+  },
+  "attribution": {
+    "agent_id": "SEOUL_01",
+    "model": "FIRST_TOUCH",
+    "first_touch_at": "2026-11-14T09:59:53.141Z",
+    "landing_url": "http://127.0.0.1:50063/index.html?agent_id=seoul_01"
+  },
+  "media": [
+    {
+      "name": "broken-part.png",
+      "type": "image/jpeg",
+      "size": 12207,
+      "original_type": "image/png",
+      "width": 2000,
+      "height": 1500,
+      "data_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX…(생략)",
+      "thumb_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX…"
+    },
+    {
+      "name": "broken-part.mp4",
+      "type": "video/mp4",
+      "size": 2048,
+      "data_url": "data:video/mp4;base64,BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBw…(생략)",
+      "thumb_url": null
+    }
+  ],
+  "client": {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "submitted_url": "http://127.0.0.1:50063/index.html?agent_id=BUSAN_01"
+  }
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dr.119 파트너 대시보드 (총판·닥터)</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="partner">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="partner.html"><span class="logo-cross" aria-hidden="true"></span>Dr.<b>119</b> <small>Partner</small></a>
+      <span class="spacer"></span>
+      <label class="who">접속 총판
+        <select id="partner-select" aria-label="접속 총판 선택"></select>
+      </label>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="panel-head">
+      <h1 id="partner-title">파트너 대시보드</h1>
+      <span class="live" id="live">실시간 동기화 · <span id="month-label"></span></span>
+    </div>
+
+    <!-- 패시브 인컴 모니터링 KPI -->
+    <section aria-labelledby="kpi-title">
+      <h2 id="kpi-title" class="sr-only" style="position:absolute;left:-9999px">이번 달 확정 수수료</h2>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <!-- 1. 오더 수신함 -->
+    <section aria-labelledby="inbox-title">
+      <div class="section-title">
+        <h2 id="inbox-title">📥 오더 수신함 <small>본사 확정 설치 공임비</small></h2>
+        <label class="filters">
+          <select id="inbox-filter" aria-label="오더 상태 필터">
+            <option value="CONFIRMED">신규 (설치 대기)</option>
+            <option value="COMPLETED">설치 완료</option>
+            <option value="">전체</option>
+          </select>
+        </label>
+      </div>
+      <div class="order-cards" id="inbox"></div>
+      <p class="empty" id="inbox-empty" hidden>배차된 오더가 없습니다.</p>
+    </section>
+
+    <!-- 2. 내 식당 현황 -->
+    <section aria-labelledby="acc-title">
+      <div class="section-title">
+        <h2 id="acc-title">🍽️ 내 식당 (My Accounts) <small>내 QR로 유입된 식당</small></h2>
+        <select id="agent-filter" aria-label="QR(영업자) 필터"></select>
+      </div>
+      <div class="table-wrap">
+        <table class="grid" id="acc-table">
+          <thead><tr><th>식당 연락처</th><th>유입 QR (agent_id)</th><th>최초 유입일</th><th class="num">접수 건수</th><th>최근 상태</th><th class="num">활성 부가계약</th><th class="num">이번 달 수수료</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. 패시브 인컴 상세 -->
+    <section aria-labelledby="pi-title">
+      <div class="section-title">
+        <h2 id="pi-title">💰 패시브 인컴 상세 <small>정기 구독·보험·렌탈 부가 마진</small></h2>
+      </div>
+      <div class="table-wrap">
+        <table class="grid" id="pi-table">
+          <thead><tr><th>계약ID</th><th>식당</th><th>agent_id</th><th>아이템</th><th class="num">월 금액</th><th class="num">쉐어링 마진율</th><th class="num">이번 달 확정 수수료</th></tr></thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. 내 QR 링크 -->
+    <section aria-labelledby="qr-title">
+      <div class="section-title"><h2 id="qr-title">🔗 내 영업 QR 링크</h2></div>
+      <div class="table-wrap">
+        <table class="grid compact" id="qr-table">
+          <thead><tr><th>agent_id</th><th>이름</th><th>구분</th><th>QR 랜딩 URL (스티커용)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint" style="margin-top:8px">하위 닥터 정산은 총판 자체 처리 대상이며, 본 화면 금액은 본사 → 총판 지급 기준입니다.</p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="dr119-core.js"></script>
+  <script src="partner.js"></script>
+</body>
+</html>
