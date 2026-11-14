@@ -7,7 +7,10 @@ const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
 
 test('schema.sql 실행: 시드 데이터 및 40만 원 정액제 CHECK 제약 검증', () => {
-  const sql = fs.readFileSync(path.join(__dirname, '..', 'schema.sql'), 'utf8');
+  const rawSql = fs.readFileSync(path.join(__dirname, '..', 'schema.sql'), 'utf8');
+  const sql = rawSql
+    .replace(/::jsonb\b/gi, '')
+    .replace(/^\s*(ALTER TABLE\b[^\n;]*ROW LEVEL SECURITY|DROP POLICY\b[^\n;]*|CREATE POLICY\b[^\n;]*|GRANT\b[^\n;]*|NOTIFY\b[^\n;]*);\s*$/gim, '');
   const db = new DatabaseSync(':memory:');
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(sql);

@@ -428,11 +428,21 @@
 
   /* ------------------------------------------------------------ 부트 */
   function refresh() { return loadAll().then(renderAll); }
+  function safeRefresh() {
+    if (dlg.open || dlg.hasAttribute('open')) return;
+    var active = document.activeElement;
+    if (active && /^(INPUT|SELECT|TEXTAREA)$/.test(active.tagName)) return;
+    refresh();
+  }
 
-  // 다른 탭(고객 접수/파트너)에서 데이터 변경 시 실시간 반영
+  // 다른 탭(고객 접수/파트너) 또는 다른 기기에서 데이터 변경 시 실시간 반영
   window.addEventListener('storage', function (e) {
     if (e.key && e.key.indexOf('dr119_') === 0) refresh();
   });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) safeRefresh();
+  });
+  setInterval(safeRefresh, 15000);
 
   refresh().then(function () {
     var h = location.hash.replace('#', '');

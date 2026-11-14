@@ -187,9 +187,10 @@
 
   function refresh() { return load().then(render); }
 
-  // 실시간: 본사/고객 탭에서 변경되면 즉시 갱신 + 월 경계 대비 1분 주기 재계산
+  // 실시간: 본사/고객 탭 또는 다른 기기 변경 시 즉시 갱신
   window.addEventListener('storage', function (e) { if (e.key && e.key.indexOf('dr119_') === 0) refresh(); });
-  setInterval(refresh, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
+  setInterval(refresh, 15000);
 
   refresh();
   window.__DR119_PARTNER__ = { state: state, refresh: refresh };

@@ -1,9 +1,9 @@
 /*!
- * Dr.119 Core — 공통 비즈니스 로직 + Mock API 계층
+ * Dr.119 Core — 공통 비즈니스 로직 + Supabase / Mock API 계층
  * ------------------------------------------------------------------
  * - 순수 함수(계산/귀속/정산/CSV)는 DOM 의존성이 없어 Node에서 단위 테스트 가능.
- * - Mock API는 localStorage에 JSON으로 저장한다. 백엔드 연동 시 Dr119.api.* 내부만
- *   fetch()로 교체하면 각 페이지 코드는 수정할 필요가 없다. (모든 메서드는 Promise 반환)
+ * - 배포 환경에서는 Supabase PostgREST API를 사용하고, Node 및 127.0.0.1 E2E
+ *   테스트 환경에서는 localStorage Mock을 사용한다. (모든 메서드는 Promise 반환)
  */
 (function (root, factory) {
   'use strict';
@@ -16,6 +16,9 @@
   /* ================================================================
    * 1. 상수
    * ================================================================ */
+  var SUPABASE_URL = 'https://acpibgztyugrcdrpiiuk.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjcGliZ3p0eXVncmNkcnBpaXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NzQwMTcsImV4cCI6MjExMDI1MDAxN30._CJvLsBUjElopRVhDAKioa8Yj9GAOj1tsAfsvNXdgW4';
+
   /** 고객 결제 총액 (화물비 + 설치비 정액) — 변경 금지 */
   var FIXED_PRICE = 400000;
 
@@ -314,7 +317,7 @@
   ];
 
   /* ================================================================
-   * 8. Mock API (localStorage JSON). 백엔드 연동 시 이 블록만 교체.
+   * 8. API 계층 (배포: Supabase PostgreSQL REST / 로컬·테스트: localStorage Mock)
    * ================================================================ */
   var storage = (function () {
     try { if (root.localStorage) return root.localStorage; } catch (e) { /* 접근 불가 */ }
@@ -350,9 +353,122 @@
     return o;
   }
 
+  /** 프론트엔드 주문 객체 → public.orders DB 행 변환 */
+  function orderToRow(o) {
+    var svc = o.service || {};
+    var attr = o.attribution || {};
+    var set = o.settlement || null;
+    return {
+      order_id: o.order_id,
+      created_at: o.created_at,
+      customer_phone: o.customer ? o.customer.phone : '',
+      service_type: svc.type,
+      fixed_price: Number(svc.fixed_price) || 0,
+      freight_payment: svc.freight_payment || (svc.type === 'DOCTOR_VISIT' ? 'INCLUDED' : 'COD'),
+      agent_id: sanitizeAgentId(attr.agent_id),
+      first_touch_at: attr.first_touch_at || null,
+      landing_url: attr.landing_url || null,
+      assigned_distributor_id: o.assigned_distributor_id || HQ_ID,
+      status: o.status || 'RECEIVED',
+      freight_cost: set ? set.freight_cost : null,
+      labor_fee: set ? set.labor_fee : null,
+      confirmed_at: set ? (set.confirmed_at || null) : null,
+      media: o.media || [],
+      history: o.history || []
+    };
+  }
+
+  /** public.orders DB 행 → 프론트엔드 주문 객체 변환 */
+  function rowToOrder(r) {
+    var svc = SERVICE_TYPES[r.service_type] || {
+      code: r.service_type,
+      label: r.service_type,
+      fixed_price: Number(r.fixed_price) || 0,
+      freight_payment: r.freight_payment || 'COD'
+    };
+    var hasSettlement = r.freight_cost !== null && r.freight_cost !== undefined &&
+      r.labor_fee !== null && r.labor_fee !== undefined;
+    return {
+      schema_version: 1,
+      order_id: r.order_id,
+      created_at: r.created_at,
+      customer: { phone: r.customer_phone },
+      service: {
+        type: r.service_type,
+        label: svc.label,
+        fixed_price: r.fixed_price !== null && r.fixed_price !== undefined ? Number(r.fixed_price) : svc.fixed_price,
+        freight_payment: r.freight_payment || svc.freight_payment
+      },
+      attribution: {
+        agent_id: r.agent_id || null,
+        model: 'FIRST_TOUCH',
+        first_touch_at: r.first_touch_at || null,
+        landing_url: r.landing_url || null
+      },
+      assigned_distributor_id: r.assigned_distributor_id || HQ_ID,
+      status: r.status || 'RECEIVED',
+      settlement: hasSettlement ? {
+        fixed_price: Number(r.fixed_price) || FIXED_PRICE,
+        freight_cost: Number(r.freight_cost),
+        labor_fee: Number(r.labor_fee),
+        confirmed_at: r.confirmed_at || null,
+        confirmed_by: 'HQ_ADMIN'
+      } : null,
+      media: Array.isArray(r.media) ? r.media : [],
+      history: Array.isArray(r.history) ? r.history : []
+    };
+  }
+
+  /** 127.0.0.1 로컬 E2E 및 Node 테스트에서는 Mock 사용, 배포 도메인에서는 Supabase 사용 */
+  function useRemoteDB() {
+    if (root && root.__DR119_USE_SUPABASE__ === true) return true;
+    if (root && root.__DR119_USE_SUPABASE__ === false) return false;
+    if (typeof window === 'undefined' || !root.location) return false;
+    var host = root.location.hostname || '';
+    if (!host || host === '127.0.0.1') return false;
+    return typeof fetch === 'function';
+  }
+
+  function sbFetch(path, options) {
+    var opts = options || {};
+    var headers = Object.assign({
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    }, opts.headers || {});
+    return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (txt) {
+          var msg = txt;
+          try { var j = JSON.parse(txt); msg = j.message || j.error || txt; } catch (e) {}
+          throw new Error('Supabase API 오류 (' + res.status + '): ' + msg);
+        });
+      }
+      if (res.status === 204) return null;
+      return res.text().then(function (txt) { return txt ? JSON.parse(txt) : null; });
+    });
+  }
+
   var api = {
     // --- 주문 ---
     submitOrder: function (payload) {
+      if (useRemoteDB()) {
+        return api.getPartners().then(function (partners) {
+          var stored = toStoredOrder(payload, partners);
+          return sbFetch('orders', {
+            method: 'POST',
+            headers: { Prefer: 'return=representation' },
+            body: orderToRow(stored)
+          }).then(function () {
+            try { var orders = read(KEYS.ORDERS, []); orders.unshift(stored); write(KEYS.ORDERS, orders); } catch (e) {}
+            return { ok: true, order_id: stored.order_id };
+          });
+        });
+      }
       var partners = read(KEYS.PARTNERS, SEED_PARTNERS);
       var orders = read(KEYS.ORDERS, []);
       var stored = toStoredOrder(payload, partners);
@@ -364,12 +480,50 @@
       }
       return Promise.resolve({ ok: true, order_id: stored.order_id });
     },
-    listOrders: function () { return Promise.resolve(read(KEYS.ORDERS, [])); },
+    listOrders: function () {
+      if (useRemoteDB()) {
+        return sbFetch('orders?select=*&order=created_at.desc').then(function (rows) {
+          return (rows || []).map(rowToOrder);
+        });
+      }
+      return Promise.resolve(read(KEYS.ORDERS, []));
+    },
     getOrder: function (id) {
+      if (useRemoteDB()) {
+        return sbFetch('orders?order_id=eq.' + encodeURIComponent(id) + '&select=*').then(function (rows) {
+          return rows && rows[0] ? rowToOrder(rows[0]) : null;
+        });
+      }
       return Promise.resolve(read(KEYS.ORDERS, []).find(function (o) { return o.order_id === id; }) || null);
     },
     /** 정액제 확정: 서버에서도 동일 공식으로 재계산(클라이언트 값 불신) */
     confirmSettlement: function (orderId, freightCost, distributorId) {
+      if (useRemoteDB()) {
+        return api.getOrder(orderId).then(function (o) {
+          if (!o) throw new Error('주문을 찾을 수 없습니다.');
+          if (o.service.type !== 'DOCTOR_VISIT') throw new Error('방문 설치 건만 공임비를 확정할 수 있습니다.');
+          if (o.status === 'COMPLETED' || o.status === 'CANCELLED') throw new Error('완료/취소된 주문은 수정할 수 없습니다.');
+          var calc = calcLaborFee(freightCost);
+          var now = new Date().toISOString();
+          var confirmedAt = (o.settlement && o.settlement.confirmed_at) || now;
+          var nextHistory = (o.history || []).concat([{ at: now, status: 'CONFIRMED', by: 'HQ_ADMIN', labor_fee: calc.labor_fee }]);
+          var patchBody = {
+            freight_cost: calc.freight_cost,
+            labor_fee: calc.labor_fee,
+            confirmed_at: confirmedAt,
+            status: 'CONFIRMED',
+            history: nextHistory
+          };
+          if (distributorId) patchBody.assigned_distributor_id = distributorId;
+          return sbFetch('orders?order_id=eq.' + encodeURIComponent(orderId), {
+            method: 'PATCH',
+            headers: { Prefer: 'return=representation' },
+            body: patchBody
+          }).then(function (rows) {
+            return rows && rows[0] ? rowToOrder(rows[0]) : null;
+          });
+        });
+      }
       var orders = read(KEYS.ORDERS, []);
       var o = orders.find(function (x) { return x.order_id === orderId; });
       if (!o) return Promise.reject(new Error('주문을 찾을 수 없습니다.'));
@@ -393,10 +547,24 @@
       return Promise.resolve(clone(o));
     },
     updateOrderStatus: function (orderId, status, by) {
+      if (!ORDER_STATUS[status]) return Promise.reject(new Error('잘못된 상태값'));
+      if (useRemoteDB()) {
+        return api.getOrder(orderId).then(function (o) {
+          if (!o) throw new Error('주문을 찾을 수 없습니다.');
+          var now = new Date().toISOString();
+          var nextHistory = (o.history || []).concat([{ at: now, status: status, by: by || 'HQ_ADMIN' }]);
+          return sbFetch('orders?order_id=eq.' + encodeURIComponent(orderId), {
+            method: 'PATCH',
+            headers: { Prefer: 'return=representation' },
+            body: { status: status, history: nextHistory }
+          }).then(function (rows) {
+            return rows && rows[0] ? rowToOrder(rows[0]) : null;
+          });
+        });
+      }
       var orders = read(KEYS.ORDERS, []);
       var o = orders.find(function (x) { return x.order_id === orderId; });
       if (!o) return Promise.reject(new Error('주문을 찾을 수 없습니다.'));
-      if (!ORDER_STATUS[status]) return Promise.reject(new Error('잘못된 상태값'));
       var now = new Date().toISOString();
       o.status = status;
       o.history = (o.history || []).concat([{ at: now, status: status, by: by || 'HQ_ADMIN' }]);
@@ -405,19 +573,69 @@
     },
 
     // --- 파트너/마진/계약/차감 ---
-    getPartners: function () { return Promise.resolve(read(KEYS.PARTNERS, SEED_PARTNERS)); },
-    getMargins: function () { return Promise.resolve(read(KEYS.MARGINS, SEED_MARGINS)); },
+    getPartners: function () {
+      if (useRemoteDB()) {
+        return Promise.all([
+          sbFetch('distributors?select=*&order=id.asc'),
+          sbFetch('agents?select=*&order=agent_id.asc')
+        ]).then(function (res) {
+          return { distributors: res[0] || [], agents: res[1] || [] };
+        });
+      }
+      return Promise.resolve(read(KEYS.PARTNERS, SEED_PARTNERS));
+    },
+    getMargins: function () {
+      if (useRemoteDB()) {
+        return sbFetch('margins?select=*&order=id.asc').then(function (rows) {
+          return (rows || []).map(function (m) {
+            return { id: m.id, name: m.name, share_pct: Number(m.share_pct) };
+          });
+        });
+      }
+      return Promise.resolve(read(KEYS.MARGINS, SEED_MARGINS));
+    },
     saveMargins: function (margins) {
       for (var i = 0; i < margins.length; i++) {
         var p = Number(margins[i].share_pct);
         if (!Number.isFinite(p) || p < 0 || p > 100) return Promise.reject(new Error('마진율은 0~100% 사이여야 합니다.'));
         if (!margins[i].id || !margins[i].name) return Promise.reject(new Error('아이템 ID와 이름은 필수입니다.'));
       }
+      if (useRemoteDB()) {
+        var rows = margins.map(function (m) {
+          return { id: m.id, name: m.name, share_pct: Number(m.share_pct) };
+        });
+        var upsertPromise = rows.length
+          ? sbFetch('margins?on_conflict=id', {
+              method: 'POST',
+              headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+              body: rows
+            })
+          : Promise.resolve([]);
+        return upsertPromise.then(function () {
+          return api.getMargins();
+        }).then(function (existing) {
+          var keep = {};
+          rows.forEach(function (r) { keep[r.id] = true; });
+          var toDelete = existing.filter(function (e) { return !keep[e.id]; }).map(function (e) { return e.id; });
+          if (!toDelete.length) return rows;
+          return Promise.all(toDelete.map(function (id) {
+            return sbFetch('margins?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+          })).then(function () { return rows; });
+        });
+      }
       return Promise.resolve(write(KEYS.MARGINS, margins));
     },
-    getContracts: function () { return Promise.resolve(read(KEYS.CONTRACTS, [])); },
+    getContracts: function () {
+      if (useRemoteDB()) {
+        return sbFetch('contracts?select=*&order=created_at.desc').then(function (rows) {
+          return (rows || []).map(function (c) {
+            return Object.assign({}, c, { monthly_amount: Number(c.monthly_amount) || 0 });
+          });
+        });
+      }
+      return Promise.resolve(read(KEYS.CONTRACTS, []));
+    },
     addContract: function (c) {
-      var list = read(KEYS.CONTRACTS, []);
       var rec = {
         contract_id: 'CT-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase(),
         customer_phone: c.customer_phone,
@@ -429,23 +647,70 @@
         status: 'ACTIVE',
         created_at: new Date().toISOString()
       };
+      if (useRemoteDB()) {
+        return sbFetch('contracts', {
+          method: 'POST',
+          headers: { Prefer: 'return=representation' },
+          body: rec
+        }).then(function (rows) {
+          var saved = rows && rows[0] ? rows[0] : rec;
+          return Object.assign({}, saved, { monthly_amount: Number(saved.monthly_amount) || 0 });
+        });
+      }
+      var list = read(KEYS.CONTRACTS, []);
       list.unshift(rec);
       write(KEYS.CONTRACTS, list);
       return Promise.resolve(rec);
     },
     cancelContract: function (id) {
+      if (useRemoteDB()) {
+        return sbFetch('contracts?contract_id=eq.' + encodeURIComponent(id), {
+          method: 'PATCH',
+          headers: { Prefer: 'return=representation' },
+          body: { status: 'CANCELLED' }
+        }).then(function (rows) {
+          return rows && rows[0] ? rows[0] : null;
+        });
+      }
       var list = read(KEYS.CONTRACTS, []);
       var c = list.find(function (x) { return x.contract_id === id; });
       if (c) { c.status = 'CANCELLED'; write(KEYS.CONTRACTS, list); }
       return Promise.resolve(c || null);
     },
-    getPenalties: function () { return Promise.resolve(read(KEYS.PENALTIES, {})); },
+    getPenalties: function () {
+      if (useRemoteDB()) {
+        return sbFetch('penalties?select=*').then(function (rows) {
+          var map = {};
+          (rows || []).forEach(function (r) {
+            map[r.month] = map[r.month] || {};
+            map[r.month][r.distributor_id] = {
+              amount: Number(r.amount) || 0,
+              memo: r.memo || '',
+              updated_at: r.updated_at || null
+            };
+          });
+          return map;
+        });
+      }
+      return Promise.resolve(read(KEYS.PENALTIES, {}));
+    },
     setPenalty: function (month, distributorId, amount, memo) {
       var a = Math.abs(Number(amount) || 0);
       if (!Number.isInteger(a)) return Promise.reject(new Error('차감액은 원 단위 정수여야 합니다.'));
+      var now = new Date().toISOString();
+      if (useRemoteDB()) {
+        var row = { month: month, distributor_id: distributorId, amount: a, memo: memo || '', updated_at: now };
+        return sbFetch('penalties?on_conflict=month,distributor_id', {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+          body: row
+        }).then(function () {
+          return { amount: a, memo: memo || '', updated_at: now };
+        });
+      }
       var all = read(KEYS.PENALTIES, {});
       all[month] = all[month] || {};
-      all[month][distributorId] = { amount: a, memo: memo || '', updated_at: new Date().toISOString() };
+      all[month][distributorId] = { amount: a, memo: memo || '', updated_at: now };
       write(KEYS.PENALTIES, all);
       return Promise.resolve(all[month][distributorId]);
     },
@@ -456,6 +721,7 @@
   };
 
   return {
+    SUPABASE_URL: SUPABASE_URL,
     FIXED_PRICE: FIXED_PRICE,
     SERVICE_TYPES: SERVICE_TYPES,
     ORDER_STATUS: ORDER_STATUS,
@@ -479,6 +745,9 @@
     normalizePhone: normalizePhone,
     generateOrderId: generateOrderId,
     escapeHTML: escapeHTML,
+    orderToRow: orderToRow,
+    rowToOrder: rowToOrder,
+    useRemoteDB: useRemoteDB,
     SEED_PARTNERS: SEED_PARTNERS,
     SEED_MARGINS: SEED_MARGINS,
     api: api

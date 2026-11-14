@@ -98,3 +98,43 @@ test('CSV 이스케이프 및 수식 인젝션 방지', () => {
   const csv = D.toCSV(['a', 'b'], [['=SUM(A1)', 'x,"y"'], [-500, '-abc']]);
   assert.equal(csv, '\uFEFFa,b\r\n\'=SUM(A1),"x,""y"""\r\n-500,\'-abc');
 });
+
+test('Supabase orders 테이블 행 왕복 변환 (orderToRow / rowToOrder)', () => {
+  const sample = {
+    schema_version: 1,
+    order_id: 'DR-20261115-ABC12',
+    created_at: '2026-11-14T21:00:00.000Z',
+    customer: { phone: '010-1234-5678' },
+    service: {
+      type: 'DOCTOR_VISIT',
+      label: D.SERVICE_TYPES.DOCTOR_VISIT.label,
+      fixed_price: 400000,
+      freight_payment: 'INCLUDED'
+    },
+    attribution: {
+      agent_id: 'SEOUL_01',
+      model: 'FIRST_TOUCH',
+      first_touch_at: '2026-11-14T20:59:00.000Z',
+      landing_url: 'https://10x-master.github.io/dr119-org/?agent_id=SEOUL_01'
+    },
+    assigned_distributor_id: 'DIST_SEOUL',
+    status: 'CONFIRMED',
+    settlement: {
+      fixed_price: 400000,
+      freight_cost: 150000,
+      labor_fee: 250000,
+      confirmed_at: '2026-11-14T21:05:00.000Z',
+      confirmed_by: 'HQ_ADMIN'
+    },
+    media: [{ name: 'photo.jpg', type: 'image/jpeg', size: 1024, thumb_url: 'data:image/jpeg;base64,AA==' }],
+    history: [{ at: '2026-11-14T21:00:00.000Z', status: 'RECEIVED', by: 'CUSTOMER' }]
+  };
+  const row = D.orderToRow(sample);
+  assert.equal(row.order_id, 'DR-20261115-ABC12');
+  assert.equal(row.customer_phone, '010-1234-5678');
+  assert.equal(row.freight_cost, 150000);
+  assert.equal(row.labor_fee, 250000);
+  assert.deepEqual(D.rowToOrder(row), sample);
+  const pendingRow = D.orderToRow({ ...sample, status: 'RECEIVED', settlement: null });
+  assert.equal(D.rowToOrder(pendingRow).settlement, null);
+});

@@ -110,3 +110,34 @@ INSERT INTO margins (id, name, share_pct) VALUES
   ('INSURANCE', '영업배상 보험', 20),
   ('WATER_PURIFIER', '정수기 렌탈', 15)
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- Supabase RLS (Row Level Security) 및 PostgREST anon/authenticated 권한
+-- ============================================================================
+ALTER TABLE distributors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE margins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE penalties ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "allow_all_distributors" ON distributors;
+CREATE POLICY "allow_all_distributors" ON distributors FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_agents" ON agents;
+CREATE POLICY "allow_all_agents" ON agents FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_orders" ON orders;
+CREATE POLICY "allow_all_orders" ON orders FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_margins" ON margins;
+CREATE POLICY "allow_all_margins" ON margins FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_contracts" ON contracts;
+CREATE POLICY "allow_all_contracts" ON contracts FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_penalties" ON penalties;
+CREATE POLICY "allow_all_penalties" ON penalties FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON distributors, agents, orders, margins, contracts, penalties TO anon, authenticated;
+NOTIFY pgrst, 'reload schema';
