@@ -1,13 +1,13 @@
-/* Dr.119 — Phase 2/3 Admin & Partner Dashboard (All-White Hairline + Print & Mobile Ready) */
+/* Dr.119 — Phase 2/3 Admin & Partner Dashboard (lge.co.kr Design System + Print & Mobile Ready) */
 :root {
   --bg: #ffffff;
-  --surface: #ffffff;
-  --ink: #0f1e36;          /* Deep Navy — 주조 타이포 및 구조선 */
-  --ink-soft: #475569;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --line-strong: #cbd5e1;
-  --red: #d7141a;          /* Focal Red — 핵심 CTA/경고 */
+  --surface: #f4f4f4;
+  --ink: #111111;          /* LG Charcoal — 주조 타이포 */
+  --ink-soft: #333333;
+  --muted: #666666;
+  --line: #e5e5e5;
+  --line-strong: #d4d4d4;
+  --red: #a50034;          /* LG Heritage Red — 핵심 CTA/경고 */
   --ok: #0f766e;
   --warn: #b45309;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -18,7 +18,8 @@
 html { background: #ffffff; }
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+  font-family: "Pretendard", "LG Smart", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  letter-spacing: -0.02em;
   background: #ffffff;
   color: var(--ink);
   font-size: 14px;
@@ -62,10 +63,17 @@ body {
 }
 .logo b { color: var(--red); }
 .logo small { font-weight: 600; color: var(--muted); margin-left: 2px; font-size: 0.82rem; }
-.logo-cross { width: 16px; height: 16px; position: relative; }
-.logo-cross::before, .logo-cross::after { content: ""; position: absolute; background: var(--red); }
-.logo-cross::before { left: 6px; top: 1px; width: 4px; height: 14px; }
-.logo-cross::after { left: 1px; top: 6px; width: 14px; height: 4px; }
+.logo-cross {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+}
+.logo-cross::before, .logo-cross::after { content: ""; position: absolute; background: #ffffff; border-radius: 1px; }
+.logo-cross::before { left: 10px; top: 5px; width: 4px; height: 14px; }
+.logo-cross::after { left: 5px; top: 10px; width: 14px; height: 4px; }
 
 .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .tab {
@@ -108,8 +116,9 @@ body {
 .topbar select {
   background: #ffffff;
   color: var(--ink);
-  border: 1px solid var(--ink);
-  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 6px 12px;
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -149,8 +158,9 @@ body {
 .filters label { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--ink-soft); font-weight: 700; }
 .filters select, .filters input {
   height: 36px;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--line-strong);
+  border-radius: 8px;
   background: #ffffff;
   color: var(--ink);
   font-size: 0.88rem;
@@ -172,8 +182,8 @@ body {
   gap: 6px;
 }
 .btn:hover { border-color: var(--red); color: var(--red); }
-.btn.primary { background: var(--ink); color: #ffffff; border-color: var(--ink); }
-.btn.primary:hover { background: var(--red); border-color: var(--red); color: #ffffff; }
+.btn.primary { background: var(--red); color: #ffffff; border-color: var(--red); }
+.btn.primary:hover { background: #ea1917; border-color: #ea1917; color: #ffffff; }
 .btn.danger { color: var(--red); border-color: var(--red); background: #ffffff; }
 .btn.small { height: 28px; padding: 0 10px; font-size: 0.8rem; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -189,8 +199,10 @@ body {
 /* ---------- Tables (회색 카드 배경·그림자 제거, 올 화이트 + 헤어라인) ---------- */
 .table-wrap {
   background: #ffffff;
+  border: 1px solid var(--line);
   border-top: 2px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -265,9 +277,11 @@ table.grid.compact { min-width: 520px; }
 }
 .kpi {
   background: #ffffff;
+  border: 1px solid var(--line);
   border-top: 2px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  padding: 14px 4px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  padding: 16px 14px;
 }
 .kpi .label { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
 .kpi .value {
@@ -286,8 +300,11 @@ table.grid.compact { min-width: 520px; }
 .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; }
 .card {
   background: #ffffff;
+  border: 1px solid var(--line);
   border-top: 2px solid var(--ink);
-  padding: 18px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  padding: 20px;
   margin-bottom: 24px;
 }
 .card h2 { margin: 0 0 12px; font-size: 1.08rem; font-weight: 900; color: var(--ink); }
@@ -489,10 +506,12 @@ dialog.drawer::backdrop { background: rgba(15, 30, 54, 0.35); }
 .auth-box {
   max-width: 440px;
   margin: 0 auto;
-  padding: 28px 24px;
+  padding: 32px 28px;
   background: #ffffff;
-  border: 1.5px solid var(--ink);
+  border: 1px solid var(--line);
   border-top: 3px solid var(--red);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 .auth-kicker {
   display: inline-block;
@@ -538,7 +557,7 @@ dialog.drawer::backdrop { background: rgba(15, 30, 54, 0.35); }
   color: var(--ink);
   font-size: 0.96rem;
   font-weight: 700;
-  border-radius: 0;
+  border-radius: 8px;
 }
 .auth-input-row input:focus {
   outline: none;
@@ -572,6 +591,27 @@ dialog.drawer::backdrop { background: rgba(15, 30, 54, 0.35); }
   font-weight: 600;
 }
 .auth-foot a:hover { color: var(--red); }
+
+/* ---------- lge.co.kr Header, Control & Card Polish ---------- */
+html, body, .topbar { background: #ffffff; }
+.topbar { border-bottom: 1px solid var(--line); }
+.btn {
+  border-color: var(--line-strong);
+  border-radius: 8px;
+}
+.calc {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+}
+.order-card {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+}
 
 /* ---------- Mobile & Print ---------- */
 @media (max-width: 640px) {
