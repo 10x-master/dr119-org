@@ -135,7 +135,7 @@
         listening = true;
         voiceBtn.classList.add('listening');
         voiceBtn.setAttribute('aria-pressed', 'true');
-        voiceBtn.innerHTML = '<span aria-hidden="true">⏹️</span> 음성 입력 멈추기';
+        voiceBtn.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12"/></svg><span>음성 입력 멈추기</span>';
         voiceStatus.textContent = '듣고 있습니다… 고장 증상을 말씀해 주세요.';
       };
       recognition.onresult = function (ev) {
@@ -158,7 +158,7 @@
         listening = false;
         voiceBtn.classList.remove('listening');
         voiceBtn.setAttribute('aria-pressed', 'false');
-        voiceBtn.innerHTML = '<span aria-hidden="true">🎙️</span> 말로 증상 적기';
+        voiceBtn.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg><span>말로 증상 적기</span>';
         if (!voiceStatus.textContent.includes('오류') && !voiceStatus.textContent.includes('권한')) {
           voiceStatus.textContent = committedText ? '음성 입력이 메모에 반영되었습니다.' : '';
         }

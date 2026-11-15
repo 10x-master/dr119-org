@@ -10,7 +10,7 @@
 <body class="admin">
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="logo" href="admin.html"><span class="logo-cross" aria-hidden="true"></span>Dr.<b>119</b> <small>HQ Admin</small></a>
+      <a class="logo" href="admin.html"><span class="logo-cross" aria-hidden="true"></span>Dr.<b>119</b> <small>본사 관제</small></a>
       <nav class="tabs" id="admin-nav" role="tablist" aria-label="관리 메뉴" hidden>
         <button role="tab" class="tab" aria-selected="true" aria-controls="tab-orders" id="t-orders">주문 접수함 <span class="count" id="badge-received">0</span></button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-billing" id="t-billing">월간 총판 정산</button>
@@ -26,7 +26,7 @@
   <!-- ===================== 본사 관리자 비밀번호 잠금 화면 ===================== -->
   <section id="admin-auth-gate" class="auth-gate" aria-labelledby="auth-title">
     <div class="auth-box">
-      <span class="auth-kicker">HQ SUPER ADMIN · 접근 제한</span>
+      <span class="auth-kicker">본사 통합 관제 · 관리자 전용</span>
       <h1 id="auth-title">본사 관리자 모드 인증</h1>
       <p class="auth-desc">주문 접수·화물 실비 확정·총판 정산·센터 관제를 열람하려면 본사 관리자 비밀번호를 입력해 주세요.</p>
       <form id="admin-auth-form" class="auth-form" novalidate>
@@ -93,10 +93,10 @@
     <!-- ===================== 2. 월간 총판 정산 ===================== -->
     <section id="tab-billing" role="tabpanel" aria-labelledby="t-billing" class="panel" hidden>
       <div class="panel-head">
-        <h1>월간 총판 정산 (Billing)</h1>
+        <h1>월간 총판 정산</h1>
         <div class="filters">
           <label>정산월 <input type="month" id="bill-month"></label>
-          <button class="btn primary" id="btn-csv" type="button">⬇ 세금계산서용 CSV</button>
+          <button class="btn primary" id="btn-csv" type="button">세금계산서용 CSV 다운로드</button>
           <button class="btn" type="button" onclick="window.print()">정산서 인쇄</button>
         </div>
       </div>

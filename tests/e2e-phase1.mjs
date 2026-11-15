@@ -31,13 +31,17 @@ try {
       priceLeak: /40만|400,000|착불/.test(t),
       banners: t.includes('한국AI인테리어공간협회') && t.includes('중소기업사업전환지원단') && t.includes('투데이 플랫폼'),
       excludesOrion: !t.includes('오리온이앤에스') && !kw.includes('오리온'),
+      noAiLabels: !/Transparent Cost|HQ Quality|Customer Protection|Answer Engine|SYSTEM 01|POLICY 01|PARTNER TRACK|COOPERATIVE & SUPPORT/i.test(t),
+      noEmojis: !/[📸🖼️🎙️⏹️]/.test(t),
+      hasBlueprint: !!document.querySelector('.washer-blueprint'),
       controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn')),
       kwLen: kw.length
     };
   })()`);
-  check(R, '올 화이트 + 가격 미노출 + 3대 배너(오리온 제외) + 카메라/음성/카카오 + SEO',
+  check(R, '올 화이트 + 가격 미노출 + 3대 배너(오리온 제외) + 탈AI/도면 + 카메라/음성/카카오 + SEO',
     designAudit.bgBody === 'rgb(255, 255, 255)' && designAudit.bgHead === 'rgb(255, 255, 255)' &&
     !designAudit.priceLeak && designAudit.banners && designAudit.excludesOrion &&
+    designAudit.noAiLabels && designAudit.noEmojis && designAudit.hasBlueprint &&
     designAudit.controls && designAudit.kwLen > 120,
     JSON.stringify(designAudit));
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));

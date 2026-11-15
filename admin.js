@@ -34,8 +34,8 @@
   }
   function thumbHTML(m) {
     if (m && m.thumb_url) return '<img class="thumb" src="' + esc(m.thumb_url) + '" alt="">';
-    if (m && /^video\//.test(m.type)) return '<span class="thumb" title="' + esc(m.name) + '">🎬</span>';
-    return '<span class="thumb">📄</span>';
+    if (m && /^video\//.test(m.type)) return '<span class="thumb" title="' + esc(m.name) + '">영상</span>';
+    return '<span class="thumb">파일</span>';
   }
 
   function loadAll() {

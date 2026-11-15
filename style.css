@@ -371,7 +371,23 @@ body {
   border-width: 2px;
   border-color: var(--ink);
 }
-.upload-icon { font-size: 1.2rem; line-height: 1; }
+.upload-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.ui-icon {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.voice-btn .ui-icon { width: 14px; height: 14px; }
 .upload-label { font-size: 0.9rem; font-weight: 800; color: var(--ink); }
 .upload-hint { font-size: 0.74rem; color: var(--ink-muted); }
 .visually-hidden-input {
@@ -723,12 +739,13 @@ body {
   }
 }
 .sec-kicker {
-  display: block;
-  font-size: 0.8rem;
+  display: inline-block;
+  padding: 2px 8px;
+  border-left: 3px solid var(--accent);
+  font-size: 0.82rem;
   font-weight: 800;
-  color: var(--accent);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  color: var(--ink);
+  letter-spacing: -0.2px;
   margin-bottom: 6px;
 }
 .sec-title {
@@ -746,6 +763,69 @@ body {
   color: var(--ink-soft);
   word-break: keep-all;
 }
+
+/* 업소용·싱크볼 초음파 세척기 구조도 & 진단 부위 표 */
+.hardware-spec-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 20px 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--line-strong);
+}
+@media (min-width: 860px) {
+  .hardware-spec-panel {
+    grid-template-columns: 5fr 7fr;
+    gap: 28px;
+    align-items: start;
+  }
+}
+.washer-blueprint {
+  margin: 0;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+}
+.bp-cap {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.washer-blueprint svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #ffffff;
+}
+.part-spec-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.part-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 0.88rem;
+}
+.part-spec-table th,
+.part-spec-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  word-break: keep-all;
+}
+.part-spec-table thead th {
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  font-weight: 800;
+  color: var(--ink);
+  background: #ffffff;
+  white-space: nowrap;
+}
+.part-spec-table td strong { color: var(--ink); }
 
 /* 비교 표 (공임나라식 투명 실비 vs 기존 시장) */
 .compare-table-wrap {
