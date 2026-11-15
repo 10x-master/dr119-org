@@ -34,7 +34,10 @@ try {
       noAiLabels: !/Transparent Cost|HQ Quality|Customer Protection|Answer Engine|SYSTEM 01|POLICY 01|PARTNER TRACK|COOPERATIVE & SUPPORT/i.test(t),
       noEmojis: !/[📸🖼️🎙️⏹️]/.test(t),
       hasBlueprint: !!document.querySelector('.washer-blueprint'),
-      controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn')),
+      controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn') && document.getElementById('region') && !document.querySelector('input[name="service_type"]') && document.getElementById('floating-install-btn') && document.querySelector('link[rel="manifest"]')),
+      footerOrgs: t.includes('중소기업사업지원단') && t.includes('주식회사 웰글로벌'),
+      witBg: getComputedStyle(document.querySelector('.hero-wit')).backgroundColor,
+      orgTopBorder: getComputedStyle(document.querySelector('.org-banner')).borderTopWidth,
       kwLen: kw.length
     };
   })()`);
@@ -42,7 +45,7 @@ try {
     designAudit.bgBody === 'rgb(255, 255, 255)' && designAudit.bgHead === 'rgb(255, 255, 255)' &&
     !designAudit.priceLeak && designAudit.banners && designAudit.excludesOrion &&
     designAudit.noAiLabels && designAudit.noEmojis && designAudit.hasBlueprint &&
-    designAudit.controls && designAudit.kwLen > 120,
+    designAudit.controls && designAudit.footerOrgs && designAudit.orgTopBorder === '1px' && designAudit.kwLen > 120,
     JSON.stringify(designAudit));
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));
 
@@ -52,10 +55,16 @@ try {
     const h1 = document.getElementById('hero-title').innerText;
     const h2 = document.getElementById('form-title').innerText;
     const btnBottom = document.getElementById('submit-btn').getBoundingClientRect().bottom;
-    return { hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && h2.includes('초음파 세척기 고장'), btnBottom };
+    const stripRect = document.querySelector('.b2b-apply-strip').getBoundingClientRect();
+    const b2bBtnRect = document.querySelector('.b2b-submit').getBoundingClientRect();
+    return {
+      hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && h2.includes('초음파 세척기 고장'),
+      btnBottom,
+      b2bFits: b2bBtnRect.right <= stripRect.right - 8
+    };
   })()`);
-  check(R, 'PC 1페이지(한 화면 768px) 수용 + "초음파 세척기 고장" 문구 확인',
-    desktopCheck.hasUltrasoundHeading && desktopCheck.btnBottom <= 768,
+  check(R, 'PC 1페이지(한 화면 768px) 수용 + "초음파 세척기 고장" 문구 + 파트너 폼 내부 수용',
+    desktopCheck.hasUltrasoundHeading && desktopCheck.btnBottom <= 768 && desktopCheck.b2bFits,
     JSON.stringify(desktopCheck));
   await cdp.screenshot(path.join(OUT, 'phase1-desktop.png'));
   await cdp.viewport(390, 844, true);
@@ -66,17 +75,17 @@ try {
 
   // 3) 빈 제출 → 검증 에러
   await cdp.eval(`document.getElementById('submit-btn').click()`);
-  check(R, '필수값 누락 시 제출 차단', await cdp.eval(`!!document.getElementById('media-error').textContent && !!document.getElementById('phone-error').textContent && document.getElementById('done').hidden`));
+  check(R, '필수값 누락 시 제출 차단', await cdp.eval(`!!document.getElementById('media-error').textContent && !!document.getElementById('phone-error').textContent && !!document.getElementById('region-error').textContent && document.getElementById('done').hidden`));
 
   // 4) 정상 제출 (방문 설치)
   await cdp.setFiles('#media', [img, vid]);
   check(R, '사진/영상 미리보기 2건', (await cdp.eval(`document.querySelectorAll('#preview li').length`)) === 2);
-  await cdp.eval(`(() => { const p=document.getElementById('phone'); p.value='01012345678'; p.dispatchEvent(new Event('input')); })()`);
+  await cdp.eval(`(() => { const p=document.getElementById('phone'); p.value='01012345678'; p.dispatchEvent(new Event('input')); const rg=document.getElementById('region'); rg.value='서울 강남구'; rg.dispatchEvent(new Event('input')); })()`);
   check(R, '연락처 자동 하이픈', (await cdp.eval(`document.getElementById('phone').value`)) === '010-1234-5678');
   const payload = await cdp.eval(`new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); })`);
   check(R, 'payload.attribution.agent_id = SEOUL_01', payload.attribution.agent_id === 'SEOUL_01' && payload.attribution.model === 'FIRST_TOUCH');
   check(R, 'payload.service = DOCTOR_VISIT / 400,000 / 화물비 포함', payload.service.type === 'DOCTOR_VISIT' && payload.service.fixed_price === 400000 && payload.service.freight_payment === 'INCLUDED');
-  check(R, 'payload.customer.phone', payload.customer.phone === '010-1234-5678');
+  check(R, 'payload.customer.phone + region', payload.customer.phone === '010-1234-5678' && payload.customer.region === '서울 강남구');
   const [m1, m2] = payload.media;
   check(R, '사진 base64 포함 + 1280px 리사이즈', m1.data_url.startsWith('data:image/jpeg;base64,') && m1.width === 2000, `원본 ${m1.width}x${m1.height}, ${m1.data_url.length}B`);
   check(R, '영상 base64 포함', m2.type === 'video/mp4' && m2.data_url.startsWith('data:video/mp4;base64,'));
@@ -85,7 +94,7 @@ try {
   check(R, '접수 완료 화면 표시', await cdp.eval(`!document.getElementById('done').hidden && document.getElementById('done-order-id').textContent === ${JSON.stringify(payload.order_id)}`));
   await cdp.screenshot(path.join(OUT, 'phase1-done.png'));
 
-  // 5) 직접 수령 옵션 + 증상 메모 + 카카오 1초 간편 등록
+  // 5) 지역 + 증상 메모 + 카카오 1초 간편 등록
   await cdp.eval(`document.getElementById('again-btn').click()`);
   await cdp.setFiles('#media', [img]);
   await cdp.eval(`(() => {
@@ -95,11 +104,14 @@ try {
     kp.value = '01098765432';
     kp.dispatchEvent(new Event('input'));
     document.getElementById('kakao-confirm-btn').click();
-    document.querySelector('input[value=SELF_PICKUP]').checked = true;
+    const rg = document.getElementById('region');
+    rg.value = '부산 해운대구';
+    rg.dispatchEvent(new Event('input'));
   })()`);
   const p2 = await cdp.eval(`new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); })`);
-  check(R, '직접 수령: SELF_PICKUP / 착불(COD) / agent + note + KAKAO 유지',
-    p2.service.type === 'SELF_PICKUP' && p2.service.freight_payment === 'COD' &&
+  check(R, '지역·증상 메모·카카오 1초 간편 등록 유지',
+    p2.service.type === 'DOCTOR_VISIT' &&
+    p2.customer.region === '부산 해운대구' &&
     p2.attribution.agent_id === 'SEOUL_01' &&
     p2.customer.note === '초음파 소리가 약하고 물이 샘' && p2.customer.auth_provider === 'KAKAO');
 

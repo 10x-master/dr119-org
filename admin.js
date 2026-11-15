@@ -91,7 +91,7 @@
       if (st && o.status !== st) return false;
       if (ty && o.service.type !== ty) return false;
       if (q) {
-        var hay = [o.order_id, o.customer.phone, o.customer.note, o.attribution && o.attribution.agent_id].join(' ').toUpperCase().replace(/-/g, '');
+        var hay = [o.order_id, o.customer.phone, o.customer.region, o.customer.note, o.attribution && o.attribution.agent_id].join(' ').toUpperCase().replace(/-/g, '');
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -105,12 +105,13 @@
       var m = o.media || [];
       var fee = o.settlement ? won(o.settlement.labor_fee) : (o.service.type === 'SELF_PICKUP' ? '<span class="chip">해당 없음</span>' : '<span class="neg">미확정</span>');
       var authTag = o.customer && o.customer.auth_provider === 'KAKAO' ? '<span class="chip kakao-chip">카카오</span>' : '';
+      var regionTag = o.customer && o.customer.region ? ' <span class="chip">' + esc(o.customer.region) + '</span>' : '';
       var noteSnippet = o.customer && o.customer.note ? '<br><span class="hint">' + esc(String(o.customer.note).slice(0, 36)) + '</span>' : '';
       return '<tr class="clickable" data-id="' + esc(o.order_id) + '" tabindex="0">' +
         '<td>' + fmtDate(o.created_at) + '</td>' +
         '<td class="mono">' + esc(o.order_id) + '</td>' +
         '<td>' + thumbHTML(m[0]) + (m.length > 1 ? '<span class="thumb-more">+' + (m.length - 1) + '</span>' : '') + '</td>' +
-        '<td>' + esc(o.customer.phone) + authTag + noteSnippet + '</td>' +
+        '<td>' + esc(o.customer.phone) + authTag + regionTag + noteSnippet + '</td>' +
         '<td><span class="chip type-' + esc(o.service.type) + '">' + (o.service.type === 'DOCTOR_VISIT' ? '방문 설치' : '직접 수령') + '</span></td>' +
         '<td>' + agentLabel(o.attribution && o.attribution.agent_id) + '</td>' +
         '<td>' + esc(distName(o.assigned_distributor_id)) + '</td>' +
@@ -148,6 +149,7 @@
       '<dt>접수일시</dt><dd>' + fmtDate(o.created_at) + '</dd>' +
       '<dt>연락처</dt><dd><a href="tel:' + esc(o.customer.phone) + '">' + esc(o.customer.phone) + '</a>' +
         (o.customer.auth_provider === 'KAKAO' ? ' <span class="chip kakao-chip">카카오 간편등록</span>' : '') + '</dd>' +
+      (o.customer.region ? '<dt>지역</dt><dd>' + esc(o.customer.region) + '</dd>' : '') +
       (o.customer.note ? '<dt>고장 증상</dt><dd>' + esc(o.customer.note) + '</dd>' : '') +
       '<dt>선택 옵션</dt><dd>' + esc(o.service.label) + '</dd>' +
       '<dt>유입 QR</dt><dd>' + agentLabel(a.agent_id) + ' → ' + esc(distName(D.distributorOfAgent(state.partners, a.agent_id))) +

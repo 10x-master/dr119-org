@@ -116,6 +116,7 @@
         '<div class="thumbs">' + (o.media || []).map(thumb).join('') + '</div>' +
         '<div>📞 <a href="tel:' + esc(o.customer.phone) + '"><b>' + esc(o.customer.phone) + '</b></a>' +
           (o.customer.auth_provider === 'KAKAO' ? ' <span class="chip kakao-chip">카카오</span>' : '') + '</div>' +
+        (o.customer.region ? '<div class="meta">지역: ' + esc(o.customer.region) + '</div>' : '') +
         (o.customer.note ? '<div class="meta">증상: ' + esc(o.customer.note) + '</div>' : '') +
         '<div class="meta">유입 QR: ' + esc((o.attribution && o.attribution.agent_id) || '직접 유입') + ' · 배차 ' + fmtDate(o.settlement.confirmed_at) + '</div>' +
         (done ? '' : '<button class="btn primary btn-done" type="button">설치 완료 보고</button>') +

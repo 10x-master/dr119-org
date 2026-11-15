@@ -8,7 +8,14 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png' };
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8'
+};
 
 export function startServer() {
   return new Promise((resolve) => {

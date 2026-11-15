@@ -8,6 +8,10 @@
   <meta name="keywords" content="초음파 세척기 고장, 고장 난 초음파 세척기 수리, 식당 초음파 세척기 AS, 업소용 식기세척기 수리, 음식점 초음파 세척기 안됨, 세척기 전원 안들어옴, 세척기 초음파 약해짐, 세척기 물새고 히터 고장, 세척기 수조로만 쓰는 경우, 제조사 부도 초음파 세척기 수리, 단종 초음파 세척기 부품 교체, 타사 브랜드 초음파 세척기 수리 가능한 곳, 중고 초음파 세척기 리본 재생, 초음파 진동자 모듈 교체, 초음파 발진기 보드 수리, 초음파 세척기 공임나라, 세척기 부품가 공개 직접 구입, 세척기 합포장 화물 배송 수리, 본사 팩토리 수리 품질 보증, 닥터119, Dr.119, Dr.119 리본 센터, 사진 한 장이면 끝 AS 접수, 수리 닥터 방문 설치, 직접 수령, 임시 대체 세척기 대여, 초음파 세척기 보상 판매, 빌트인 가정용 초음파 세척기 시공, 싱크볼 거치 초음파 세척기 설치, 오프라인 지역 수리 센터 창업, 초음파 세척기 총판 대리점 모집, 수리 닥터 기술 교육 자격, 주방 설비 B2B 파트너, 한국AI인테리어공간협회, 중소기업사업전환지원단, 투데이 플랫폼">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/dr119-logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <link rel="canonical" href="https://dr119.org/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Dr.119 (닥터119)">
@@ -94,8 +98,8 @@
       {
         "@type": "HowToStep",
         "position": 3,
-        "name": "받는 방법 선택",
-        "text": "전문 닥터 방문 설치 또는 직접 수령 중 매장 상황에 맞는 방식을 선택합니다."
+        "name": "방문·접수 지역 입력",
+        "text": "시·구·동 또는 시·군 등 수리가 필요한 매장 지역을 입력합니다."
       },
       {
         "@type": "HowToStep",
@@ -235,7 +239,7 @@
               <ol class="lg-stepper" aria-label="수리 예약 4단계">
                 <li class="is-on"><b>01</b> 사진·증상</li>
                 <li><b>02</b> 연락처</li>
-                <li><b>03</b> 수리방식</li>
+                <li><b>03</b> 지역</li>
                 <li><b>04</b> 예약접수</li>
               </ol>
             </div>
@@ -311,25 +315,15 @@
                 <p class="field-error" id="phone-error" role="alert"></p>
               </fieldset>
 
-              <!-- STEP 3: 받는 방법 선택 -->
+              <!-- STEP 3: 지역 입력 -->
               <fieldset class="step">
-                <legend><span class="step-no">3</span> 수리·설치 방식 선택</legend>
-                <div class="options" role="radiogroup">
-                  <label class="option">
-                    <input type="radio" name="service_type" value="DOCTOR_VISIT" checked>
-                    <span class="option-body">
-                      <span class="option-title">전문 닥터 방문 설치</span>
-                      <span class="option-desc">교육 닥터 직접 방문 · 수거·재생·재설치</span>
-                    </span>
-                  </label>
-                  <label class="option">
-                    <input type="radio" name="service_type" value="SELF_PICKUP">
-                    <span class="option-body">
-                      <span class="option-title">직접 수령 (자가 설치)</span>
-                      <span class="option-desc">합포장 화물 수령 후 직접 설치·정리</span>
-                    </span>
-                  </label>
+                <legend><span class="step-no">3</span> 지역 <span class="step-opt">시·구·동 또는 시·군</span></legend>
+                <div class="region-row">
+                  <label for="region" class="sr-only">지역</label>
+                  <input type="text" id="region" name="region" autocomplete="address-level2"
+                         placeholder="예: 서울 강남구 / 부산 해운대구 / 경기 수원시" maxlength="60" class="phone-input region-input" required>
                 </div>
+                <p class="field-error" id="region-error" role="alert"></p>
               </fieldset>
 
               <!-- STEP 4: 접수 완료 -->
@@ -697,9 +691,17 @@
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
-      <div>
-        <strong style="color:#111111;">Dr.119 (닥터119) 전국 초음파 세척기 수리·재생 플랫폼</strong>
-        <p style="margin:4px 0 0;">© <span id="year"></span> Dr.119. All rights reserved.</p>
+      <div class="footer-brand-block">
+        <a class="brand footer-brand" href="#main" aria-label="Dr.119 홈">
+          <span class="brand-cross" aria-hidden="true"></span>
+          <span class="brand-text">Dr.<strong>119</strong></span>
+        </a>
+        <div class="footer-orgs-row">
+          <span class="footer-org-item"><strong>중소기업사업지원단</strong></span>
+          <span class="footer-org-divider" aria-hidden="true">|</span>
+          <span class="footer-org-item"><strong>주식회사 웰글로벌</strong></span>
+        </div>
+        <p class="footer-copy">© <span id="year"></span> Dr.119 · 주식회사 웰글로벌. All rights reserved.</p>
       </div>
       <nav class="footer-links" aria-label="서비스 관리 메뉴">
         <a href="partner.html">총판·닥터 파트너 대시보드</a>
@@ -707,6 +709,30 @@
       </nav>
     </div>
   </footer>
+
+  <!-- 오른쪽 중간 플로팅 메뉴: PC 바탕화면·모바일 홈 화면 Dr.119 아이콘 설치 -->
+  <aside class="floating-dock" id="floating-dock" aria-label="빠른 바로가기">
+    <button type="button" class="float-btn float-install" id="floating-install-btn" title="PC 바탕화면·모바일 홈 화면에 Dr.119 아이콘 설치">
+      <img class="float-logo-img" src="icons/dr119-logo.svg" alt="" width="28" height="28">
+      <span class="float-label">닥터119<br>아이콘 설치</span>
+    </button>
+  </aside>
+
+  <!-- 바탕화면·홈 화면 설치 안내 모달 -->
+  <dialog id="install-guide-dialog" class="install-dialog" aria-labelledby="install-dialog-title">
+    <div class="install-dialog-head">
+      <div class="install-dialog-brand">
+        <img src="icons/dr119-logo.svg" alt="Dr.119 로고" width="32" height="32">
+        <h3 id="install-dialog-title">Dr.119 바탕화면·모바일 아이콘 설치</h3>
+      </div>
+      <button type="button" class="install-dialog-close" id="install-dialog-close" aria-label="닫기">×</button>
+    </div>
+    <p id="install-guide-text" class="install-guide-text"></p>
+    <div class="install-dialog-actions">
+      <button type="button" class="install-copy-btn" id="install-copy-btn">현재 주소 복사하기</button>
+      <button type="button" class="install-ok-btn" id="install-ok-btn">확인</button>
+    </div>
+  </dialog>
 
   <script src="dr119-core.js"></script>
   <script src="script.js"></script>

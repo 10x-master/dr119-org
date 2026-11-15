@@ -350,6 +350,7 @@
     o.settlement = null;
     o.assigned_distributor_id = distributorOfAgent(partners, o.attribution && o.attribution.agent_id);
     var initialEntry = { at: o.created_at, status: 'RECEIVED', by: 'CUSTOMER' };
+    if (o.customer && o.customer.region) initialEntry.region = String(o.customer.region).slice(0, 120);
     if (o.customer && o.customer.note) initialEntry.note = String(o.customer.note).slice(0, 500);
     if (o.customer && o.customer.auth_provider) initialEntry.auth_provider = String(o.customer.auth_provider).slice(0, 40);
     o.history = [initialEntry];
@@ -393,6 +394,7 @@
       r.labor_fee !== null && r.labor_fee !== undefined;
     var hist = Array.isArray(r.history) ? r.history : [];
     var cust = { phone: r.customer_phone };
+    if (hist[0] && hist[0].region) cust.region = hist[0].region;
     if (hist[0] && hist[0].note) cust.note = hist[0].note;
     if (hist[0] && hist[0].auth_provider) cust.auth_provider = hist[0].auth_provider;
     return {

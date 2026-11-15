@@ -15,6 +15,7 @@
   var cameraInput = document.getElementById('camera-media');
   var preview = document.getElementById('preview');
   var phoneInput = document.getElementById('phone');
+  var regionInput = document.getElementById('region');
   var symptomInput = document.getElementById('symptom_note');
   var voiceBtn = document.getElementById('voice-btn');
   var voiceStatus = document.getElementById('voice-status');
@@ -27,6 +28,7 @@
   var doneBox = document.getElementById('done');
   var mediaError = document.getElementById('media-error');
   var phoneError = document.getElementById('phone-error');
+  var regionError = document.getElementById('region-error');
 
   /** 선택된 파일 목록 (File 객체) & 인증 수단 */
   var files = [];
@@ -203,6 +205,15 @@
     }
   });
 
+  if (regionInput) {
+    regionInput.addEventListener('input', function () {
+      if (regionInput.getAttribute('aria-invalid') === 'true' && regionInput.value.trim()) {
+        regionInput.removeAttribute('aria-invalid');
+        if (regionError) regionError.textContent = '';
+      }
+    });
+  }
+
   if (kakaoPhoneInput) {
     kakaoPhoneInput.addEventListener('input', function () {
       kakaoPhoneInput.value = formatPhoneValue(kakaoPhoneInput.value);
@@ -324,10 +335,13 @@
    * 6) Submit → JSON payload 생성 → 콘솔 출력 + API 전송
    * ------------------------------------------------------------ */
   function buildPayload(media) {
-    var typeCode = (form.querySelector('input[name="service_type"]:checked') || {}).value;
+    var checkedSvc = form.querySelector('input[name="service_type"]:checked');
+    var typeCode = (checkedSvc && D.SERVICE_TYPES[checkedSvc.value]) ? checkedSvc.value : 'DOCTOR_VISIT';
     var svc = D.SERVICE_TYPES[typeCode];
     var now = new Date();
     var cust = { phone: D.normalizePhone(phoneInput.value) };
+    var region = regionInput ? regionInput.value.trim() : '';
+    if (region) cust.region = region;
     var note = symptomInput ? symptomInput.value.trim() : '';
     if (note) cust.note = note;
     if (authProvider) cust.auth_provider = authProvider;
@@ -359,6 +373,8 @@
     mediaError.textContent = '';
     phoneError.textContent = '';
     phoneInput.removeAttribute('aria-invalid');
+    if (regionError) regionError.textContent = '';
+    if (regionInput) regionInput.removeAttribute('aria-invalid');
     if (!files.length) {
       mediaError.textContent = '고장 부위 사진 또는 영상을 1개 이상 올려주세요.';
       ok = false;
@@ -369,7 +385,12 @@
       if (ok) phoneInput.focus();
       ok = false;
     }
-    if (!form.querySelector('input[name="service_type"]:checked')) ok = false;
+    if (regionInput && !regionInput.value.trim()) {
+      if (regionError) regionError.textContent = '지역을 입력해 주세요. (예: 서울 강남구 / 부산 해운대구)';
+      regionInput.setAttribute('aria-invalid', 'true');
+      if (ok) regionInput.focus();
+      ok = false;
+    }
     return ok;
   }
 
@@ -470,4 +491,89 @@
 
   var y = document.getElementById('year');
   if (y) y.textContent = String(new Date().getFullYear());
+
+  /* ------------------------------------------------------------
+   * 8) PWA 등록 및 PC 바탕화면·모바일 홈 화면 Dr.119 아이콘 설치
+   * ------------------------------------------------------------ */
+  (function initAppInstall() {
+    if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      });
+    }
+    var installBtn = document.getElementById('floating-install-btn');
+    var dlg = document.getElementById('install-guide-dialog');
+    var guideText = document.getElementById('install-guide-text');
+    var closeBtn = document.getElementById('install-dialog-close');
+    var okBtn = document.getElementById('install-ok-btn');
+    var copyBtn = document.getElementById('install-copy-btn');
+    var deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function buildGuideMessage() {
+      var ua = navigator.userAgent || '';
+      if (/iPhone|iPad|iPod/i.test(ua)) {
+        return 'Safari 하단 [공유] 버튼을 누른 뒤 [홈 화면에 추가]를 선택하면 Dr.119 로고 아이콘이 모바일 홈 화면에 설치됩니다.';
+      }
+      if (/Android/i.test(ua)) {
+        return '브라우저 우측 상단 메뉴(⋮)에서 [홈 화면에 추가] 또는 [앱 설치]를 누르면 Dr.119 아이콘이 홈 화면에 추가됩니다.';
+      }
+      return 'PC 브라우저(Chrome·Edge) 주소창 오른쪽 [설치] 아이콘 또는 브라우저 메뉴 → [저장 및 공유 / 앱 → 바로가기 만들기·앱 설치]를 선택하시면 바탕화면에 Dr.119 아이콘이 생성됩니다.';
+    }
+
+    function openGuide() {
+      if (!dlg) return;
+      if (guideText) guideText.textContent = buildGuideMessage();
+      if (typeof dlg.showModal === 'function') {
+        if (!dlg.open) dlg.showModal();
+      } else {
+        dlg.setAttribute('open', '');
+      }
+    }
+
+    function closeGuide() {
+      if (!dlg) return;
+      if (typeof dlg.close === 'function' && dlg.open) dlg.close();
+      else dlg.removeAttribute('open');
+    }
+
+    if (installBtn) {
+      installBtn.addEventListener('click', function () {
+        if (deferredPrompt) {
+          var p = deferredPrompt;
+          deferredPrompt = null;
+          p.prompt();
+          if (p.userChoice && typeof p.userChoice.then === 'function') {
+            p.userChoice.then(function (choice) {
+              if (!choice || choice.outcome !== 'accepted') openGuide();
+            }).catch(openGuide);
+          }
+          return;
+        }
+        openGuide();
+      });
+    }
+    if (closeBtn) closeBtn.addEventListener('click', closeGuide);
+    if (okBtn) okBtn.addEventListener('click', closeGuide);
+    if (dlg) {
+      dlg.addEventListener('click', function (e) {
+        if (e.target === dlg) closeGuide();
+      });
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            copyBtn.textContent = '주소 복사 완료!';
+            setTimeout(function () { copyBtn.textContent = '현재 주소 복사하기'; }, 1800);
+          }).catch(function () {});
+        }
+      });
+    }
+  })();
 })();

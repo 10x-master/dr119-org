@@ -13,13 +13,19 @@ const { srv, base } = await startServer();
 const { cdp, close } = await launchBrowser();
 const R = [];
 
-async function customerSubmit(agentId, phone, type = 'DOCTOR_VISIT') {
+async function customerSubmit(agentId, phone, type = 'DOCTOR_VISIT', region = '서울 강남구') {
   await cdp.eval(`localStorage.removeItem('dr119_attribution')`); // 다른 고객 브라우저 시뮬레이션
   await cdp.goto(`${base}/index.html${agentId ? '?agent_id=' + agentId : ''}`);
   await cdp.setFiles('#media', [img]);
-  return cdp.eval(`(() => { const p=document.getElementById('phone'); p.value=${JSON.stringify(phone)}; p.dispatchEvent(new Event('input'));
-    document.querySelector('input[value=${type}]').checked = true;
-    return new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); }); })()`);
+  return cdp.eval(`(() => {
+    const p=document.getElementById('phone'); p.value=${JSON.stringify(phone)}; p.dispatchEvent(new Event('input'));
+    const rg=document.getElementById('region'); rg.value=${JSON.stringify(region)}; rg.dispatchEvent(new Event('input'));
+    if (${JSON.stringify(type)} !== 'DOCTOR_VISIT') {
+      const r=document.createElement('input'); r.type='radio'; r.name='service_type'; r.value=${JSON.stringify(type)}; r.checked=true; r.hidden=true;
+      document.getElementById('as-form').appendChild(r);
+    }
+    return new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); });
+  })()`);
 }
 const typeInto = (sel, v) => cdp.eval(`(() => { const el=document.querySelector(${JSON.stringify(sel)}); el.value=${JSON.stringify(v)}; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); })()`);
 const text = (sel) => cdp.eval(`document.querySelector(${JSON.stringify(sel)})?.textContent.trim()`);
