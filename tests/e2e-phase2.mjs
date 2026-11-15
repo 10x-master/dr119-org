@@ -37,6 +37,19 @@ try {
   const o5 = await customerSubmit(null, '010-9999-0000');                  // 직접 유입(HQ)
 
   await cdp.goto(`${base}/admin.html`);
+  check(R, '초기 진입 시 관리자 잠금 상태(#admin-main 비노출 · 테이블 비어있음)',
+    await cdp.eval(`document.getElementById('admin-main').hidden && !document.getElementById('admin-auth-gate').hidden && document.querySelectorAll('#orders-table tbody tr').length === 0`));
+  await typeInto('#admin-pw', 'wrong-pw');
+  await cdp.eval(`document.getElementById('btn-admin-unlock').click()`); await sleep(100);
+  check(R, '오답 비밀번호 거부 + 에러 표시',
+    await cdp.eval(`document.getElementById('admin-main').hidden && !!document.getElementById('admin-auth-error').textContent.trim()`));
+  await typeInto('#admin-pw', 'dnd7377!!@@');
+  await cdp.eval(`document.getElementById('btn-admin-unlock').click()`); await sleep(250);
+  check(R, '정답 비밀번호(dnd7377!!@@) 입력 시 관리자 잠금 해제',
+    await cdp.eval(`!document.getElementById('admin-main').hidden && document.getElementById('admin-auth-gate').hidden`));
+  await cdp.goto(`${base}/admin.html`); await sleep(200);
+  check(R, '같은 탭 새로고침 후 세션 유지',
+    await cdp.eval(`!document.getElementById('admin-main').hidden && document.getElementById('admin-auth-gate').hidden`));
   check(R, '주문 접수함: 5건 리스트 + 사진 썸네일', (await cdp.eval(`document.querySelectorAll('#orders-table tbody tr').length`)) === 5 && (await cdp.eval(`document.querySelectorAll('#orders-table tbody img.thumb').length`)) === 5);
   check(R, '신규 접수 배지 = 5', (await text('#badge-received')) === '5');
   await cdp.screenshot(path.join(OUT, 'phase2-orders.png'));
@@ -112,6 +125,10 @@ try {
   check(R, 'CSV: BOM + 헤더 + 총판 3행', csv.startsWith('\uFEFF') && lines[0].startsWith('정산월,총판ID') && lines.length === 4);
   const sl = lines.find((l) => l.includes('DIST_SEOUL')).split(',');
   check(R, 'CSV 서울 행: 차감 -30000 · 지급 542499 · 사유', sl[10] === '-30000' && sl[11] === '542499' && sl[14] === '설치 지연 클레임', sl.join(','));
+
+  await cdp.eval(`document.getElementById('btn-admin-lock').click()`); await sleep(150);
+  check(R, '관리자 잠금 버튼 클릭 시 재잠금 · DOM 초기화',
+    await cdp.eval(`document.getElementById('admin-main').hidden && !document.getElementById('admin-auth-gate').hidden && document.querySelectorAll('#orders-table tbody tr').length === 0`));
 
   const errs = cdp.logs.filter((l) => l.type === 'exception' || l.type === 'error');
   check(R, 'JS 런타임 에러 없음', errs.length === 0, errs.map((e) => e.text).join(' | '));

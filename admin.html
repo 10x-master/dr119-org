@@ -11,18 +11,41 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="logo" href="admin.html"><span class="logo-cross" aria-hidden="true"></span>Dr.<b>119</b> <small>HQ Admin</small></a>
-      <nav class="tabs" role="tablist" aria-label="관리 메뉴">
+      <nav class="tabs" id="admin-nav" role="tablist" aria-label="관리 메뉴" hidden>
         <button role="tab" class="tab" aria-selected="true" aria-controls="tab-orders" id="t-orders">주문 접수함 <span class="count" id="badge-received">0</span></button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-billing" id="t-billing">월간 총판 정산</button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-margins" id="t-margins">마진 세팅</button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-network" id="t-network">센터·닥터·교육 관리</button>
       </nav>
       <span class="spacer"></span>
+      <button type="button" class="btn small" id="btn-admin-lock" hidden>관리자 잠금</button>
       <a class="topbar-link" href="index.html">고객 페이지 →</a>
     </div>
   </header>
 
-  <main class="container">
+  <!-- ===================== 본사 관리자 비밀번호 잠금 화면 ===================== -->
+  <section id="admin-auth-gate" class="auth-gate" aria-labelledby="auth-title">
+    <div class="auth-box">
+      <span class="auth-kicker">HQ SUPER ADMIN · 접근 제한</span>
+      <h1 id="auth-title">본사 관리자 모드 인증</h1>
+      <p class="auth-desc">주문 접수·화물 실비 확정·총판 정산·센터 관제를 열람하려면 본사 관리자 비밀번호를 입력해 주세요.</p>
+      <form id="admin-auth-form" class="auth-form" novalidate>
+        <label for="admin-pw">관리자 비밀번호</label>
+        <div class="auth-input-row">
+          <input type="password" id="admin-pw" name="password" autocomplete="current-password"
+                 placeholder="비밀번호 입력" required autofocus>
+          <button type="button" class="btn" id="btn-toggle-pw" aria-pressed="false">표시</button>
+        </div>
+        <p class="auth-error" id="admin-auth-error" role="alert"></p>
+        <button type="submit" class="btn primary auth-submit" id="btn-admin-unlock">관리자 모드 잠금 해제</button>
+      </form>
+      <div class="auth-foot">
+        <a href="index.html">← 고객 접수 페이지로 돌아가기</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" id="admin-main" hidden>
     <!-- ===================== 1. 주문 접수함 (공임나라 + SaaS ERP 벤치마킹) ===================== -->
     <section id="tab-orders" role="tabpanel" aria-labelledby="t-orders" class="panel">
       <div class="panel-head">

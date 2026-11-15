@@ -506,30 +506,117 @@
     });
   }
 
-  /* ------------------------------------------------------------ 부트 */
-  function refresh() { return loadAll().then(renderAll); }
+  /* ------------------------------------------------------------ 인증 & 부트 */
+  var unlocked = false;
+  var pollTimer = null;
+  var authGate = $('#admin-auth-gate');
+  var adminNav = $('#admin-nav');
+  var adminMain = $('#admin-main');
+  var lockBtn = $('#btn-admin-lock');
+  var authForm = $('#admin-auth-form');
+  var pwInput = $('#admin-pw');
+  var pwToggleBtn = $('#btn-toggle-pw');
+  var authErr = $('#admin-auth-error');
+
+  function setAuthView(ok) {
+    unlocked = !!ok;
+    if (authGate) authGate.hidden = unlocked;
+    if (adminNav) adminNav.hidden = !unlocked;
+    if (adminMain) adminMain.hidden = !unlocked;
+    if (lockBtn) lockBtn.hidden = !unlocked;
+  }
+
+  function refresh() {
+    if (!unlocked) return Promise.resolve();
+    return loadAll().then(renderAll);
+  }
+
   function safeRefresh() {
+    if (!unlocked) return;
     if (dlg.open || dlg.hasAttribute('open')) return;
     var active = document.activeElement;
     if (active && /^(INPUT|SELECT|TEXTAREA)$/.test(active.tagName)) return;
     refresh();
   }
 
+  function unlockAndBoot() {
+    setAuthView(true);
+    if (!pollTimer) pollTimer = setInterval(safeRefresh, 15000);
+    return refresh().then(function () {
+      var h = location.hash.replace('#', '');
+      var t = tabs.find(function (x) { return x.getAttribute('aria-controls') === 'tab-' + h; });
+      if (t) selectTab(t);
+    });
+  }
+
+  function lockAdmin() {
+    try { sessionStorage.removeItem(D.ADMIN_SESSION_KEY); } catch (e) {}
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    if (dlg && (dlg.open || dlg.hasAttribute('open'))) dlg.close();
+    state.orders = [];
+    state.contracts = [];
+    ['#orders-table tbody', '#billing-table tbody', '#billing-table tfoot', '#contract-table tbody', '#leads-table tbody'].forEach(function (sel) {
+      var el = $(sel);
+      if (el) el.innerHTML = '';
+    });
+    setAuthView(false);
+    if (pwInput) { pwInput.value = ''; pwInput.type = 'password'; pwInput.focus(); }
+    if (pwToggleBtn) { pwToggleBtn.textContent = '표시'; pwToggleBtn.setAttribute('aria-pressed', 'false'); }
+    if (authErr) authErr.textContent = '';
+  }
+
+  if (pwInput) {
+    pwInput.addEventListener('input', function () {
+      if (authErr) authErr.textContent = '';
+    });
+  }
+  if (pwToggleBtn && pwInput) {
+    pwToggleBtn.addEventListener('click', function () {
+      var show = pwInput.type === 'password';
+      pwInput.type = show ? 'text' : 'password';
+      pwToggleBtn.textContent = show ? '숨김' : '표시';
+      pwToggleBtn.setAttribute('aria-pressed', String(show));
+    });
+  }
+  if (authForm && pwInput) {
+    authForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var val = pwInput.value || '';
+      if (D.verifyAdminPassword(val)) {
+        try { sessionStorage.setItem(D.ADMIN_SESSION_KEY, D.ADMIN_AUTH_HASH); } catch (err) {}
+        pwInput.value = '';
+        if (authErr) authErr.textContent = '';
+        unlockAndBoot();
+      } else {
+        if (authErr) authErr.textContent = '비밀번호가 일치하지 않습니다. 다시 확인해 주세요.';
+        pwInput.focus();
+        pwInput.select();
+      }
+    });
+  }
+  if (lockBtn) {
+    lockBtn.addEventListener('click', function () {
+      lockAdmin();
+      toast('본사 관리자 모드가 잠금 처리되었습니다.');
+    });
+  }
+
   // 다른 탭(고객 접수/파트너) 또는 다른 기기에서 데이터 변경 시 실시간 반영
   window.addEventListener('storage', function (e) {
-    if (e.key && e.key.indexOf('dr119_') === 0) refresh();
+    if (unlocked && e.key && e.key.indexOf('dr119_') === 0) refresh();
   });
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) safeRefresh();
+    if (unlocked && !document.hidden) safeRefresh();
   });
-  setInterval(safeRefresh, 15000);
 
-  refresh().then(function () {
-    var h = location.hash.replace('#', '');
-    var t = tabs.find(function (x) { return x.getAttribute('aria-controls') === 'tab-' + h; });
-    if (t) selectTab(t);
-  });
+  var savedAuth = null;
+  try { savedAuth = sessionStorage.getItem(D.ADMIN_SESSION_KEY); } catch (e) {}
+  if (D.verifyAdminToken(savedAuth)) {
+    unlockAndBoot();
+  } else {
+    setAuthView(false);
+  }
 
   // 테스트/디버그용 노출
-  window.__DR119_ADMIN__ = { state: state, refresh: refresh, openOrder: openOrder };
+  window.__DR119_ADMIN__ = { state: state, refresh: refresh, openOrder: openOrder, lock: lockAdmin };
 })();

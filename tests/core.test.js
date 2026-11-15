@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const D = require('../dr119-core.js');
+const crypto = require('node:crypto');
 
 test('QR agent_id 파싱/정규화', () => {
   assert.equal(D.parseAgentId('?agent_id=SEOUL_01'), 'SEOUL_01');
@@ -146,4 +147,16 @@ test('Supabase orders 테이블 행 왕복 변환 (orderToRow / rowToOrder)', ()
   const enrichedRoundTrip = D.rowToOrder(D.orderToRow(enriched));
   assert.equal(enrichedRoundTrip.customer.note, '전원이 안 들어오고 누수 있음');
   assert.equal(enrichedRoundTrip.customer.auth_provider, 'KAKAO');
+});
+
+test('본사 관리자 비밀번호 SHA-256 검증 및 세션 토큰', () => {
+  const expected = crypto.createHash('sha256').update('dr119-hq:dnd7377!!@@').digest('hex');
+  assert.equal(D.sha256Hex('dr119-hq:dnd7377!!@@'), expected);
+  assert.equal(D.verifyAdminPassword('dnd7377!!@@'), true);
+  assert.equal(D.verifyAdminPassword('dnd7377!!@'), false);
+  assert.equal(D.verifyAdminPassword(' dnd7377!!@@ '), false);
+  assert.equal(D.verifyAdminPassword(''), false);
+  assert.equal(D.verifyAdminPassword(null), false);
+  assert.equal(D.verifyAdminToken(D.ADMIN_AUTH_HASH), true);
+  assert.equal(D.verifyAdminToken('1'), false);
 });
