@@ -42,6 +42,20 @@ try {
     JSON.stringify(designAudit));
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));
 
+  // Desktop 1366x768 '한 페이지(1 viewport)' 확인 + "초음파 세척기 고장" 문구 확인
+  await cdp.viewport(1366, 768, false);
+  const desktopCheck = await cdp.eval(`(() => {
+    const h1 = document.getElementById('hero-title').innerText;
+    const h2 = document.getElementById('form-title').innerText;
+    const btnBottom = document.getElementById('submit-btn').getBoundingClientRect().bottom;
+    return { hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && h2.includes('초음파 세척기 고장'), btnBottom };
+  })()`);
+  check(R, 'PC 1페이지(한 화면 768px) 수용 + "초음파 세척기 고장" 문구 확인',
+    desktopCheck.hasUltrasoundHeading && desktopCheck.btnBottom <= 768,
+    JSON.stringify(desktopCheck));
+  await cdp.screenshot(path.join(OUT, 'phase1-desktop.png'));
+  await cdp.viewport(390, 844, true);
+
   // 2) 다른 QR로 재접속 → First-touch 유지
   await cdp.goto(`${base}/index.html?agent_id=BUSAN_01`);
   check(R, 'First-touch Lock-in (BUSAN_01 재접속에도 SEOUL_01 유지)', (await cdp.eval(`document.getElementById('agent_id').value`)) === 'SEOUL_01');
