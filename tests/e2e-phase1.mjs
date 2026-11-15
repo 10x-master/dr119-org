@@ -36,17 +36,63 @@ try {
       hasBlueprint: !!document.querySelector('.washer-blueprint'),
       controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn') && document.getElementById('region') && !document.querySelector('input[name="service_type"]') && document.getElementById('floating-install-btn') && document.querySelector('link[rel="manifest"]')),
       footerOrgs: t.includes('중소기업사업지원단') && t.includes('주식회사 웰글로벌'),
+      companyInfo: t.includes('최광웅') && t.includes('217-88-03660') && t.includes('삼숭로58번길 84-9') && t.includes('1661-0783') && t.includes('010-5553-8250'),
+      mobileHeader: (() => {
+        const logo = document.querySelector('.site-header .brand')?.getBoundingClientRect();
+        const mTitle = document.querySelector('.mobile-header-title')?.getBoundingClientRect();
+        const phone = document.querySelector('.header-phone')?.getBoundingClientRect();
+        const ham = document.getElementById('mobile-menu-btn')?.getBoundingClientRect();
+        const head = document.querySelector('.site-header')?.getBoundingClientRect();
+        return !!(logo && mTitle && phone && ham && head &&
+          logo.width > 0 && mTitle.width > 0 && phone.width > 0 && ham.width > 0 &&
+          logo.left < mTitle.left && mTitle.left < phone.left && phone.left < ham.left &&
+          head.height <= 56);
+      })(),
+      mobileFirstScreen: (() => {
+        const intake = document.querySelector('.intake-col')?.getBoundingClientRect();
+        const hero = document.querySelector('.hero')?.getBoundingClientRect();
+        const sub = document.getElementById('submit-btn')?.getBoundingClientRect();
+        const bar = document.getElementById('mobile-bottom-bar')?.getBoundingClientRect();
+        const intakePhone = document.querySelector('.intake-phone')?.innerText || '';
+        return {
+          intakeAboveHero: !!(intake && hero && intake.top < hero.top),
+          subBottom: sub?.bottom || 9999,
+          barTop: bar?.top || 844,
+          fitsInFirstScreen: !!(sub && bar && sub.bottom <= bar.top + 1),
+          hasIntakePhone: intakePhone.includes('1661-0783')
+        };
+      })(),
+      symptomBoxRedMic: (() => {
+        const wrap = document.querySelector('.symptom-input-wrap');
+        const badge = document.querySelector('.mic-red-badge');
+        const hasBoth = !!(wrap && wrap.querySelector('#symptom_note') && wrap.querySelector('#voice-btn') && badge);
+        const redBg = badge ? getComputedStyle(badge).backgroundColor : '';
+        return hasBoth && redBg === 'rgb(234, 25, 23)' && t.includes('텍스트를 치거나 음성으로도 입력할 수 있습니다');
+      })(),
       witBg: getComputedStyle(document.querySelector('.hero-wit')).backgroundColor,
       orgTopBorder: getComputedStyle(document.querySelector('.org-banner')).borderTopWidth,
       kwLen: kw.length
     };
   })()`);
-  check(R, '올 화이트 + 가격 미노출 + 3대 배너(오리온 제외) + 탈AI/도면 + 카메라/음성/카카오 + SEO',
+  check(R, '올 화이트 + 가격 미노출 + 3대 배너 + 모바일 헤더/1화면 꽉참 + 빨간 마이크 + wellglobal.net 회사정보',
     designAudit.bgBody === 'rgb(255, 255, 255)' && designAudit.bgHead === 'rgb(255, 255, 255)' &&
     !designAudit.priceLeak && designAudit.banners && designAudit.excludesOrion &&
     designAudit.noAiLabels && designAudit.noEmojis && designAudit.hasBlueprint &&
-    designAudit.controls && designAudit.footerOrgs && designAudit.orgTopBorder === '1px' && designAudit.kwLen > 120,
+    designAudit.controls && designAudit.footerOrgs && designAudit.companyInfo &&
+    designAudit.mobileHeader && designAudit.mobileFirstScreen.intakeAboveHero &&
+    designAudit.mobileFirstScreen.fitsInFirstScreen && designAudit.mobileFirstScreen.hasIntakePhone &&
+    designAudit.symptomBoxRedMic && designAudit.orgTopBorder === '1px' && designAudit.kwLen > 120,
     JSON.stringify(designAudit));
+  const hamburgerWorks = await cdp.eval(`(() => {
+    const btn = document.getElementById('mobile-menu-btn');
+    const nav = document.getElementById('header-nav');
+    btn.click();
+    const opened = nav.classList.contains('is-open') && btn.getAttribute('aria-expanded') === 'true' && nav.getBoundingClientRect().height > 0;
+    btn.click();
+    const closed = !nav.classList.contains('is-open') && btn.getAttribute('aria-expanded') === 'false';
+    return opened && closed;
+  })()`);
+  check(R, '모바일 햄버거 메뉴 열기/닫기 동작', hamburgerWorks);
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));
 
   // Desktop 1366x768 '한 페이지(1 viewport)' 확인 + "초음파 세척기 고장" 문구 확인
@@ -91,7 +137,15 @@ try {
   check(R, '영상 base64 포함', m2.type === 'video/mp4' && m2.data_url.startsWith('data:video/mp4;base64,'));
   const consoleJson = cdp.logs.find((l) => l.type === 'log' && l.text.trim().startsWith('{'));
   check(R, '콘솔에 JSON payload 출력', consoleJson && JSON.parse(consoleJson.text).order_id === payload.order_id);
-  check(R, '접수 완료 화면 표시', await cdp.eval(`!document.getElementById('done').hidden && document.getElementById('done-order-id').textContent === ${JSON.stringify(payload.order_id)}`));
+  check(R, '접수 완료 화면 및 수리 진행 프로세스 안내 표시', await cdp.eval(`(() => {
+    const done = document.getElementById('done');
+    const proc = document.querySelector('.done-process');
+    const again = document.getElementById('again-btn')?.getBoundingClientRect();
+    const bar = document.getElementById('mobile-bottom-bar')?.getBoundingClientRect();
+    return !done.hidden && document.getElementById('done-order-id').textContent === ${JSON.stringify(payload.order_id)} &&
+      !!proc && proc.innerText.includes('접수 후 수리 진행 프로세스 안내') && proc.innerText.includes('1661-0783') &&
+      !!(again && bar && again.bottom <= bar.top + 1);
+  })()`));
   await cdp.screenshot(path.join(OUT, 'phase1-done.png'));
 
   // 5) 지역 + 증상 메모 + 카카오 1초 간편 등록

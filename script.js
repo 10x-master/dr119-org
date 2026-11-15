@@ -493,8 +493,40 @@
   if (y) y.textContent = String(new Date().getFullYear());
 
   /* ------------------------------------------------------------
-   * 8) PWA 등록 및 PC 바탕화면·모바일 홈 화면 Dr.119 아이콘 설치
+   * 8) 모바일 햄버거 메뉴 & 웰글로벌 카톡채널 안내 & PWA 아이콘 설치
    * ------------------------------------------------------------ */
+  (function initMobileHeaderNav() {
+    var menuBtn = document.getElementById('mobile-menu-btn');
+    var headerNav = document.getElementById('header-nav');
+    if (!menuBtn || !headerNav) return;
+
+    function setOpen(open) {
+      if (open) headerNav.classList.add('is-open');
+      else headerNav.classList.remove('is-open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuBtn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    }
+
+    menuBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!headerNav.classList.contains('is-open'));
+    });
+
+    headerNav.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (headerNav.classList.contains('is-open') && !headerNav.contains(e.target) && !menuBtn.contains(e.target)) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && headerNav.classList.contains('is-open')) setOpen(false);
+    });
+  })();
+
   (function initAppInstall() {
     if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
       window.addEventListener('load', function () {
@@ -503,11 +535,14 @@
     }
     var installBtn = document.getElementById('floating-install-btn');
     var dlg = document.getElementById('install-guide-dialog');
+    var dlgTitle = document.getElementById('install-dialog-title');
     var guideText = document.getElementById('install-guide-text');
     var closeBtn = document.getElementById('install-dialog-close');
     var okBtn = document.getElementById('install-ok-btn');
     var copyBtn = document.getElementById('install-copy-btn');
+    var kakaoTriggers = document.querySelectorAll('.kakao-channel-trigger');
     var deferredPrompt = null;
+    var dialogMode = 'install';
 
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
@@ -525,9 +560,20 @@
       return 'PC 브라우저(Chrome·Edge) 주소창 오른쪽 [설치] 아이콘 또는 브라우저 메뉴 → [저장 및 공유 / 앱 → 바로가기 만들기·앱 설치]를 선택하시면 바탕화면에 Dr.119 아이콘이 생성됩니다.';
     }
 
-    function openGuide() {
+    function openGuide(mode) {
       if (!dlg) return;
-      if (guideText) guideText.textContent = buildGuideMessage();
+      dialogMode = mode || 'install';
+      if (dialogMode === 'kakao') {
+        if (dlgTitle) dlgTitle.textContent = '주식회사 웰글로벌 카카오톡 채널 상담';
+        if (guideText) {
+          guideText.textContent = '카카오톡 상단 검색창(돋보기)에서 "웰글로벌" 채널을 검색해 1:1 상담하시거나, 화면 상단 긴급 접수 폼 또는 대표번호 1661-0783(고객센터 010-5553-8250)으로 바로 연결하실 수 있습니다.';
+        }
+        if (copyBtn) copyBtn.textContent = '"웰글로벌" 검색어 복사';
+      } else {
+        if (dlgTitle) dlgTitle.textContent = 'Dr.119 바탕화면·모바일 아이콘 설치';
+        if (guideText) guideText.textContent = buildGuideMessage();
+        if (copyBtn) copyBtn.textContent = '현재 주소 복사하기';
+      }
       if (typeof dlg.showModal === 'function') {
         if (!dlg.open) dlg.showModal();
       } else {
@@ -549,14 +595,19 @@
           p.prompt();
           if (p.userChoice && typeof p.userChoice.then === 'function') {
             p.userChoice.then(function (choice) {
-              if (!choice || choice.outcome !== 'accepted') openGuide();
-            }).catch(openGuide);
+              if (!choice || choice.outcome !== 'accepted') openGuide('install');
+            }).catch(function () { openGuide('install'); });
           }
           return;
         }
-        openGuide();
+        openGuide('install');
       });
     }
+    Array.prototype.forEach.call(kakaoTriggers, function (btn) {
+      btn.addEventListener('click', function () {
+        openGuide('kakao');
+      });
+    });
     if (closeBtn) closeBtn.addEventListener('click', closeGuide);
     if (okBtn) okBtn.addEventListener('click', closeGuide);
     if (dlg) {
@@ -566,11 +617,12 @@
     }
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
-        var url = window.location.href;
+        var textToCopy = dialogMode === 'kakao' ? '웰글로벌' : window.location.href;
+        var defaultLabel = dialogMode === 'kakao' ? '"웰글로벌" 검색어 복사' : '현재 주소 복사하기';
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(function () {
-            copyBtn.textContent = '주소 복사 완료!';
-            setTimeout(function () { copyBtn.textContent = '현재 주소 복사하기'; }, 1800);
+          navigator.clipboard.writeText(textToCopy).then(function () {
+            copyBtn.textContent = '복사 완료!';
+            setTimeout(function () { copyBtn.textContent = defaultLabel; }, 1800);
           }).catch(function () {});
         }
       });
