@@ -137,4 +137,13 @@ test('Supabase orders 테이블 행 왕복 변환 (orderToRow / rowToOrder)', ()
   assert.deepEqual(D.rowToOrder(row), sample);
   const pendingRow = D.orderToRow({ ...sample, status: 'RECEIVED', settlement: null });
   assert.equal(D.rowToOrder(pendingRow).settlement, null);
+
+  // customer.note & auth_provider persisted via history[0] without schema change
+  const enriched = D.toStoredOrder({
+    ...sample,
+    customer: { phone: '010-9999-8888', note: '전원이 안 들어오고 누수 있음', auth_provider: 'KAKAO' }
+  }, D.SEED_PARTNERS);
+  const enrichedRoundTrip = D.rowToOrder(D.orderToRow(enriched));
+  assert.equal(enrichedRoundTrip.customer.note, '전원이 안 들어오고 누수 있음');
+  assert.equal(enrichedRoundTrip.customer.auth_provider, 'KAKAO');
 });

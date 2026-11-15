@@ -349,7 +349,10 @@
     o.status = 'RECEIVED';
     o.settlement = null;
     o.assigned_distributor_id = distributorOfAgent(partners, o.attribution && o.attribution.agent_id);
-    o.history = [{ at: o.created_at, status: 'RECEIVED', by: 'CUSTOMER' }];
+    var initialEntry = { at: o.created_at, status: 'RECEIVED', by: 'CUSTOMER' };
+    if (o.customer && o.customer.note) initialEntry.note = String(o.customer.note).slice(0, 500);
+    if (o.customer && o.customer.auth_provider) initialEntry.auth_provider = String(o.customer.auth_provider).slice(0, 40);
+    o.history = [initialEntry];
     return o;
   }
 
@@ -388,11 +391,15 @@
     };
     var hasSettlement = r.freight_cost !== null && r.freight_cost !== undefined &&
       r.labor_fee !== null && r.labor_fee !== undefined;
+    var hist = Array.isArray(r.history) ? r.history : [];
+    var cust = { phone: r.customer_phone };
+    if (hist[0] && hist[0].note) cust.note = hist[0].note;
+    if (hist[0] && hist[0].auth_provider) cust.auth_provider = hist[0].auth_provider;
     return {
       schema_version: 1,
       order_id: r.order_id,
       created_at: r.created_at,
-      customer: { phone: r.customer_phone },
+      customer: cust,
       service: {
         type: r.service_type,
         label: svc.label,
@@ -415,7 +422,7 @@
         confirmed_by: 'HQ_ADMIN'
       } : null,
       media: Array.isArray(r.media) ? r.media : [],
-      history: Array.isArray(r.history) ? r.history : []
+      history: hist
     };
   }
 
@@ -747,6 +754,7 @@
     escapeHTML: escapeHTML,
     orderToRow: orderToRow,
     rowToOrder: rowToOrder,
+    toStoredOrder: toStoredOrder,
     useRemoteDB: useRemoteDB,
     SEED_PARTNERS: SEED_PARTNERS,
     SEED_MARGINS: SEED_MARGINS,

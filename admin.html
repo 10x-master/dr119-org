@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Dr.119 본사 관리자 (Super Admin)</title>
+  <title>Dr.119 본사 관리자 (Super Admin) — 품질·공임·센터/닥터 통합 관제</title>
   <link rel="stylesheet" href="admin.css">
 </head>
 <body class="admin">
@@ -15,15 +15,18 @@
         <button role="tab" class="tab" aria-selected="true" aria-controls="tab-orders" id="t-orders">주문 접수함 <span class="count" id="badge-received">0</span></button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-billing" id="t-billing">월간 총판 정산</button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-margins" id="t-margins">마진 세팅</button>
+        <button role="tab" class="tab" aria-selected="false" aria-controls="tab-network" id="t-network">센터·닥터·교육 관리</button>
       </nav>
+      <span class="spacer"></span>
+      <a class="topbar-link" href="index.html">고객 페이지 →</a>
     </div>
   </header>
 
   <main class="container">
-    <!-- ===================== 1. 주문 접수함 ===================== -->
+    <!-- ===================== 1. 주문 접수함 (공임나라 + SaaS ERP 벤치마킹) ===================== -->
     <section id="tab-orders" role="tabpanel" aria-labelledby="t-orders" class="panel">
       <div class="panel-head">
-        <h1>주문 접수함</h1>
+        <h1>주문 접수함 <small style="font-size:0.85rem;font-weight:600;color:#64748b;">· 실비·화물·표준 공임 배차 관제</small></h1>
         <div class="filters">
           <label>상태
             <select id="f-status">
@@ -42,14 +45,19 @@
               <option value="SELF_PICKUP">직접 수령</option>
             </select>
           </label>
-          <input type="search" id="f-q" placeholder="연락처·접수번호·agent 검색">
+          <input type="search" id="f-q" placeholder="연락처·접수번호·agent·증상 검색">
+          <button type="button" class="btn" id="btn-print-orders" onclick="window.print()">인쇄</button>
         </div>
       </div>
+
+      <!-- 실시간 운영 KPI 스트립 (타사 AS 관제 표준 벤치마킹) -->
+      <div class="kpis" id="orders-kpis"></div>
+
       <div class="table-wrap">
         <table class="grid" id="orders-table">
           <thead>
             <tr>
-              <th>접수일시</th><th>접수번호</th><th>사진</th><th>연락처</th><th>옵션</th>
+              <th>접수일시</th><th>접수번호</th><th>사진</th><th>연락처·증상</th><th>옵션</th>
               <th>유입 QR (agent_id)</th><th>배정 총판</th><th class="num">설치 공임비</th><th>상태</th>
             </tr>
           </thead>
@@ -66,9 +74,10 @@
         <div class="filters">
           <label>정산월 <input type="month" id="bill-month"></label>
           <button class="btn primary" id="btn-csv" type="button">⬇ 세금계산서용 CSV</button>
+          <button class="btn" type="button" onclick="window.print()">정산서 인쇄</button>
         </div>
       </div>
-      <p class="hint">지급 예정금 = 설치 공임비 합계 + 부가 수수료 합계 − 본사 차감액 · 공임비 확정일(KST) 기준 월 집계 · 하위 닥터 정산은 총판 자체 처리(시스템 제외)</p>
+      <p class="hint">지급 예정금 = 설치 공임비 합계 + 부가 수수료 합계 − 본사 차감액 · 공임비 확정일(KST) 기준 월 집계 · 하위 닥터 정산은 지역 수리 센터(총판) 자체 처리(시스템 분리)</p>
       <div class="kpis" id="bill-kpis"></div>
       <div class="table-wrap">
         <table class="grid" id="billing-table">
@@ -105,7 +114,7 @@
 
         <article class="card">
           <h2>부가 계약 등록 <small>(보험·정수기·정기구독 등)</small></h2>
-          <p class="hint">식당 연락처를 선택하면 최초 유입 QR(agent_id)이 자동 귀속됩니다. 수수료는 그 agent의 소속 총판에 매월 지급됩니다.</p>
+          <p class="hint">식당 연락처를 선택하면 최초 유입 QR(agent_id)이 자동 귀속됩니다. 수수료는 그 agent의 소속 지역 센터(총판)에 매월 지급됩니다.</p>
           <form id="contract-form" class="form-grid">
             <label>식당 연락처
               <input list="customer-list" id="c-phone" required placeholder="010-0000-0000">
@@ -149,13 +158,48 @@
         </div>
       </article>
     </section>
+
+    <!-- ===================== 4. 센터·닥터·품질·교육 관리 ===================== -->
+    <section id="tab-network" role="tabpanel" aria-labelledby="t-network" class="panel" hidden>
+      <div class="panel-head">
+        <h1>지역 수리 센터 · 수리 닥터 · 교육/품질 관제</h1>
+      </div>
+      <p class="hint">본사 차원의 AS 품질 관리, 센터·닥터 정규 교육 이수 상태, 그리고 홈페이지 파트너 가입 신청 내역을 통합 관리합니다.</p>
+
+      <article class="card">
+        <h2>가동 중인 지역 수리 센터 및 수리 닥터 교육·품질 현황</h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="network-centers-table">
+            <thead>
+              <tr><th>코드</th><th>구분</th><th>명칭</th><th>소속 거점 센터</th><th>교육·품질 인증</th><th>영업권 QR</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>신규 파트너 가입 신청함 <small>(수리 닥터 · 지역 오프라인 수리 센터)</small></h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="leads-table">
+            <thead>
+              <tr><th>신청일시</th><th>가입 트랙</th><th>성함/상호</th><th>활동 지역</th><th>연락처</th><th>교육·심사 상태</th><th>관리</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
   </main>
 
-  <!-- ===================== 주문 상세 + 정액제 계산기 ===================== -->
+  <!-- ===================== 주문 상세 + 정액제/실비 정산 + 품질 검수 ===================== -->
   <dialog id="order-dialog" class="drawer" aria-labelledby="od-title">
     <form method="dialog" class="drawer-head">
       <h2 id="od-title">주문 상세</h2>
-      <button class="icon-btn" value="close" aria-label="닫기">✕</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button type="button" class="btn small" onclick="window.print()">명세서 인쇄</button>
+        <button class="icon-btn" value="close" aria-label="닫기">✕</button>
+      </div>
     </form>
     <div class="drawer-body" id="od-body"></div>
   </dialog>

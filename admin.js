@@ -44,7 +44,7 @@
         state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
       });
   }
-  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); }
+  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); renderNetwork(); }
 
   /* ------------------------------------------------------------ 탭 */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
@@ -64,13 +64,34 @@
   ['#f-status', '#f-type'].forEach(function (s) { $(s).addEventListener('change', renderOrders); });
   $('#f-q').addEventListener('input', renderOrders);
 
+  function renderOrdersKpis() {
+    var box = $('#orders-kpis');
+    if (!box) return;
+    var received = 0, confirmed = 0, done = 0, kakao = 0, stale = 0;
+    var nowMs = Date.now();
+    state.orders.forEach(function (o) {
+      if (o.status === 'RECEIVED') {
+        received++;
+        if (o.created_at && (nowMs - new Date(o.created_at).getTime()) > 24 * 3600 * 1000) stale++;
+      } else if (o.status === 'CONFIRMED') confirmed++;
+      else if (o.status === 'COMPLETED' || o.status === 'SHIPPED') done++;
+      if (o.customer && o.customer.auth_provider === 'KAKAO') kakao++;
+    });
+    box.innerHTML =
+      '<div class="kpi accent"><div class="label">신규 접수 (배차 대기)</div><div class="value">' + received + '건</div><div class="sub">' + (stale ? '24시간+ 지연 ' + stale + '건' : '지연 없음') + '</div></div>' +
+      '<div class="kpi"><div class="label">공임 확정·수리중</div><div class="value">' + confirmed + '건</div><div class="sub">지역 센터·닥터 진행</div></div>' +
+      '<div class="kpi"><div class="label">완료·발송</div><div class="value">' + done + '건</div><div class="sub">누적 ' + state.orders.length + '건 중</div></div>' +
+      '<div class="kpi"><div class="label">카카오 간편 접수</div><div class="value">' + kakao + '건</div><div class="sub">1초 간편 등록 고객</div></div>';
+  }
+
   function renderOrders() {
+    renderOrdersKpis();
     var st = $('#f-status').value, ty = $('#f-type').value, q = $('#f-q').value.trim().toUpperCase().replace(/-/g, '');
     var list = state.orders.filter(function (o) {
       if (st && o.status !== st) return false;
       if (ty && o.service.type !== ty) return false;
       if (q) {
-        var hay = [o.order_id, o.customer.phone, o.attribution && o.attribution.agent_id].join(' ').toUpperCase().replace(/-/g, '');
+        var hay = [o.order_id, o.customer.phone, o.customer.note, o.attribution && o.attribution.agent_id].join(' ').toUpperCase().replace(/-/g, '');
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -83,12 +104,14 @@
     $('#orders-table tbody').innerHTML = list.map(function (o) {
       var m = o.media || [];
       var fee = o.settlement ? won(o.settlement.labor_fee) : (o.service.type === 'SELF_PICKUP' ? '<span class="chip">해당 없음</span>' : '<span class="neg">미확정</span>');
+      var authTag = o.customer && o.customer.auth_provider === 'KAKAO' ? '<span class="chip kakao-chip">카카오</span>' : '';
+      var noteSnippet = o.customer && o.customer.note ? '<br><span class="hint">' + esc(String(o.customer.note).slice(0, 36)) + '</span>' : '';
       return '<tr class="clickable" data-id="' + esc(o.order_id) + '" tabindex="0">' +
         '<td>' + fmtDate(o.created_at) + '</td>' +
         '<td class="mono">' + esc(o.order_id) + '</td>' +
         '<td>' + thumbHTML(m[0]) + (m.length > 1 ? '<span class="thumb-more">+' + (m.length - 1) + '</span>' : '') + '</td>' +
-        '<td>' + esc(o.customer.phone) + '</td>' +
-        '<td><span class="chip type-' + esc(o.service.type) + '">' + (o.service.type === 'DOCTOR_VISIT' ? '방문 설치 40만' : '직접 수령·착불') + '</span></td>' +
+        '<td>' + esc(o.customer.phone) + authTag + noteSnippet + '</td>' +
+        '<td><span class="chip type-' + esc(o.service.type) + '">' + (o.service.type === 'DOCTOR_VISIT' ? '방문 설치' : '직접 수령') + '</span></td>' +
         '<td>' + agentLabel(o.attribution && o.attribution.agent_id) + '</td>' +
         '<td>' + esc(distName(o.assigned_distributor_id)) + '</td>' +
         '<td class="num">' + fee + '</td>' +
@@ -123,12 +146,19 @@
       '<dl class="kv">' +
       '<dt>접수번호</dt><dd class="mono">' + esc(o.order_id) + '</dd>' +
       '<dt>접수일시</dt><dd>' + fmtDate(o.created_at) + '</dd>' +
-      '<dt>연락처</dt><dd><a href="tel:' + esc(o.customer.phone) + '">' + esc(o.customer.phone) + '</a></dd>' +
+      '<dt>연락처</dt><dd><a href="tel:' + esc(o.customer.phone) + '">' + esc(o.customer.phone) + '</a>' +
+        (o.customer.auth_provider === 'KAKAO' ? ' <span class="chip kakao-chip">카카오 간편등록</span>' : '') + '</dd>' +
+      (o.customer.note ? '<dt>고장 증상</dt><dd>' + esc(o.customer.note) + '</dd>' : '') +
       '<dt>선택 옵션</dt><dd>' + esc(o.service.label) + '</dd>' +
       '<dt>유입 QR</dt><dd>' + agentLabel(a.agent_id) + ' → ' + esc(distName(D.distributorOfAgent(state.partners, a.agent_id))) +
         (a.first_touch_at ? '<br><span class="hint">최초 유입 ' + fmtDate(a.first_touch_at) + '</span>' : '') + '</dd>' +
       '<dt>상태</dt><dd><span class="chip ' + esc(o.status) + '">' + esc(D.ORDER_STATUS[o.status]) + '</span></dd>' +
-      '</dl>';
+      '</dl>' +
+      '<div class="parts-audit">' +
+      '<strong>공임나라형 투명 정산 · 품질검수 체크</strong><br>' +
+      '• 부품 조달: 본사 리본 표준 부품 실비 공개 (고객 직접 구입 시 공임만 정산 가능)<br>' +
+      '• 물류·검수: 왕복 합포장 화물 실비 산정 · 입고/출고 다각도 사진 검수 (' + (o.media ? o.media.length : 0) + '장 등록)' +
+      '</div>';
 
     var locked = o.status === 'COMPLETED' || o.status === 'CANCELLED';
     if (o.service.type === 'DOCTOR_VISIT') {
@@ -424,6 +454,56 @@
       return '<tr><td class="mono">' + esc(a.agent_id) + '</td><td>' + esc(a.name) + '</td><td>' + (a.role === 'DOCTOR' ? '닥터' : '총판') + '</td>' +
         '<td>' + esc(distName(a.distributor_id)) + '</td><td><span class="qr-link">' + esc(origin + '?agent_id=' + a.agent_id) + '</span></td></tr>';
     }).join('');
+  }
+
+  function renderNetwork() {
+    var ct = $('#network-centers-table tbody');
+    if (ct) {
+      var origin = 'https://dr119.org/';
+      ct.innerHTML = state.partners.agents.map(function (a) {
+        return '<tr>' +
+          '<td class="mono">' + esc(a.agent_id) + '</td>' +
+          '<td>' + (a.role === 'DOCTOR' ? '<span class="chip CONFIRMED">수리 닥터</span>' : '<span class="chip ACTIVE">지역 수리 센터</span>') + '</td>' +
+          '<td>' + esc(a.name) + '</td>' +
+          '<td>' + esc(distName(a.distributor_id)) + '</td>' +
+          '<td><span class="pos">본사 기술·품질 교육 수료</span></td>' +
+          '<td><span class="qr-link">' + esc(origin + '?agent_id=' + a.agent_id) + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }
+    var lt = $('#leads-table tbody');
+    if (lt) {
+      var leads = [];
+      try { leads = JSON.parse(localStorage.getItem('dr119_partner_leads') || '[]'); } catch (e) {}
+      lt.innerHTML = leads.length ? leads.map(function (l) {
+        var done = l.training_status === '교육·인증 완료';
+        return '<tr>' +
+          '<td>' + fmtDate(l.created_at) + '</td>' +
+          '<td>' + esc(l.role_label || l.role) + '</td>' +
+          '<td>' + esc(l.name) + '</td>' +
+          '<td>' + esc(l.region) + '</td>' +
+          '<td>' + esc(l.phone) + '</td>' +
+          '<td><span class="chip ' + (done ? 'COMPLETED' : 'RECEIVED') + '">' + esc(l.training_status || '교육·심사 대기') + '</span></td>' +
+          '<td>' + (done ? '' : '<button type="button" class="btn small approve-lead" data-id="' + esc(l.id) + '">교육·인증 완료</button>') + '</td>' +
+          '</tr>';
+      }).join('') : '<tr><td colspan="7" class="empty">접수된 신규 파트너 신청이 없습니다.</td></tr>';
+    }
+  }
+
+  var leadsTable = $('#leads-table tbody');
+  if (leadsTable) {
+    leadsTable.addEventListener('click', function (e) {
+      var btn = e.target.closest('.approve-lead');
+      if (!btn) return;
+      var id = btn.getAttribute('data-id');
+      try {
+        var leads = JSON.parse(localStorage.getItem('dr119_partner_leads') || '[]');
+        leads.forEach(function (l) { if (l.id === id) l.training_status = '교육·인증 완료'; });
+        localStorage.setItem('dr119_partner_leads', JSON.stringify(leads));
+        renderNetwork();
+        toast('본사 교육·품질 인증 완료로 처리되었습니다.');
+      } catch (err) {}
+    });
   }
 
   /* ------------------------------------------------------------ 부트 */

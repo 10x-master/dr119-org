@@ -18,10 +18,28 @@ try {
   await cdp.viewport(390, 844, true);
   console.log('▶ Phase 1 — B2C 접수 페이지');
 
-  // 1) QR 첫 접속
+  // 1) QR 첫 접속 + 올 화이트 + SEO/AEO + 3대 기관 배너 + 가격 미노출 검증
   await cdp.goto(`${base}/index.html?agent_id=seoul_01`);
   check(R, 'URL agent_id 파싱 → hidden 필드 주입', (await cdp.eval(`document.getElementById('agent_id').value`)) === 'SEOUL_01');
-  check(R, 'JSON-LD LocalBusiness + Service 스키마 존재', await cdp.eval(`(() => { const t=[...document.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent)['@type']); return t.includes('LocalBusiness') && t.includes('Service'); })()`));
+  check(R, 'JSON-LD LocalBusiness + Service + HowTo + FAQPage 스키마 존재', await cdp.eval(`(() => { const t=[...document.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent)['@type']); return t.includes('LocalBusiness') && t.includes('Service') && t.includes('HowTo') && t.includes('FAQPage'); })()`));
+  const designAudit = await cdp.eval(`(() => {
+    const t = document.body.innerText;
+    const kw = document.querySelector('meta[name="keywords"]')?.content || '';
+    return {
+      bgBody: getComputedStyle(document.body).backgroundColor,
+      bgHead: getComputedStyle(document.querySelector('.site-header')).backgroundColor,
+      priceLeak: /40만|400,000|착불/.test(t),
+      banners: t.includes('한국AI인테리어공간협회') && t.includes('중소기업사업전환지원단') && t.includes('투데이 플랫폼'),
+      excludesOrion: !t.includes('오리온이앤에스') && !kw.includes('오리온'),
+      controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn')),
+      kwLen: kw.length
+    };
+  })()`);
+  check(R, '올 화이트 + 가격 미노출 + 3대 배너(오리온 제외) + 카메라/음성/카카오 + SEO',
+    designAudit.bgBody === 'rgb(255, 255, 255)' && designAudit.bgHead === 'rgb(255, 255, 255)' &&
+    !designAudit.priceLeak && designAudit.banners && designAudit.excludesOrion &&
+    designAudit.controls && designAudit.kwLen > 120,
+    JSON.stringify(designAudit));
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));
 
   // 2) 다른 QR로 재접속 → First-touch 유지
@@ -49,12 +67,34 @@ try {
   check(R, '접수 완료 화면 표시', await cdp.eval(`!document.getElementById('done').hidden && document.getElementById('done-order-id').textContent === ${JSON.stringify(payload.order_id)}`));
   await cdp.screenshot(path.join(OUT, 'phase1-done.png'));
 
-  // 5) 직접 수령 옵션
+  // 5) 직접 수령 옵션 + 증상 메모 + 카카오 1초 간편 등록
   await cdp.eval(`document.getElementById('again-btn').click()`);
   await cdp.setFiles('#media', [img]);
-  await cdp.eval(`(() => { const p=document.getElementById('phone'); p.value='010-9876-5432'; p.dispatchEvent(new Event('input')); document.querySelector('input[value=SELF_PICKUP]').checked = true; })()`);
+  await cdp.eval(`(() => {
+    document.getElementById('symptom_note').value = '초음파 소리가 약하고 물이 샘';
+    document.getElementById('kakao-sync-btn').click();
+    const kp = document.getElementById('kakao-phone-input');
+    kp.value = '01098765432';
+    kp.dispatchEvent(new Event('input'));
+    document.getElementById('kakao-confirm-btn').click();
+    document.querySelector('input[value=SELF_PICKUP]').checked = true;
+  })()`);
   const p2 = await cdp.eval(`new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); })`);
-  check(R, '직접 수령: SELF_PICKUP / 착불(COD) / agent 유지', p2.service.type === 'SELF_PICKUP' && p2.service.freight_payment === 'COD' && p2.attribution.agent_id === 'SEOUL_01');
+  check(R, '직접 수령: SELF_PICKUP / 착불(COD) / agent + note + KAKAO 유지',
+    p2.service.type === 'SELF_PICKUP' && p2.service.freight_payment === 'COD' &&
+    p2.attribution.agent_id === 'SEOUL_01' &&
+    p2.customer.note === '초음파 소리가 약하고 물이 샘' && p2.customer.auth_provider === 'KAKAO');
+
+  // 6) 파트너(지역 센터/수리 닥터) 가입 상담 저장 확인
+  await cdp.eval(`(() => {
+    document.getElementById('pa-role').value = 'LOCAL_CENTER';
+    document.getElementById('pa-name').value = '대구중앙센터';
+    document.getElementById('pa-region').value = '대구광역시';
+    const pp = document.getElementById('pa-phone'); pp.value = '01033334444'; pp.dispatchEvent(new Event('input'));
+    document.querySelector('#partner-apply-form button[type=submit]').click();
+  })()`);
+  const leads = await cdp.eval(`JSON.parse(localStorage.getItem('dr119_partner_leads') || '[]')`);
+  check(R, '파트너 가입 신청 저장 (dr119_partner_leads)', leads.length === 1 && leads[0].role === 'LOCAL_CENTER' && leads[0].phone === '010-3333-4444');
 
   // 6) Mock API 저장 확인 (원본 제거, 썸네일만)
   const stored = await cdp.eval(`JSON.parse(localStorage.getItem('dr119_orders'))`);

@@ -114,7 +114,9 @@
         '<div><div class="meta">설치 공임비 (본사 확정)</div><div class="fee">' + won(o.settlement.labor_fee) + '</div>' +
         '<div class="meta">정액 400,000 − 화물비 ' + o.settlement.freight_cost.toLocaleString('ko-KR') + ' (본사 부담)</div></div>' +
         '<div class="thumbs">' + (o.media || []).map(thumb).join('') + '</div>' +
-        '<div>📞 <a href="tel:' + esc(o.customer.phone) + '"><b>' + esc(o.customer.phone) + '</b></a></div>' +
+        '<div>📞 <a href="tel:' + esc(o.customer.phone) + '"><b>' + esc(o.customer.phone) + '</b></a>' +
+          (o.customer.auth_provider === 'KAKAO' ? ' <span class="chip kakao-chip">카카오</span>' : '') + '</div>' +
+        (o.customer.note ? '<div class="meta">증상: ' + esc(o.customer.note) + '</div>' : '') +
         '<div class="meta">유입 QR: ' + esc((o.attribution && o.attribution.agent_id) || '직접 유입') + ' · 배차 ' + fmtDate(o.settlement.confirmed_at) + '</div>' +
         (done ? '' : '<button class="btn primary btn-done" type="button">설치 완료 보고</button>') +
         '</article>';
