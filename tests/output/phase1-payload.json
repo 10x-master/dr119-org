@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "order_id": "DR-20261114-L3CZQ",
-  "created_at": "2026-11-14T09:59:54.172Z",
+  "order_id": "DR-20261118-WDMKQ",
+  "created_at": "2026-11-17T22:44:16.537Z",
   "customer": {
-    "phone": "010-1234-5678"
+    "phone": "010-1234-5678",
+    "region": "서울 강남구"
   },
   "service": {
     "type": "DOCTOR_VISIT",
@@ -14,8 +15,8 @@
   "attribution": {
     "agent_id": "SEOUL_01",
     "model": "FIRST_TOUCH",
-    "first_touch_at": "2026-11-14T09:59:53.141Z",
-    "landing_url": "http://127.0.0.1:50063/index.html?agent_id=seoul_01"
+    "first_touch_at": "2026-11-17T22:44:08.458Z",
+    "landing_url": "http://127.0.0.1:58668/index.html?agent_id=seoul_01"
   },
   "media": [
     {
@@ -37,7 +38,7 @@
     }
   ],
   "client": {
-    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
-    "submitted_url": "http://127.0.0.1:50063/index.html?agent_id=BUSAN_01"
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+    "submitted_url": "http://127.0.0.1:58668/index.html?agent_id=BUSAN_01"
   }
 }

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Dr.119 Shorts Renderer</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+    canvas { display: block; width: 1080px; height: 1920px; }
+  </style>
+</head>
+<body>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d', { alpha: false });
+  const W = 1080, H = 1920;
+  const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+
+  // 에셋 저장소
+  const imgs = {};
+  let timeline = null;
+  let videoEncoder = null;
+  let encodedVideoChunks = [];
+  let keyIndices = [];
+  let avcCBase64 = '';
+  let sampleIdx = 0;
+
+  function bufToB64(u8) {
+    let bin = '';
+    const step = 0x8000;
+    for (let i = 0; i < u8.length; i += step) {
+      bin += String.fromCharCode.apply(null, u8.subarray(i, i + step));
+    }
+    return btoa(bin);
+  }
+
+  function loadImg(url) {
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = (e) => reject(new Error('이미지 로드 실패: ' + url.slice(0, 64)));
+      im.src = url.startsWith('data:') ? url : url + '?t=' + Date.now();
+    });
+  }
+
+  // ─── AAC 오디오 인코딩 (master-audio.wav fetch -> AudioEncoder mp4a.40.2) ───
+  window.__encodeAudio = async (wavUrl) => {
+    const resp = await fetch(wavUrl);
+    const ab = await resp.arrayBuffer();
+    const dv = new DataView(ab);
+    const sr = dv.getUint32(24, true);
+    const ch = dv.getUint16(22, true);
+    const pcmStart = 44;
+    const totalSamples = Math.floor((ab.byteLength - pcmStart) / (ch * 2));
+
+    const samplesB64 = [];
+    const sampleDurations = [];
+    let ascBase64 = btoa(String.fromCharCode(0x11, 0x90)); // fallback 48kHz stereo AAC-LC
+
+    const ae = new AudioEncoder({
+      output(chunk, meta) {
+        if (meta && meta.decoderConfig && meta.decoderConfig.description) {
+          const desc = meta.decoderConfig.description;
+          const u8 = desc instanceof ArrayBuffer ? new Uint8Array(desc) : new Uint8Array(desc.buffer, desc.byteOffset, desc.byteLength);
+          if (u8.length > 0) ascBase64 = bufToB64(u8);
+        }
+        const raw = new Uint8Array(chunk.byteLength);
+        chunk.copyTo(raw);
+        samplesB64.push(bufToB64(raw));
+        sampleDurations.push(Math.round((chunk.duration || 21333.333) * sr / 1e6));
+      },
+      error(e) { console.error('AudioEncoder err:', e); throw e; },
+    });
+
+    ae.configure({
+      codec: 'mp4a.40.2',
+      sampleRate: sr,
+      numberOfChannels: ch,
+      bitrate: 128000,
+    });
+
+    // 4096 프레임씩 디인터리브해 AudioData(f32-planar) 인코딩
+    const BLOCK = 4096;
+    for (let offset = 0; offset < totalSamples; offset += BLOCK) {
+      const count = Math.min(BLOCK, totalSamples - offset);
+      const planar = new Float32Array(count * ch);
+      for (let i = 0; i < count; i++) {
+        const byteOff = pcmStart + (offset + i) * ch * 2;
+        planar[i] = dv.getInt16(byteOff, true) / 32768;
+        if (ch === 2) planar[count + i] = dv.getInt16(byteOff + 2, true) / 32768;
+      }
+      const ad = new AudioData({
+        format: 'f32-planar',
+        sampleRate: sr,
+        numberOfFrames: count,
+        numberOfChannels: ch,
+        timestamp: Math.round((offset / sr) * 1e6),
+        data: planar,
+      });
+      ae.encode(ad);
+      ad.close();
+      if (ae.encodeQueueSize > 16) await new Promise((r) => setTimeout(r, 8));
+    }
+    await ae.flush();
+    ae.close();
+
+    return { samples: samplesB64, sampleDurations, ascBase64 };
+  };
+
+  // ─── 비디오 인코더 & 에셋 초기화 ───
+  window.__initRenderer = async (tl) => {
+    timeline = tl;
+    const entries = [
+      ['form', './assets/mobile-form-raw.png'],
+      ['formFilled', './assets/mobile-form-filled.png'],
+      ['done', './assets/mobile-done-raw.png'],
+      ['ct1', './assets/channeltalk-review-1.png'],
+      ['ct2', './assets/channeltalk-review-2.png'],
+      ['ct3', './assets/channeltalk-review-3.png'],
+      ['logo', '../icons/dr119-logo.svg'],
+    ];
+    await Promise.all(entries.map(async ([k, u]) => { imgs[k] = await loadImg(u); }));
+
+    encodedVideoChunks = [];
+    keyIndices = [];
+    avcCBase64 = '';
+    sampleIdx = 0;
+
+    videoEncoder = new VideoEncoder({
+      output(chunk, meta) {
+        sampleIdx += 1;
+        if (chunk.type === 'key') keyIndices.push(sampleIdx);
+        if (!avcCBase64 && meta && meta.decoderConfig && meta.decoderConfig.description) {
+          const d = meta.decoderConfig.description;
+          const u8 = d instanceof ArrayBuffer ? new Uint8Array(d) : new Uint8Array(d.buffer, d.byteOffset, d.byteLength);
+          avcCBase64 = bufToB64(u8);
+        }
+        const out = new Uint8Array(chunk.byteLength);
+        chunk.copyTo(out);
+        encodedVideoChunks.push(bufToB64(out));
+      },
+      error(e) { console.error('VideoEncoder err:', e); throw e; },
+    });
+
+    videoEncoder.configure({
+      codec: 'avc1.42002a',
+      width: W,
+      height: H,
+      bitrate: 4_500_000,
+      framerate: 30,
+      latencyMode: 'realtime',
+      avc: { format: 'avc' },
+    });
+  };
+
+  // ─── 그리기 헬퍼 ───
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const easeOut = (t) => 1 - Math.pow(1 - clamp(t), 3);
+  const easeBack = (t) => {
+    const x = clamp(t);
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+  };
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+  }
+
+  function drawLogo(cx, cy, r) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#a50034';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    const bw = r * 0.36, bh = r * 1.24;
+    rr(cx - bw / 2, cy - bh / 2, bw, bh, r * 0.08);
+    ctx.fill();
+    rr(cx - bh / 2, cy - bw / 2, bh, bw, r * 0.08);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawPersistentTopBar(darkTheme) {
+    ctx.save();
+    rr(46, 56, W - 92, 102, 51);
+    ctx.fillStyle = darkTheme ? 'rgba(15, 23, 42, 0.78)' : 'rgba(255, 255, 255, 0.94)';
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = darkTheme ? 'rgba(255, 255, 255, 0.22)' : 'rgba(165, 0, 52, 0.2)';
+    ctx.stroke();
+
+    drawLogo(102, 107, 34);
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = darkTheme ? '#ffffff' : '#0f172a';
+    ctx.font = `900 32px ${FONT}`;
+    ctx.fillText('Dr.119', 150, 96);
+
+    ctx.fillStyle = darkTheme ? '#cbd5e1' : '#475569';
+    ctx.font = `700 22px ${FONT}`;
+    ctx.fillText('초음파 세척기 수리센터', 150, 129);
+
+    // 우측 전화번호 뱃지
+    rr(680, 74, 326, 66, 33);
+    ctx.fillStyle = '#a50034';
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 30px ${FONT}`;
+    ctx.fillText('📞 1661-0783', 843, 108);
+    ctx.restore();
+  }
+
+  function drawPhoneFrame(x, y, w, h, img, overlayFn) {
+    ctx.save();
+    // 그림자
+    ctx.shadowColor = 'rgba(15, 23, 42, 0.34)';
+    ctx.shadowBlur = 46;
+    ctx.shadowOffsetY = 22;
+    rr(x - 16, y - 16, w + 32, h + 32, 56);
+    ctx.fillStyle = '#0f172a';
+    ctx.fill();
+    ctx.restore();
+
+    // 화면 클립
+    ctx.save();
+    rr(x, y, w, h, 42);
+    ctx.clip();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, w, h);
+    if (img) {
+      const scale = w / img.width;
+      const drawH = img.height * scale;
+      ctx.drawImage(img, x, y, w, drawH);
+    }
+    if (overlayFn) overlayFn(x, y, w, h);
+    ctx.restore();
+
+    // 테두리 하이라이트
+    ctx.save();
+    rr(x - 16, y - 16, w + 32, h + 32, 56);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSubtitles(t, scenes) {
+    // 각 장면별 한국어 음성 싱크 자막 큐
+    const [s1, s2, s3, s4, s5] = scenes;
+    const cues = [
+      { a: s1.start, b: s1.start + 3.2, line1: '수백만 원짜리 초음파 세척기!', line2: '고장 나서 그냥 물통으로 쓰셨나요?', hl: '물통' },
+      { a: s1.start + 3.2, b: s1.end, line1: '초음파 세척계의 공임나라', line2: '닥터 119가 새것처럼 살려드립니다!', hl: '공임나라' },
+
+      { a: s2.start, b: s2.start + 3.6, line1: '사용 방법은 사진 한 장이면 끝!', line2: '① 첫 화면에서 고장 사진 1장 찰칵!', hl: '사진 한 장' },
+      { a: s2.start + 3.6, b: s2.start + 7.4, line1: '② 빨간 마이크 버튼 눌러', line2: '말로 증상을 편하게 적으세요!', hl: '빨간 마이크' },
+      { a: s2.start + 7.4, b: s2.end, line1: '③ 연락처·지역만 입력하고', line2: '④ 119 긴급 접수하기 누르면 완료!', hl: '긴급 접수하기' },
+
+      { a: s3.start, b: s3.start + 3.4, line1: '접수 즉시 진동자·발진기 부품 원가', line2: '합포장 화물 실비 100% 공개!', hl: '100% 공개' },
+      { a: s3.start + 3.4, b: s3.end, line1: '거품 출장비 없이', line2: '정해진 표준 공임만 투명 청구합니다!', hl: '표준 공임' },
+
+      { a: s4.start, b: s4.start + 2.8, line1: '제조사 부도로 버릴 뻔했는데', line2: '"새것처럼 살아나서 너무 고맙습니다!!"', hl: '고맙습니다' },
+      { a: s4.start + 2.8, b: s4.start + 5.5, line1: '대체 기기 대여에 빨간 마이크 접수까지', line2: '"정말 고맙습니다 닥터119!!"', hl: '고맙습니다' },
+      { a: s4.start + 5.5, b: s4.end, line1: '전국 사장님들의 실제 채널톡 후기', line2: '"정직하게 고쳐주셔서 정말 고맙습니다 ❤️"', hl: '고맙습니다' },
+
+      { a: s5.start, b: s5.end, line1: '초음파 세척기 수리는 Dr.119!', line2: '지금 📞 1661-0783 으로 접수하세요!', hl: '1661-0783' },
+    ];
+    const cue = cues.find((c) => t >= c.a && t <= c.b) || cues[cues.length - 1];
+
+    ctx.save();
+    const boxY = 1410, boxH = 166, boxW = W - 84;
+    rr(42, boxY, boxW, boxH, 30);
+    ctx.fillStyle = 'rgba(10, 15, 28, 0.90)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 41px ${FONT}`;
+    ctx.fillText(cue.line1, W / 2, boxY + 54);
+
+    // 둘째 줄 키워드 하이라이트 렌더링
+    ctx.font = `900 45px ${FONT}`;
+    const txt = cue.line2;
+    const idx = cue.hl ? txt.indexOf(cue.hl) : -1;
+    if (idx === -1) {
+      ctx.fillStyle = '#fde047';
+      ctx.fillText(txt, W / 2, boxY + 114);
+    } else {
+      const pre = txt.slice(0, idx);
+      const mid = cue.hl;
+      const post = txt.slice(idx + mid.length);
+      const wTotal = ctx.measureText(txt).width;
+      const wPre = ctx.measureText(pre).width;
+      const wMid = ctx.measureText(mid).width;
+      const xStart = W / 2 - wTotal / 2;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(pre, xStart, boxY + 114);
+      ctx.fillStyle = '#fde047';
+      ctx.fillText(mid, xStart + wPre, boxY + 114);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(post, xStart + wPre + wMid, boxY + 114);
+    }
+    ctx.restore();
+  }
+
+  function drawBottomProgress(t, totalDur) {
+    ctx.save();
+    const barY = 1876;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+    rr(48, barY, W - 96, 10, 5);
+    ctx.fill();
+    ctx.fillStyle = '#e11d48';
+    rr(48, barY, Math.max(20, (W - 96) * clamp(t / totalDur)), 10, 5);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ─── 장면별 렌더링 함수 ───
+  function renderScene1(t, s) {
+    const lt = t - s.start;
+    // 다크 네이비-크림슨 배경
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0f172a');
+    g.addColorStop(0.55, '#2b0917');
+    g.addColorStop(1, '#090d16');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // 119 긴급 펄스 배지
+    const pop1 = easeBack(lt / 0.45);
+    ctx.save();
+    ctx.translate(W / 2, 232);
+    ctx.scale(pop1, pop1);
+    rr(-275, -36, 550, 72, 36);
+    ctx.fillStyle = '#dc2626';
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 32px ${FONT}`;
+    ctx.fillText('🚨 초음파 세척기 119 긴급 구조', 0, 2);
+    ctx.restore();
+
+    // 대형 헤드라인
+    const slideH = easeOut(lt / 0.55);
+    ctx.save();
+    ctx.globalAlpha = slideH;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = `900 68px ${FONT}`;
+    ctx.fillText('수백만 원 주고 샀는데', W / 2, 365);
+    ctx.fillStyle = '#fde047';
+    ctx.font = `900 76px ${FONT}`;
+    ctx.fillText('국자·대파만 담그는', W / 2, 462);
+    ctx.fillStyle = '#fb7185';
+    ctx.font = `900 84px ${FONT}`;
+    ctx.fillText("‘비싼 물통’ 되셨나요?", W / 2, 562);
+    ctx.restore();
+
+    // 중앙 비교 카드 (고장 방치 BEFORE -> Dr.119 복원 AFTER)
+    const flip = clamp((lt - 3.6) / 0.9);
+    const flipEase = easeOut(flip);
+
+    // 상단 고장 카드
+    ctx.save();
+    rr(72, 650, W - 144, 300, 32);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = flip > 0.2 ? 'rgba(148,163,184,0.35)' : '#f43f5e';
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#fda4af';
+    ctx.font = `900 30px ${FONT}`;
+    ctx.fillText('❌ 기존 현장의 답답한 현실', 112, 706);
+
+    const issues = [
+      '• 제조사 폐업·단종으로 AS 연락 두절',
+      '• 부르는 게 값인 깜깜이 출장비·수리비',
+      '• 수조 바닥만 덩그러니 비싼 물통 방치',
+    ];
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = `700 31px ${FONT}`;
+    issues.forEach((line, idx) => ctx.fillText(line, 112, 770 + idx * 54));
+    ctx.restore();
+
+    // 하단 Dr.119 솔루션 카드 (3.6초부터 환하게 등장)
+    ctx.save();
+    const scaleAfter = 0.9 + 0.1 * flipEase;
+    ctx.translate(W / 2, 1175);
+    ctx.scale(scaleAfter, scaleAfter);
+    rr(-468, -175, 936, 350, 34);
+    const ag = ctx.createLinearGradient(-468, -175, 468, 175);
+    ag.addColorStop(0, '#a50034');
+    ag.addColorStop(1, '#e11d48');
+    ctx.fillStyle = ag;
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#fde047';
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fde047';
+    ctx.font = `900 34px ${FONT}`;
+    ctx.fillText('✨ 초음파 세척계의 공임나라, Dr.119', 0, -108);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 54px ${FONT}`;
+    ctx.fillText('새것처럼 완벽 복원!', 0, -28);
+
+    ctx.fillStyle = '#ffe4e6';
+    ctx.font = `800 32px ${FONT}`;
+    ctx.fillText('✔ 부품 실비 100% 공개  ✔ 합포장 화물 실비', 0, 56);
+    ctx.fillText('✔ 정해진 표준 공임 정찰 청구', 0, 110);
+    ctx.restore();
+  }
+
+  function renderScene2(t, s) {
+    const lt = t - s.start;
+    // 밝은 스튜디오 화이트/펄 배경
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#f8fafc');
+    g.addColorStop(1, '#e2e8f0');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // 섹션 타이틀
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#a50034';
+    ctx.font = `900 30px ${FONT}`;
+    ctx.fillText('📱 1분 간편 AS 접수 사용 방법', W / 2, 208);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `900 56px ${FONT}`;
+    ctx.fillText('사진 한 장 + 빨간 마이크면 끝!', W / 2, 272);
+    ctx.restore();
+
+    // 스텝 진행 알약 4개
+    const stepIdx = lt < 3.0 ? 0 : lt < 6.6 ? 1 : lt < 8.8 ? 2 : 3;
+    const stepNames = ['① 사진 1장', '② 빨간 마이크', '③ 연락처·지역', '④ 긴급접수'];
+    for (let i = 0; i < 4; i++) {
+      const bx = 66 + i * 242;
+      rr(bx, 326, 224, 54, 27);
+      ctx.fillStyle = i === stepIdx ? '#a50034' : (i < stepIdx ? '#10b981' : '#ffffff');
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = i === stepIdx ? '#a50034' : '#cbd5e1';
+      ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = i <= stepIdx ? '#ffffff' : '#475569';
+      ctx.font = `800 24px ${FONT}`;
+      ctx.fillText(stepNames[i], bx + 112, 354);
+    }
+
+    // 좌측: 실제 Dr.119 모바일 전체 첫 화면 (390:844 비율 그대로 무손실 배치)
+    const useFilled = lt >= 5.8;
+    const pX = 54, pY = 398, pW = 450, pH = 974;
+    drawPhoneFrame(pX, pY, pW, pH, useFilled ? imgs.formFilled : imgs.form, (fx, fy, fw) => {
+      const scale = fw / 390;
+      const box = (rx, ry, rw, rh, col) => {
+        ctx.save();
+        rr(fx + rx * scale, fy + ry * scale, rw * scale, rh * scale, 12 * scale);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = col;
+        ctx.stroke();
+        ctx.fillStyle = col.replace(', 1)', ', 0.14)');
+        ctx.fill();
+        ctx.restore();
+      };
+      if (stepIdx === 0) box(20, 165, 350, 98, 'rgba(225, 29, 72, 1)');
+      if (stepIdx === 1) {
+        box(20, 272, 350, 95, 'rgba(220, 38, 38, 1)');
+        const cx = fx + 266 * scale, cy = fy + 332 * scale;
+        for (let k = 0; k < 2; k++) {
+          const ph = ((lt * 1.8 + k * 0.5) % 1);
+          ctx.beginPath();
+          ctx.arc(cx, cy, (16 + ph * 34) * scale, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(220, 38, 38, ${(1 - ph) * 0.85})`;
+          ctx.lineWidth = 4.5;
+          ctx.stroke();
+        }
+      }
+      if (stepIdx === 2) box(20, 428, 350, 198, 'rgba(37, 99, 235, 1)');
+      if (stepIdx === 3) box(20, 650, 350, 92, 'rgba(16, 185, 129, 1)');
+    });
+
+    // 우측: 4단계 단계별 사용방법 카드 (활성 단계 강조)
+    const callouts = [
+      { no: 'STEP 1', title: '고장 사진 1장 찰칵 📸', desc: '고장 부위·전체 사진\n한 장만 올려도 접수 끝!', color: '#a50034' },
+      { no: 'STEP 2', title: '빨간 마이크 말로 입력 🔴', desc: '"말로 증상 적기" 누르면\n말한 증상이 자동 기록!', color: '#dc2626' },
+      { no: 'STEP 3', title: '카카오 1초·지역 입력 ⚡', desc: '사장님 연락처와\n시·구·동 지역만 입력!', color: '#2563eb' },
+      { no: 'STEP 4', title: '119 긴급 접수하기 ✅', desc: '터치 한 번이면 1분 완료\n투명 실비 즉시 안내!', color: '#059669' },
+    ];
+    callouts.forEach((c, idx) => {
+      const isAct = idx === stepIdx;
+      const isDone = idx < stepIdx;
+      const cy = 408 + idx * 244;
+      ctx.save();
+      const sc = isAct ? 1.03 : 1;
+      ctx.translate(782, cy + 106);
+      ctx.scale(sc, sc);
+      rr(-246, -106, 492, 212, 26);
+      ctx.fillStyle = isAct ? c.color : '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = isAct ? 4 : 2.5;
+      ctx.strokeStyle = isAct ? '#fde047' : (isDone ? '#10b981' : '#cbd5e1');
+      ctx.stroke();
+
+      rr(-222, -84, 114, 38, 12);
+      ctx.fillStyle = isAct ? '#fde047' : (isDone ? '#10b981' : '#e2e8f0');
+      ctx.fill();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = isAct ? '#111827' : (isDone ? '#ffffff' : '#475569');
+      ctx.font = `900 20px ${FONT}`;
+      ctx.fillText(isDone ? '완료 ✓' : c.no, -165, -64);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = isAct ? '#ffffff' : '#0f172a';
+      ctx.font = `900 31px ${FONT}`;
+      ctx.fillText(c.title, -96, -63);
+
+      ctx.fillStyle = isAct ? '#f8fafc' : '#475569';
+      ctx.font = `700 26px ${FONT}`;
+      c.desc.split('\n').forEach((ln, li) => {
+        ctx.fillText(ln, -218, 8 + li * 40);
+      });
+      ctx.restore();
+    });
+  }
+
+  function renderScene3(t, s) {
+    const lt = t - s.start;
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#fff1f2');
+    g.addColorStop(0.5, '#ffffff');
+    g.addColorStop(1, '#f1f5f9');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#a50034';
+    ctx.font = `900 32px ${FONT}`;
+    ctx.fillText('💰 접수 완료 & 100% 투명 실비 프로세스', W / 2, 212);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `900 58px ${FONT}`;
+    ctx.fillText('공임나라식 정직한 수리!', W / 2, 278);
+    ctx.restore();
+
+    // 좌측: 실제 접수 완료 화면 (#done)
+    const pEnter = easeOut(lt / 0.55);
+    drawPhoneFrame(62 - (1 - pEnter) * 90, 355, 440, 880, imgs.done);
+
+    // 우측: 3대 투명 실비 보장 카드 순차 등장
+    const cards = [
+      { delay: 0.25, num: '01', title: '부품 원가 100% 공개', desc: '진동자·발진기·히터\n직접 사오셔도 공임만 시공!' },
+      { delay: 1.55, num: '02', title: '합포장 왕복 화물 실비', desc: '출장비 거품 싹 빼고\n정해진 표준 기술 공임만!' },
+      { delay: 2.85, num: '03', title: '다각도 검수 & 대체기기', desc: '수거·출고 사진 전수 검수\n본사 전산 AS 보증까지!' },
+    ];
+    cards.forEach((c, idx) => {
+      const p = easeBack((lt - c.delay) / 0.45);
+      if (p <= 0.01) return;
+      const cy = 390 + idx * 290;
+      ctx.save();
+      ctx.translate(776, cy + 120);
+      ctx.scale(p, p);
+      rr(-242, -120, 484, 240, 28);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#a50034';
+      ctx.stroke();
+
+      rr(-216, -94, 72, 44, 14);
+      ctx.fillStyle = '#a50034';
+      ctx.fill();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 24px ${FONT}`;
+      ctx.fillText(c.num, -180, -64);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = `900 34px ${FONT}`;
+      ctx.fillText(c.title, -126, -64);
+
+      ctx.fillStyle = '#334155';
+      ctx.font = `700 27px ${FONT}`;
+      const lines = c.desc.split('\n');
+      lines.forEach((ln, li) => ctx.fillText(ln, -214, 4 + li * 42));
+      ctx.restore();
+    });
+  }
+
+  function renderScene4(t, s) {
+    const lt = t - s.start;
+    // 채널톡 시그니처 보라/인디고 스튜디오 배경
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#1e1b4b');
+    g.addColorStop(0.5, '#3b0764');
+    g.addColorStop(1, '#0f172a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // 상단 채널톡 배지 & 헤드라인
+    ctx.save();
+    rr(210, 184, 660, 56, 28);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#c4b5fd';
+    ctx.font = `900 28px ${FONT}`;
+    ctx.fillText('💬 실제 사장님 채널톡(ChannelTalk) 캡처', W / 2, 221);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 52px ${FONT}`;
+    ctx.fillText('"고쳐주셔서 정말 고맙습니다!"', W / 2, 294);
+    ctx.restore();
+
+    // 3장의 채널톡 캡처 순차 쇼케이스
+    const slotDur = s.duration / 3;
+    const idx = Math.min(2, Math.floor(lt / slotDur));
+    const slotLt = lt - idx * slotDur;
+    const pop = easeBack(slotLt / 0.38);
+
+    const cardImgs = [imgs.ct1, imgs.ct2, imgs.ct3];
+    const stickers = [
+      '후기 #1 · "돈 수백만 원 아꼈어요! 너무 고맙습니다!!"',
+      '후기 #2 · "빨간 마이크 + 대체기기 정말 고맙습니다!!"',
+      '후기 #3 · "투명 실비·다각도 검수 정말 고맙습니다 ❤️"',
+    ];
+
+    const im = cardImgs[idx];
+    const cw = 820;
+    const ch = Math.round(cw * (im.height / im.width)); // ~1087px -> fits cleanly y=335..1400!
+    ctx.save();
+    ctx.translate(W / 2, 340 + Math.min(ch, 1020) / 2);
+    ctx.scale(0.88 + 0.12 * pop, 0.88 + 0.12 * pop);
+    const drawH = Math.min(ch, 1010);
+    const drawW = Math.round(drawH * (im.width / im.height));
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    ctx.shadowBlur = 40;
+    ctx.drawImage(im, -drawW / 2, -drawH / 2, drawW, drawH);
+    ctx.restore();
+
+    // 하단 노란 강조 리본
+    ctx.save();
+    const bump = 1 + 0.03 * Math.sin(slotLt * 9);
+    ctx.translate(W / 2, 1365);
+    ctx.scale(bump, bump);
+    rr(-440, -34, 880, 68, 34);
+    ctx.fillStyle = '#fde047';
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#111827';
+    ctx.font = `900 31px ${FONT}`;
+    ctx.fillText(stickers[idx], 0, 2);
+    ctx.restore();
+  }
+
+  function renderScene5(t, s) {
+    const lt = t - s.start;
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#7f0026');
+    g.addColorStop(0.55, '#a50034');
+    g.addColorStop(1, '#3b0717');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    const pulse = 1 + 0.04 * Math.sin(lt * 5.5);
+    ctx.save();
+    ctx.translate(W / 2, 360);
+    ctx.scale(pulse, pulse);
+    ctx.beginPath();
+    ctx.arc(0, 0, 118, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    drawLogo(0, 0, 96);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fde047';
+    ctx.font = `900 38px ${FONT}`;
+    ctx.fillText('초음파 세척계의 공임나라', W / 2, 535);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 72px ${FONT}`;
+    ctx.fillText('초음파 세척기 수리는', W / 2, 622);
+    ctx.font = `900 88px ${FONT}`;
+    ctx.fillText('Dr.119 (닥터119)', W / 2, 724);
+
+    // 대형 전화 접수 카드
+    const cScale = easeBack(lt / 0.45);
+    ctx.save();
+    ctx.translate(W / 2, 955);
+    ctx.scale(cScale, cScale);
+    rr(-450, -140, 900, 280, 42);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 32;
+
+    ctx.fillStyle = '#334155';
+    ctx.font = `800 34px ${FONT}`;
+    ctx.fillText('📞 고장 사진 한 장·전화 간편 접수', 0, -64);
+
+    ctx.fillStyle = '#a50034';
+    ctx.font = `900 116px ${FONT}`;
+    ctx.fillText('1661-0783', 0, 56);
+    ctx.restore();
+
+    // 신뢰 배지 & 정식 기업 정보 (wellglobal.net 기준)
+    rr(110, 1140, 860, 74, 37);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 29px ${FONT}`;
+    ctx.fillText('사진 1장 접수  ·  빨간 마이크 음성 입력  ·  전국 방문/합포장', W / 2, 1187);
+
+    ctx.fillStyle = '#ffe4e6';
+    ctx.font = `800 28px ${FONT}`;
+    ctx.fillText('중소기업사업지원단 · 주식회사 웰글로벌 (CEO 최광웅)', W / 2, 1280);
+    ctx.fillStyle = '#fda4af';
+    ctx.font = `700 25px ${FONT}`;
+    ctx.fillText('dr119.org  |  고객센터 010-5553-8250', W / 2, 1326);
+    ctx.restore();
+  }
+
+  function drawFrameAt(t) {
+    const sc = timeline.scenes;
+    let darkTop = true;
+    if (t < sc[0].end) { renderScene1(t, sc[0]); darkTop = true; }
+    else if (t < sc[1].end) { renderScene2(t, sc[1]); darkTop = false; }
+    else if (t < sc[2].end) { renderScene3(t, sc[2]); darkTop = false; }
+    else if (t < sc[3].end) { renderScene4(t, sc[3]); darkTop = true; }
+    else { renderScene5(t, sc[4]); darkTop = true; }
+
+    drawPersistentTopBar(darkTop);
+    drawSubtitles(t, sc);
+    drawBottomProgress(t, timeline.totalDur);
+  }
+
+  window.__renderBatch = async (startF, endF, previewList) => {
+    const snaps = {};
+    const prevSet = new Set(previewList || []);
+    const durUs = Math.round(1_000_000 / 30);
+
+    for (let f = startF; f < endF; f++) {
+      const t = f / 30;
+      drawFrameAt(t);
+
+      if (prevSet.has(f)) {
+        snaps[String(f)] = cv.toDataURL('image/png');
+      }
+
+      const vf = new VideoFrame(cv, {
+        timestamp: Math.round((f * 1_000_000) / 30),
+        duration: durUs,
+      });
+      videoEncoder.encode(vf, { keyFrame: f % 60 === 0 });
+      vf.close();
+
+      while (videoEncoder.encodeQueueSize > 12) {
+        await new Promise((r) => setTimeout(r, 8));
+      }
+    }
+    return snaps;
+  };
+
+  let gridDataUrl = '';
+  window.__buildGrid = async (frameIndices, frameMap) => {
+    const gcv = document.createElement('canvas');
+    const pad = 28, tw = 320, th = 568; // 9:16 비율
+    gcv.width = pad * 6 + tw * 5;
+    gcv.height = th + 120;
+    const gctx = gcv.getContext('2d');
+    gctx.fillStyle = '#0f172a';
+    gctx.fillRect(0, 0, gcv.width, gcv.height);
+
+    const labels = ['1. 훅 (비싼 물통)', '2. 사용법 (1분 접수)', '3. 투명 실비 공개', '4. 채널톡 고맙다 리뷰', '5. 1661-0783 CTA'];
+    for (let i = 0; i < frameIndices.length; i++) {
+      const f = frameIndices[i];
+      const url = frameMap[String(f)];
+      if (!url) continue;
+      const im = await loadImg(url);
+      const x = pad + i * (tw + pad);
+      gctx.drawImage(im, x, 24, tw, th);
+      gctx.fillStyle = '#fde047';
+      gctx.font = `900 22px ${FONT}`;
+      gctx.textAlign = 'center';
+      gctx.fillText(labels[i] || '', x + tw / 2, th + 76);
+    }
+    gridDataUrl = gcv.toDataURL('image/png').split(',')[1];
+  };
+  window.__getGridBase64 = () => gridDataUrl;
+
+  window.__flushVideo = async () => {
+    await videoEncoder.flush();
+    videoEncoder.close();
+    return { count: encodedVideoChunks.length, keyIndices, avcC: avcCBase64 };
+  };
+  window.__getVideoSlice = (a, b) => encodedVideoChunks.slice(a, b);
+})();
+</script>
+</body>
+</html>

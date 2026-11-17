@@ -1,0 +1,74 @@
+﻿[Dr.119 플랫폼 기반 신규 브랜드·멀티 도메인 사이트 복제 매뉴얼]
+
+원본 저장소 위치
+- GitHub 원격 저장소: https://github.com/10x-master/dr119-org
+- 로컬 PC 원본 폴더: c:\work\dr119-org
+
+------------------------------------------------------------------------
+1단계. GitHub 원본 저장소 통째로 복제하기
+------------------------------------------------------------------------
+1) 브라우저에서 https://github.com/10x-master/dr119-org/settings 에 들어가
+   'Template repository' 체크박스를 켜 둡니다. (최초 1회)
+2) https://github.com/10x-master/dr119-org 우측 상단의 녹색
+   'Use this template' -> 'Create a new repository' 버튼을 눌러
+   원하는 새 저장소 이름으로 통째로 복제합니다.
+3) 내 PC 폴더로 받으려면 터미널(PowerShell)에서 아래를 실행합니다.
+   git clone https://github.com/10x-master/<새저장소이름>.git
+   cd <새저장소이름>
+   (이미 로컬 c:\work\dr119-org 폴더만 복제할 때는 3단계의 --out 옵션을 씁니다.)
+
+------------------------------------------------------------------------
+2단계. 복제된 폴더의 site-config.json 수정하기
+------------------------------------------------------------------------
+1) 복제한 폴더 맨 바깥(루트)에 있는 site-config.json 파일을 메모장이나
+   VS Code / Antigravity에서 엽니다.
+2) 아래 항목을 새 사이트 정보로 고치고 저장합니다.
+   - domain        : 새 도메인 주소 (예: cleanfix119.kr)
+   - siteUrl       : 새 사이트 전체 주소 (예: https://cleanfix119.kr/)
+   - brand.code    : 영문 로고명 (예: Fix.119)
+   - brand.nameKo  : 한글 브랜드명 (예: 픽스119)
+   - brand.tagline : 한 줄 슬로건 (예: 식기세척기의 공임나라)
+   - brand.primaryColor : 메인 색상 코드 (예: #0f4c81)
+   - service.category   : 수리 대상 품목 (예: 업소용 식기세척기)
+   - contact.mainPhone  : 대표 전화번호 (예: 1588-0119)
+   - contact.csPhone    : 고객센터 번호 (예: 010-1234-5678)
+   - contact.email      : 문의 이메일
+   - company.*          : 법인명, CEO, 사업자번호, 주소
+
+------------------------------------------------------------------------
+3단계. 자동 변환 스크립트 실행하기 (node clone-site.mjs)
+------------------------------------------------------------------------
+1) 복제한 폴더 위치에서 PowerShell 터미널을 엽니다.
+2) 먼저 수정될 내역을 미리 확인합니다.
+   node clone-site.mjs --dry-run
+3) 실제 일괄 반영을 실행합니다.
+   - 복제한 새 폴더에 바로 적용할 때:
+     node clone-site.mjs --in-place --config .\site-config.json
+   - 원본(c:\work\dr119-org)에서 새 폴더로 바로 찍어낼 때:
+     node clone-site.mjs --config .\my-site.json --out ..\my-new-site
+4) index.html, partner.html, admin.html, style.css, manifest.webmanifest,
+   로고 SVG, CNAME 파일까지 자동으로 새 브랜드로 바뀝니다.
+
+------------------------------------------------------------------------
+4단계. DB(Supabase) 및 홍보 쇼츠 분리 (필요 시 선택)
+------------------------------------------------------------------------
+- DB를 따로 쓰려면: 새 Supabase 프로젝트 생성 후 schema.sql을 실행하고,
+  site-config.json의 supabase.url과 anonKey를 교체한 뒤 3단계를 다시 실행합니다.
+- 유튜브 쇼츠 영상을 새 브랜드로 찍으려면: shorts/make-tts.ps1과
+  shorts/build-shorts.mjs에서 상호·전화번호 문구만 고쳐 실행합니다.
+
+------------------------------------------------------------------------
+5단계. GitHub 업로드 및 새 도메인 연결하기
+------------------------------------------------------------------------
+1) 변경 내용을 GitHub에 올립니다.
+   git add .
+   git commit -m "새 도메인 브랜드 설정 적용"
+   git push origin main
+2) GitHub 저장소 -> Settings -> Pages에서 Source를 'GitHub Actions'로 선택합니다.
+3) 도메인 구입처(가비아·카페24 등) DNS 관리에서 아래 레코드를 넣습니다.
+   - A 레코드     @   -> 185.199.108.153
+   - A 레코드     @   -> 185.199.109.153
+   - A 레코드     @   -> 185.199.110.153
+   - A 레코드     @   -> 185.199.111.153
+   - CNAME 레코드 www -> 10x-master.github.io
+4) GitHub Pages -> Custom domain에 새 도메인 입력 후 Enforce HTTPS를 켭니다.

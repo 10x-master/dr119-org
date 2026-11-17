@@ -1,0 +1,78 @@
+﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>신규 브랜드 사이트 복제 매뉴얼</title>
+<style>
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; line-height: 1.65; color: #111827; padding: 24pt; }
+  h1 { color: #a50034; font-size: 18pt; border-bottom: 2pt solid #a50034; padding-bottom: 6pt; }
+  h2 { color: #0f172a; font-size: 13pt; margin-top: 16pt; background: #f8fafc; padding: 6pt 10pt; border-left: 4pt solid #a50034; }
+  p, li { font-size: 10.5pt; }
+  pre { background: #f1f5f9; border: 1pt solid #cbd5e1; padding: 8pt 10pt; font-family: Consolas, "맑은 고딕", monospace; font-size: 9.5pt; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 9.5pt; }
+  th, td { border: 1pt solid #cbd5e1; padding: 6pt 8pt; text-align: left; }
+  th { background: #f1f5f9; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Dr.119 플랫폼 기반 신규 브랜드·멀티 도메인 사이트 복제 매뉴얼</h1>
+<p><strong>GitHub 원본 저장소:</strong> https://github.com/10x-master/dr119-org<br>
+<strong>로컬 PC 원본 폴더:</strong> c:\work\dr119-org</p>
+
+<h2>1단계. GitHub 원본 저장소 통째로 복제하기</h2>
+<ol>
+  <li><strong>https://github.com/10x-master/dr119-org/settings</strong> 로 이동해 <em>Template repository</em> 체크박스를 켭니다. (최초 1회)</li>
+  <li>원본 저장소 오른쪽 상단의 녹색 <strong>Use this template &rarr; Create a new repository</strong> 버튼을 눌러 새 저장소로 통째로 복제합니다.</li>
+  <li>내 PC로 내려받아 작업하려면 터미널에서 다음을 실행합니다.<br>
+  <pre>git clone https://github.com/10x-master/&lt;새저장소이름&gt;.git
+cd &lt;새저장소이름&gt;</pre></li>
+</ol>
+
+<h2>2단계. 복제된 폴더의 site-config.json 수정하기</h2>
+<p>복제한 폴더 맨 바깥(루트)에 있는 <strong>site-config.json</strong> 파일을 열고 새 사이트 정보로 수정 후 저장합니다.</p>
+<table>
+  <tr><th>항목 키</th><th>설명</th><th>Dr.119 기본값</th><th>새 사이트 입력 예시</th></tr>
+  <tr><td>domain</td><td>연결할 새 도메인 (CNAME 자동 생성)</td><td>dr119.org</td><td>cleanfix119.kr</td></tr>
+  <tr><td>siteUrl</td><td>대표 사이트 주소 (끝 / 포함)</td><td>https://dr119.org/</td><td>https://cleanfix119.kr/</td></tr>
+  <tr><td>brand.code / nameKo</td><td>영문 로고 / 한글 브랜드명</td><td>Dr.119 / 닥터119</td><td>Fix.119 / 픽스119</td></tr>
+  <tr><td>brand.primaryColor</td><td>메인 포인트 색상</td><td>#a50034</td><td>#0f4c81</td></tr>
+  <tr><td>service.category</td><td>수리·취급 대상 기종</td><td>초음파 세척기</td><td>업소용 식기세척기</td></tr>
+  <tr><td>contact.mainPhone</td><td>헤더·푸터 대표번호</td><td>1661-0783</td><td>1588-0119</td></tr>
+  <tr><td>company.*</td><td>회사명, CEO, 사업자번호, 주소</td><td>주식회사 웰글로벌 / 최광웅</td><td>새 사업자 정보 입력</td></tr>
+</table>
+
+<h2>3단계. 자동 변환 스크립트 실행하기 (node clone-site.mjs)</h2>
+<pre># 1) 수정될 항목 미리보기 (파일 변경 없음)
+node clone-site.mjs --dry-run
+
+# 2) 복제한 폴더에 바로 적용
+node clone-site.mjs --in-place --config .\site-config.json
+
+# 3) 로컬 원본(c:\work\dr119-org)에서 새 폴더로 한 번에 찍어내기
+node clone-site.mjs --config .\my-site.json --out ..\my-new-site</pre>
+<p>실행하면 index.html, partner.html, admin.html, style.css, manifest.webmanifest, 로고 SVG, CNAME 파일이 일괄 변환됩니다.</p>
+
+<h2>4단계. DB(Supabase) 및 홍보 쇼츠 분리 (선택)</h2>
+<ul>
+  <li>별도 DB가 필요하면 새 Supabase 프로젝트에서 <strong>schema.sql</strong>을 실행한 뒤 <code>site-config.json</code>의 <code>supabase.url</code>과 <code>anonKey</code>를 교체하고 3단계를 다시 실행합니다.</li>
+  <li>새 브랜드 유튜브 쇼츠 영상이 필요하면 <code>shorts\make-tts.ps1</code>과 <code>shorts\build-shorts.mjs</code>의 상호·전화번호만 수정해 실행합니다.</li>
+</ul>
+
+<h2>5단계. GitHub 업로드 및 새 도메인 DNS 연결하기</h2>
+<pre>git add .
+git commit -m "새 브랜드 도메인 설정 적용"
+git push origin main</pre>
+<ol>
+  <li>새 GitHub 저장소 <strong>Settings &rarr; Pages</strong> 에서 Source를 <strong>GitHub Actions</strong>로 지정합니다.</li>
+  <li>도메인 기관(가비아·카페24 등) DNS 관리에서 아래 레코드를 등록합니다.</li>
+</ol>
+<table>
+  <tr><th>레코드 타입</th><th>호스트(Host)</th><th>연결 값(IP / 주소)</th><th>비고</th></tr>
+  <tr><td>A</td><td>@</td><td>185.199.108.153</td><td>GitHub Pages IP #1</td></tr>
+  <tr><td>A</td><td>@</td><td>185.199.109.153</td><td>GitHub Pages IP #2</td></tr>
+  <tr><td>A</td><td>@</td><td>185.199.110.153</td><td>GitHub Pages IP #3</td></tr>
+  <tr><td>A</td><td>@</td><td>185.199.111.153</td><td>GitHub Pages IP #4</td></tr>
+  <tr><td>CNAME</td><td>www</td><td>10x-master.github.io</td><td>www 서브도메인</td></tr>
+</table>
+<p>마지막으로 GitHub Pages의 <strong>Custom domain</strong>에 새 도메인을 입력하고 <strong>Enforce HTTPS</strong>를 체크하면 완료됩니다.</p>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "sampleRate": 48000,
+  "channels": 2,
+  "fps": 30,
+  "totalDur": 41.6,
+  "totalFrames": 1248,
+  "scenes": [
+    {
+      "scene": 1,
+      "start": 0,
+      "end": 9.4,
+      "duration": 9.4,
+      "voiceStart": 0.22,
+      "voiceEnd": 9.092
+    },
+    {
+      "scene": 2,
+      "start": 9.4,
+      "end": 20.8,
+      "duration": 11.4,
+      "voiceStart": 9.65,
+      "voiceEnd": 20.393
+    },
+    {
+      "scene": 3,
+      "start": 20.8,
+      "end": 27.4,
+      "duration": 6.6,
+      "voiceStart": 21.05,
+      "voiceEnd": 26.972
+    },
+    {
+      "scene": 4,
+      "start": 27.4,
+      "end": 35.6,
+      "duration": 8.2,
+      "voiceStart": 27.68,
+      "voiceEnd": 34.067
+    },
+    {
+      "scene": 5,
+      "start": 35.6,
+      "end": 41.6,
+      "duration": 6,
+      "voiceStart": 35.82,
+      "voiceEnd": 40.852
+    }
+  ]
+}

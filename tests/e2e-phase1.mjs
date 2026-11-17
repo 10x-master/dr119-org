@@ -53,13 +53,15 @@ try {
         const hero = document.querySelector('.hero')?.getBoundingClientRect();
         const sub = document.getElementById('submit-btn')?.getBoundingClientRect();
         const bar = document.getElementById('mobile-bottom-bar')?.getBoundingClientRect();
-        const intakePhone = document.querySelector('.intake-phone')?.innerText || '';
+        const headerPhone = document.querySelector('.header-phone')?.innerText || '';
         return {
           intakeAboveHero: !!(intake && hero && intake.top < hero.top),
           subBottom: sub?.bottom || 9999,
           barTop: bar?.top || 844,
           fitsInFirstScreen: !!(sub && bar && sub.bottom <= bar.top + 1),
-          hasIntakePhone: intakePhone.includes('1661-0783')
+          noDuplicateIntakeHead: !document.querySelector('.intake-head') && !document.getElementById('form-title') && !document.querySelector('.intake-phone'),
+          noGrayDividerLines: getComputedStyle(document.querySelector('.site-header')).borderBottomWidth === '0px' && getComputedStyle(document.querySelector('.top-stage')).borderBottomWidth === '0px',
+          hasHeaderPhone: headerPhone.includes('1661-0783')
         };
       })(),
       symptomBoxRedMic: (() => {
@@ -74,13 +76,14 @@ try {
       kwLen: kw.length
     };
   })()`);
-  check(R, '올 화이트 + 가격 미노출 + 3대 배너 + 모바일 헤더/1화면 꽉참 + 빨간 마이크 + wellglobal.net 회사정보',
+  check(R, '올 화이트 + 가격 미노출 + 3대 배너 + 모바일 헤더/1화면 + 상단중복·그레이선 제거 + 빨간 마이크',
     designAudit.bgBody === 'rgb(255, 255, 255)' && designAudit.bgHead === 'rgb(255, 255, 255)' &&
     !designAudit.priceLeak && designAudit.banners && designAudit.excludesOrion &&
     designAudit.noAiLabels && designAudit.noEmojis && designAudit.hasBlueprint &&
     designAudit.controls && designAudit.footerOrgs && designAudit.companyInfo &&
     designAudit.mobileHeader && designAudit.mobileFirstScreen.intakeAboveHero &&
-    designAudit.mobileFirstScreen.fitsInFirstScreen && designAudit.mobileFirstScreen.hasIntakePhone &&
+    designAudit.mobileFirstScreen.fitsInFirstScreen && designAudit.mobileFirstScreen.noDuplicateIntakeHead &&
+    designAudit.mobileFirstScreen.noGrayDividerLines && designAudit.mobileFirstScreen.hasHeaderPhone &&
     designAudit.symptomBoxRedMic && designAudit.orgTopBorder === '1px' && designAudit.kwLen > 120,
     JSON.stringify(designAudit));
   const hamburgerWorks = await cdp.eval(`(() => {
@@ -95,16 +98,16 @@ try {
   check(R, '모바일 햄버거 메뉴 열기/닫기 동작', hamburgerWorks);
   await cdp.screenshot(path.join(OUT, 'phase1-form.png'));
 
-  // Desktop 1366x768 '한 페이지(1 viewport)' 확인 + "초음파 세척기 고장" 문구 확인
+  // Desktop 1366x768 '한 페이지(1 viewport)' 확인 + 접수카드 상단 2줄 삭제 확인
   await cdp.viewport(1366, 768, false);
   const desktopCheck = await cdp.eval(`(() => {
     const h1 = document.getElementById('hero-title').innerText;
-    const h2 = document.getElementById('form-title').innerText;
+    const intakeHeadRemoved = !document.querySelector('.intake-head') && !document.getElementById('form-title') && !document.querySelector('.intake-phone');
     const btnBottom = document.getElementById('submit-btn').getBoundingClientRect().bottom;
     const stripRect = document.querySelector('.b2b-apply-strip').getBoundingClientRect();
     const b2bBtnRect = document.querySelector('.b2b-submit').getBoundingClientRect();
     return {
-      hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && h2.includes('초음파 세척기 고장'),
+      hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && intakeHeadRemoved,
       btnBottom,
       b2bFits: b2bBtnRect.right <= stripRect.right - 8
     };

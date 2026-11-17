@@ -109,8 +109,42 @@
   }
 
   /* ------------------------------------------------------------
-   * 3) 실시간 한국어 음성-텍스트 증상 입력 (Web Speech API)
+   * 3) 빠른 증상 칩 선택 + 실시간 한국어 음성 입력 (Web Speech API)
    * ------------------------------------------------------------ */
+  (function initSymptomChips() {
+    var chips = document.querySelectorAll('.symptom-chip');
+    if (!chips.length || !symptomInput) return;
+
+    function syncChipsFromInput() {
+      var val = symptomInput.value;
+      Array.prototype.forEach.call(chips, function (chip) {
+        var kw = chip.getAttribute('data-symptom') || '';
+        var active = !!(kw && val.indexOf(kw) !== -1);
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+
+    Array.prototype.forEach.call(chips, function (chip) {
+      chip.addEventListener('click', function () {
+        var kw = chip.getAttribute('data-symptom') || '';
+        if (!kw) return;
+        var parts = symptomInput.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        var idx = parts.indexOf(kw);
+        if (idx >= 0) parts.splice(idx, 1);
+        else parts.push(kw);
+        symptomInput.value = parts.join(', ');
+        syncChipsFromInput();
+      });
+    });
+    symptomInput.addEventListener('input', syncChipsFromInput);
+    if (form) {
+      form.addEventListener('reset', function () {
+        setTimeout(syncChipsFromInput, 0);
+      });
+    }
+  })();
+
   (function initVoiceInput() {
     if (!voiceBtn || !symptomInput) return;
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -120,7 +154,7 @@
 
     voiceBtn.addEventListener('click', function () {
       if (!SpeechRecognition) {
-        voiceStatus.textContent = '이 브라우저는 음성 인식을 지원하지 않습니다. 키보드로 간단히 적어 주세요.';
+        voiceStatus.textContent = '이 브라우저는 음성 인식을 지원하지 않습니다. 위 증상 칩을 누르거나 직접 적어 주세요.';
         return;
       }
       if (listening && recognition) {
@@ -137,7 +171,7 @@
         listening = true;
         voiceBtn.classList.add('listening');
         voiceBtn.setAttribute('aria-pressed', 'true');
-        voiceBtn.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12"/></svg><span>음성 입력 멈추기</span>';
+        voiceBtn.innerHTML = '<span class="mic-red-badge" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"/></svg></span><span>음성 멈추기</span>';
         voiceStatus.textContent = '듣고 있습니다… 고장 증상을 말씀해 주세요.';
       };
       recognition.onresult = function (ev) {
@@ -160,7 +194,7 @@
         listening = false;
         voiceBtn.classList.remove('listening');
         voiceBtn.setAttribute('aria-pressed', 'false');
-        voiceBtn.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg><span>말로 증상 적기</span>';
+        voiceBtn.innerHTML = '<span class="mic-red-badge" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></span><span>말로 증상 적기</span>';
         if (!voiceStatus.textContent.includes('오류') && !voiceStatus.textContent.includes('권한')) {
           voiceStatus.textContent = committedText ? '음성 입력이 메모에 반영되었습니다.' : '';
         }
