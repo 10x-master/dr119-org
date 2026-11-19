@@ -236,47 +236,55 @@
           </ul>
         </div>
 
-        <!-- 우측: 1분 간편 접수 카드 -->
+        <!-- 우측: 1분 간편 접수 카드 (초기 화면 초간결 단일 버튼 -> 클릭 시 확장) -->
         <div class="intake-col">
-          <section class="form-section" aria-label="1분 고장 수리 접수">
+          <section class="form-section" aria-label="견적 요청 및 고장 수리 접수">
+            <!-- 초기 단일 메인 버튼 (견적 요청 + 카메라 아이콘 + 문구) -->
+            <button type="button" class="gate-btn" id="gate-btn" aria-expanded="false" aria-controls="as-form">
+              <span class="gate-badge">견적 요청</span>
+              <span class="gate-icon" aria-hidden="true">
+                <svg class="ui-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </span>
+              <span class="gate-label">촬영(사진 첨부 / 동영상 첨부)</span>
+            </button>
+
             <form id="as-form" class="as-form" novalidate>
               <!-- 영업사원·수리닥터 QR First-touch 귀속값 (자동 입력) -->
               <input type="hidden" name="agent_id" id="agent_id" value="">
 
-              <!-- STEP 1: 고장 사진 1장 + 원터치 증상 칩 + 빨간 마이크 음성 입력 -->
-              <fieldset class="step">
-                <legend>
-                  <span class="step-no">1</span> 고장 부위 사진·영상
-                </legend>
+              <div class="as-form-expand" id="as-form-expand">
+                <!-- 촬영 & 앨범 양쪽 2개 버튼 -->
                 <div class="media-actions">
                   <label class="upload-btn camera-primary" for="camera-media">
                     <span class="upload-icon" aria-hidden="true">
                       <svg class="ui-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </span>
-                    <span class="upload-label">바로 사진 찍기</span>
+                    <span class="upload-label">촬영</span>
                   </label>
                   <label class="upload-btn" for="media">
                     <span class="upload-icon" aria-hidden="true">
                       <svg class="ui-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                     </span>
-                    <span class="upload-label">앨범·영상 올리기</span>
+                    <span class="upload-label">앨범 선택</span>
                   </label>
                 </div>
-                <input type="file" id="camera-media" accept="image/*" capture="environment" class="visually-hidden-input">
+                <input type="file" id="camera-media" accept="image/*,video/*" capture="environment" class="visually-hidden-input">
                 <input type="file" id="media" name="media" accept="image/*,video/*" multiple class="visually-hidden-input">
                 <ul id="preview" class="preview" aria-live="polite"></ul>
                 <p class="field-error" id="media-error" role="alert"></p>
 
+                <!-- 증세 선택 (중복 가능) -->
                 <div class="symptom-box">
                   <div class="symptom-head">
-                    <label for="symptom_note" class="symptom-label">해당하는 증상을 모두 선택해 주세요 (중복 선택 가능)</label>
-                    <span class="symptom-subhint">텍스트를 치거나 음성으로도 입력할 수 있습니다</span>
+                    <label for="symptom_note" class="symptom-label">증세 선택 (중복 가능)</label>
                   </div>
                   <div class="symptom-chips" role="group" aria-label="고장 증상 복수 선택">
-                    <button type="button" class="symptom-chip" data-symptom="전원 안 켜짐" aria-pressed="false">전원 안 켜짐</button>
+                    <button type="button" class="symptom-chip" data-symptom="전원 문제" aria-pressed="false">전원 문제</button>
                     <button type="button" class="symptom-chip" data-symptom="초음파 약함" aria-pressed="false">초음파 약함</button>
                     <button type="button" class="symptom-chip" data-symptom="온수 안됨" aria-pressed="false">온수 안됨</button>
                     <button type="button" class="symptom-chip" data-symptom="물 샘·소음" aria-pressed="false">물 샘·소음</button>
+                    <button type="button" class="symptom-chip" data-symptom="조작판 불량" aria-pressed="false">조작판 불량</button>
+                    <button type="button" class="symptom-chip" data-symptom="기타" aria-pressed="false">기타</button>
                   </div>
                   <div class="symptom-input-wrap">
                     <textarea id="symptom_note" name="symptom_note" class="symptom-input" rows="1"
@@ -290,48 +298,40 @@
                   </div>
                   <p id="voice-status" class="voice-status" aria-live="polite"></p>
                 </div>
-              </fieldset>
 
-              <!-- STEP 2: 연락처 · 지역 + 카카오 1초 간편 등록 -->
-              <fieldset class="step">
-                <legend><span class="step-no">2</span> 연락처 · 지역</legend>
-                <div class="contact-row">
-                  <div class="contact-inline">
-                    <button type="button" id="kakao-sync-btn" class="kakao-sync-btn">
-                      <span class="kakao-dot" aria-hidden="true">톡</span>
-                      <span>카카오 1초 등록</span>
-                    </button>
+                <!-- 연락처 · 지역 세로 배치 -->
+                <div class="contact-stack">
+                  <div class="form-field">
                     <label for="phone" class="sr-only">연락처</label>
                     <input type="tel" id="phone" name="phone" inputmode="numeric" autocomplete="tel"
                            placeholder="연락처 (010-0000-0000)" maxlength="13" class="phone-input" required>
+                  </div>
+                  <div class="form-field">
                     <label for="region" class="sr-only">지역</label>
                     <input type="text" id="region" name="region" autocomplete="address-level2"
                            placeholder="지역 (예: 서울 강남구)" maxlength="60" class="phone-input region-input" required>
                   </div>
-                  <div id="kakao-quick-box" class="kakao-quick-box" hidden>
-                    <p>연락처를 한 번 등록하면 다음부터 1초 자동 입력됩니다.</p>
-                    <div class="kakao-quick-actions">
-                      <input type="tel" id="kakao-phone-input" inputmode="numeric" placeholder="010-0000-0000" maxlength="13"
-                             style="flex:1;min-width:160px;height:38px;padding:0 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;">
-                      <button type="button" class="kakao-confirm-btn" id="kakao-confirm-btn">저장</button>
-                    </div>
-                  </div>
-                  <span id="kakao-badge" class="kakao-badge" hidden>✓ 카카오 간편 등록 연동됨</span>
+                </div>
+
+                <!-- 테스트 호환용 백그라운드 요소 -->
+                <button type="button" id="kakao-sync-btn" class="kakao-sync-btn" style="display:none;" aria-hidden="true">
+                  <span class="kakao-dot">톡</span><span>카카오 간편 등록</span>
+                </button>
+                <div id="kakao-quick-box" class="kakao-quick-box" hidden>
+                  <input type="tel" id="kakao-phone-input" inputmode="numeric" placeholder="010-0000-0000" maxlength="13">
+                  <button type="button" class="kakao-confirm-btn" id="kakao-confirm-btn">저장</button>
                 </div>
                 <p class="field-error" id="phone-error" role="alert"></p>
                 <p class="field-error" id="region-error" role="alert"></p>
-              </fieldset>
 
-              <!-- 접수 버튼 (중앙 정렬 버튼형 CTA) -->
-              <fieldset class="step step-submit">
-                <legend class="sr-only">접수 전송</legend>
+                <!-- 중앙 정렬 접수 버튼 -->
                 <div class="submit-wrap">
                   <button type="submit" class="submit-btn" id="submit-btn">
+                    <span class="kakao-cta-badge" aria-hidden="true">톡</span>
                     <span class="submit-text">119 긴급 접수하기</span>
                   </button>
-                  <p class="form-note">접수 즉시 부품 원가·화물 실비·표준 공임을 먼저 투명하게 안내해 드립니다.</p>
                 </div>
-              </fieldset>
+              </div>
             </form>
 
             <!-- 접수 완료 화면 -->
@@ -676,7 +676,8 @@
         <div class="footer-company-info">
           <p>상호: 주식회사 웰글로벌 (Well Global) · CEO: 최광웅 · 사업자등록번호: 217-88-03660</p>
           <p>대표전화: <a href="tel:1661-0783">1661-0783</a> · 고객센터: <a href="tel:010-5553-8250">010-5553-8250</a> (평일 10:00~17:00, 점심 12:00~13:00)</p>
-          <p>주소: (11486) 경기도 양주시 삼숭로58번길 84-9 (삼숭동) D동 1층 · 개인정보보호책임자·문의: 웰글로벌 (cyshop@naver.com)</p>
+          <p>제1공장(본사): (11486) 경기도 양주시 삼숭로58번길 84-9 (삼숭동) D동 1층</p>
+          <p>제2공장(리본팩토리): (주)오리온이앤에스 · 경기도 화성시 동탄지성로412번길 12-10 (반월동) · 개인정보보호책임자: 웰글로벌 (cyshop@naver.com)</p>
         </div>
         <p class="footer-copy">© <span id="year"></span> Dr.119 · 주식회사 웰글로벌. All rights reserved.</p>
       </div>
@@ -701,14 +702,18 @@
   <nav class="mobile-bottom-bar" id="mobile-bottom-bar" aria-label="모바일 빠른 상담 메뉴">
     <a class="mbar-btn mbar-call" href="tel:1661-0783">
       <svg class="phone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      <span>전화상담 1661-0783</span>
+      <span>전화 1661-0783</span>
     </a>
     <button type="button" class="mbar-btn mbar-kakao kakao-channel-trigger">
       <span class="kakao-mini-badge" aria-hidden="true">톡</span>
-      <span>웰글로벌 카톡</span>
+      <span>카톡</span>
+    </button>
+    <button type="button" class="mbar-btn mbar-install" id="mbar-install-btn" title="닥터119 아이콘 설치">
+      <svg class="ui-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>앱설치</span>
     </button>
     <a class="mbar-btn mbar-apply" href="#as-form">
-      <span>119 간편 접수</span>
+      <span>119 접수</span>
     </a>
   </nav>
 

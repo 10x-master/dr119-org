@@ -247,8 +247,8 @@ body {
 }
 .hero-wit {
   margin: 0 0 20px;
-  padding-left: 14px;
-  border-left: 3px solid var(--accent);
+  padding-left: 0;
+  border-left: 0;
   background: transparent;
   color: var(--ink-soft);
   font-size: 0.94rem;
@@ -1393,21 +1393,25 @@ body {
   .header-tag { display: none; }
   .mobile-header-title {
     display: inline-block;
-    font-size: 0.86rem;
+    font-size: 0.80rem;
     font-weight: 800;
     color: var(--ink);
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
-  .header-right { gap: 5px; flex-shrink: 0; }
+  .header-right {
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
   .header-phone {
-    font-size: 0.8rem;
-    padding: 3px 7px;
-    border-radius: 999px;
-    background: var(--accent-tint);
-    border: 1px solid #f0c2cf;
+    font-size: 0.82rem;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-weight: 800;
   }
   .header-phone .phone-icon { width: 12px; height: 12px; }
   .mobile-menu-btn {
@@ -1423,6 +1427,7 @@ body {
     color: var(--ink);
     cursor: pointer;
     flex-shrink: 0;
+    order: 2;
   }
   .header-nav { display: none; }
   .header-nav.is-open {
@@ -1494,17 +1499,8 @@ body {
   .site-footer { padding-bottom: 84px; }
 
   .floating-dock {
-    top: auto;
-    bottom: 60px;
-    right: 6px;
-    transform: none;
-    padding: 4px 3px;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+    display: none !important;
   }
-  .float-btn { width: 44px; padding: 4px 2px; gap: 2px; }
-  .float-logo-img { width: 22px; height: 22px; }
-  .float-label { font-size: 0.6rem; }
 
   .mobile-bottom-bar {
     position: fixed;
@@ -1514,7 +1510,7 @@ body {
     height: 52px;
     z-index: 49;
     display: grid;
-    grid-template-columns: 1.15fr 1fr 1fr;
+    grid-template-columns: 1.15fr 0.85fr 0.95fr 1fr;
     background: #ffffff;
     border-top: 1px solid var(--line-strong);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
@@ -1524,35 +1520,112 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     border: 0;
     border-right: 1px solid var(--line);
     background: #ffffff;
     color: var(--ink);
     font-family: inherit;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     font-weight: 800;
     text-decoration: none;
     cursor: pointer;
-    padding: 0 4px;
+    padding: 0 2px;
     white-space: nowrap;
   }
   .mbar-btn:last-child { border-right: 0; }
+  .mbar-btn .ui-icon { width: 14px; height: 14px; stroke: currentColor; fill: none; }
   .mbar-call { color: var(--accent); }
   .mbar-kakao { background: #fffbe6; color: var(--kakao-ink); }
+  .mbar-install { color: var(--ink-soft); }
   .kakao-mini-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     border-radius: 4px;
     background: var(--kakao);
     color: var(--kakao-ink);
-    font-size: 0.66rem;
+    font-size: 0.64rem;
     font-weight: 900;
   }
   .mbar-apply { background: var(--accent); color: #ffffff; }
+}
+
+/* Contact Stack & Modern Pill Inputs */
+.contact-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.contact-stack .form-field {
+  width: 100%;
+}
+.contact-stack .phone-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Kakao CTA badge in Submit Button */
+.kakao-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--kakao);
+  color: var(--kakao-ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  margin-right: 6px;
+}
+
+/* Primary Top Upload Button */
+.upload-btn.upload-single {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  gap: 8px;
+}
+
+/* Freight Guide Button & Modal */
+.freight-cta-wrap {
+  margin-top: 16px;
+  text-align: center;
+}
+.freight-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--accent);
+  background: #ffffff;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.freight-guide-btn:hover {
+  background: var(--accent-tint);
+}
+.freight-table-modal {
+  width: min(600px, 94vw);
+  border: 0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+}
+.freight-table-modal::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
 }
 
 @media print {

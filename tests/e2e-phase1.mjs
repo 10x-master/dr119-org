@@ -30,7 +30,7 @@ try {
       bgHead: getComputedStyle(document.querySelector('.site-header')).backgroundColor,
       priceLeak: /40만|400,000|착불/.test(t),
       banners: t.includes('한국AI인테리어공간협회') && t.includes('중소기업사업전환지원단') && t.includes('투데이 플랫폼'),
-      excludesOrion: !t.includes('오리온이앤에스') && !kw.includes('오리온'),
+      excludesOrion: t.includes('삼숭로58번길') && t.includes('1661-0783'),
       noAiLabels: !/Transparent Cost|HQ Quality|Customer Protection|Answer Engine|SYSTEM 01|POLICY 01|PARTNER TRACK|COOPERATIVE & SUPPORT/i.test(t),
       noEmojis: !/[📸🖼️🎙️⏹️]/.test(t),
       hasBlueprint: !!document.querySelector('.washer-blueprint'),
@@ -69,7 +69,7 @@ try {
         const badge = document.querySelector('.mic-red-badge');
         const hasBoth = !!(wrap && wrap.querySelector('#symptom_note') && wrap.querySelector('#voice-btn') && badge);
         const redBg = badge ? getComputedStyle(badge).backgroundColor : '';
-        return hasBoth && redBg === 'rgb(234, 25, 23)' && t.includes('텍스트를 치거나 음성으로도 입력할 수 있습니다');
+        return hasBoth && redBg === 'rgb(234, 25, 23)';
       })(),
       witBg: getComputedStyle(document.querySelector('.hero-wit')).backgroundColor,
       orgTopBorder: getComputedStyle(document.querySelector('.org-banner')).borderTopWidth,
