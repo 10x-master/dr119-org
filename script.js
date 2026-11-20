@@ -81,6 +81,22 @@
     cameraInput.addEventListener('change', function () { handlePickedFiles(cameraInput); });
   }
 
+  // 모바일/PC 사진 촬영 및 앨범 선택 보증 이벤트
+  var takePhotoBtn = document.getElementById('btn-take-photo');
+  var pickAlbumBtn = document.getElementById('btn-pick-album');
+  var gateBtn = document.getElementById('gate-btn');
+
+  if (gateBtn) {
+    gateBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (cameraInput) {
+        cameraInput.click();
+      } else if (fileInput) {
+        fileInput.click();
+      }
+    });
+  }
+
   function renderPreview() {
     preview.innerHTML = '';
     files.forEach(function (f, i) {
@@ -445,6 +461,8 @@
       .then(function (r) {
         document.getElementById('done-order-id').textContent = r.res.order_id;
         form.hidden = true;
+        var headLg = document.getElementById('intake-header-lg');
+        if (headLg) headLg.hidden = true;
         doneBox.hidden = false;
         doneBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         window.dispatchEvent(new CustomEvent('dr119:submitted', { detail: r.payload }));
@@ -469,6 +487,8 @@
     form.reset();
     agentInput.value = attribution.agent_id || ''; // reset 후에도 귀속값 유지
     doneBox.hidden = true;
+    var headLg = document.getElementById('intake-header-lg');
+    if (headLg) headLg.hidden = false;
     form.hidden = false;
   });
 

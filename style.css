@@ -293,8 +293,32 @@ body {
   background: #ffffff;
   border: 1px solid #ebebeb;
   border-radius: var(--radius-card);
-  padding: 22px 24px;
+  padding: 20px 22px;
   box-shadow: var(--shadow-wizard);
+}
+.intake-header-lg {
+  margin-bottom: 12px;
+}
+.intake-badge-lg {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 2px;
+  letter-spacing: -0.02em;
+}
+.intake-title-lg {
+  margin: 0 0 3px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+.intake-sub-lg {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
 }
 .form-section { padding: 0; background: #ffffff; }
 
@@ -365,6 +389,9 @@ body {
   cursor: pointer;
   touch-action: manipulation;
   transition: border-color 0.15s, background-color 0.15s;
+}
+.upload-btn * {
+  pointer-events: none;
 }
 .upload-btn.camera-primary {
   background: #ffffff;
@@ -1480,19 +1507,19 @@ body {
   .phone-input { height: 40px; font-size: 0.88rem; padding: 0 10px; }
   .submit-btn { min-width: 220px; height: 52px; padding: 0 32px; font-size: 1rem; }
   .form-note { margin-top: 6px; font-size: 0.72rem; }
-  .done { padding: 10px 0 6px; }
-  .done-icon { width: 28px; height: 28px; font-size: 0.92rem; margin-bottom: 6px; }
-  .done h2 { font-size: 1.1rem; margin-bottom: 4px; }
-  .done p { font-size: 0.81rem; margin-bottom: 8px; }
-  .done-meta { padding: 8px 10px; margin-bottom: 10px; font-size: 0.84rem; }
-  .done-process { padding: 10px 12px; margin-bottom: 10px; }
-  .done-process-title { font-size: 0.84rem; margin-bottom: 6px; }
-  .done-process-steps { gap: 5px; }
-  .done-process-steps li { padding-bottom: 5px; }
-  .done-process-steps strong { font-size: 0.78rem; }
-  .done-process-steps span { font-size: 0.74rem; line-height: 1.4; }
-  .done-contact-bar { margin-top: 6px; padding-top: 6px; font-size: 0.78rem; }
-  .again-btn { height: 38px; font-size: 0.88rem; }
+  .done { padding: 4px 0 4px; }
+  .done-icon { width: 26px; height: 26px; font-size: 0.88rem; margin-bottom: 4px; }
+  .done h2 { font-size: 1.05rem; margin-bottom: 3px; }
+  .done p { font-size: 0.78rem; margin-bottom: 6px; }
+  .done-meta { padding: 6px 8px; margin-bottom: 8px; font-size: 0.8rem; }
+  .done-process { padding: 8px 10px; margin-bottom: 8px; }
+  .done-process-title { font-size: 0.8rem; margin-bottom: 4px; }
+  .done-process-steps { gap: 4px; }
+  .done-process-steps li { padding-bottom: 4px; }
+  .done-process-steps strong { font-size: 0.76rem; }
+  .done-process-steps span { font-size: 0.72rem; line-height: 1.35; }
+  .done-contact-bar { margin-top: 4px; padding-top: 4px; font-size: 0.75rem; }
+  .again-btn { height: 36px; font-size: 0.84rem; }
 
   .ed-section, .faq, .partner-banners { padding: 42px 0; }
   .footer-side { align-items: flex-start; width: 100%; }
