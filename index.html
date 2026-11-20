@@ -257,16 +257,16 @@
                     <span class="upload-icon" aria-hidden="true">
                       <svg class="ui-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </span>
-                    <span class="upload-label"><strong>사진 촬영하기</strong> (즉시 카메라 실행)</span>
+                    <span class="upload-label"><strong>사진 촬영</strong></span>
                   </label>
                   <label class="upload-btn" for="media" id="btn-pick-album">
                     <span class="upload-icon" aria-hidden="true">
                       <svg class="ui-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                     </span>
-                    <span class="upload-label"><strong>앨범에서 선택</strong> (사진·영상 첨부)</span>
+                    <span class="upload-label"><strong>앨범 선택</strong></span>
                   </label>
                 </div>
-                <input type="file" id="camera-media" accept="image/*,video/*" capture="environment" class="visually-hidden-input">
+                <input type="file" id="camera-media" accept="image/*" capture="environment" class="visually-hidden-input">
                 <input type="file" id="media" name="media" accept="image/*,video/*" multiple class="visually-hidden-input">
                 <ul id="preview" class="preview" aria-live="polite"></ul>
                 <p class="field-error" id="media-error" role="alert"></p>
@@ -286,12 +286,12 @@
                   </div>
                   <div class="symptom-input-wrap">
                     <textarea id="symptom_note" name="symptom_note" class="symptom-input" rows="1"
-                              placeholder="(선택) 직접 입력하거나 빨간 마이크를 눌러 말로 적으세요"></textarea>
+                              placeholder="(선택) 직접 입력 또는 음성 입력"></textarea>
                     <button type="button" id="voice-btn" class="voice-btn" aria-pressed="false" title="말로 증상 적기 (음성 입력)">
                       <span class="mic-red-badge" aria-hidden="true">
                         <svg class="ui-icon" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
                       </span>
-                      <span>말로 증상 적기</span>
+                      <span>말로</span>
                     </button>
                   </div>
                   <p id="voice-status" class="voice-status" aria-live="polite"></p>

@@ -86,6 +86,19 @@
   var pickAlbumBtn = document.getElementById('btn-pick-album');
   var gateBtn = document.getElementById('gate-btn');
 
+  if (takePhotoBtn && cameraInput) {
+    takePhotoBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      cameraInput.click();
+    });
+  }
+  if (pickAlbumBtn && fileInput) {
+    pickAlbumBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      fileInput.click();
+    });
+  }
+
   if (gateBtn) {
     gateBtn.addEventListener('click', function (e) {
       e.preventDefault();

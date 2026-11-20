@@ -43,7 +43,7 @@ export async function launchBrowser() {
   fs.mkdirSync(tmpBase, { recursive: true });
   const profile = fs.mkdtempSync(path.join(tmpBase, 'profile-'));
   let stderr = '';
-  const proc = spawn(exe, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
+  const proc = spawn(exe, ['--headless=new', '--no-sandbox', '--disable-setuid-sandbox', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--disable-gpu',
     '--disable-breakpad', '--disable-crash-reporter', '--disable-crashpad-for-testing', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
   proc.stderr.on('data', (d) => { stderr += d; });
