@@ -39,12 +39,20 @@
   }
 
   function loadAll() {
-    return Promise.all([api.listOrders(), api.getPartners(), api.getMargins(), api.getContracts(), api.getPenalties()])
-      .then(function (r) {
-        state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
-      });
+    return Promise.all([
+      api.listOrders(),
+      api.getPartners(),
+      api.getMargins(),
+      api.getContracts(),
+      api.getPenalties(),
+      api.getProducts ? api.getProducts() : Promise.resolve([]),
+      api.getAffiliateSales ? api.getAffiliateSales() : Promise.resolve([])
+    ]).then(function (r) {
+      state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
+      state.products = r[5] || []; state.affiliateSales = r[6] || [];
+    });
   }
-  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); renderNetwork(); }
+  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); renderNetwork(); renderProducts(); renderAffiliateSales(); }
 
   /* ------------------------------------------------------------ 탭 */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
@@ -155,7 +163,53 @@
       '<dt>유입 QR</dt><dd>' + agentLabel(a.agent_id) + ' → ' + esc(distName(D.distributorOfAgent(state.partners, a.agent_id))) +
         (a.first_touch_at ? '<br><span class="hint">최초 유입 ' + fmtDate(a.first_touch_at) + '</span>' : '') + '</dd>' +
       '<dt>상태</dt><dd><span class="chip ' + esc(o.status) + '">' + esc(D.ORDER_STATUS[o.status]) + '</span></dd>' +
-      '</dl>' +
+      '</dl>';
+
+    var cs = o.consultation || {};
+    html +=
+      '<section class="consult-box" style="margin:14px 0;padding:14px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;">' +
+      '<h3 style="margin:0 0 10px;font-size:0.95rem;color:#0f172a;display:flex;align-items:center;gap:6px;">' +
+      '<span>📞</span> 1차 전화 상담 및 정밀 진단 기록부' +
+      (o.consultation_status === 'COMPLETED' ? ' <span class="chip" style="background:#0f766e;color:#fff;">상담 완료</span>' : ' <span class="chip" style="background:#e2e8f0;color:#475569;">미상담</span>') +
+      '</h3>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;">' +
+      '<div><label>기기 규격(사이즈)</label>' +
+      '<select id="cs-size">' +
+      ['선택 안 함', '800형 (소형)', '900형', '1000형 (표준)', '1200형 (대형)', '1500형 (특대형)', '기타 규격'].map(function(s){ return '<option value="' + esc(s) + '"' + (cs.product_size === s ? ' selected' : '') + '>' + esc(s) + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div><label>제조사 브랜드</label>' +
+      '<select id="cs-mfg">' +
+      ['선택 안 함', '클린조이', '초음파119', '탑소닉', '세이버', '에코', '세척천사', '기타 폐업/단종사'].map(function(m){ return '<option value="' + esc(m) + '"' + (cs.manufacturer === m ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div><label>사용 연수</label>' +
+      '<select id="cs-years">' +
+      ['선택 안 함', '1년 미만', '1~3년', '3~5년', '5년 이상 (노후)'].map(function(y){ return '<option value="' + esc(y) + '"' + (cs.years_used === y ? ' selected' : '') + '>' + esc(y) + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div><label>고장 문제 부위</label>' +
+      '<select id="cs-problem">' +
+      ['선택 안 함', '진동자 파손/출력 저하', '발진기 보드 소손', '히터 단선/온수 불가', '수조 누수/크랙', '조작부 전원 불량', '복합 고장'].map(function(p){ return '<option value="' + esc(p) + '"' + (cs.problem_detail === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div><label>고장 지속 기간</label>' +
+      '<select id="cs-duration">' +
+      ['선택 안 함', '3일 이내', '1~2주일', '1개월 이상', '수개월 방치'].map(function(d){ return '<option value="' + esc(d) + '"' + (cs.duration_of_issue === d ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div><label>1차 진단 및 추천 솔루션</label>' +
+      '<select id="cs-solution">' +
+      '<option value="REBORN_400K"' + (cs.diagnostic_solution === 'REBORN_400K' ? ' selected' : '') + '>공장 입고 40만 전면 재생 (권장, 화물비 별도)</option>' +
+      '<option value="TRADE_IN"' + (cs.diagnostic_solution === 'TRADE_IN' ? ' selected' : '') + '>리본 인증중고 보상판매 맞교환</option>' +
+      '<option value="NEW_REPLACE"' + (cs.diagnostic_solution === 'NEW_REPLACE' ? ' selected' : '') + '>신품 교체 연계</option>' +
+      '</select></div>' +
+      '<div><label>예상 화물비 (고객 별도 부담)</label>' +
+      '<input type="number" id="cs-freight" value="' + (cs.freight_quote || 100000) + '" placeholder="예: 100,000"></div>' +
+      '<div><label>총 견적 안내 금액 (원)</label>' +
+      '<input type="number" id="cs-quote" value="' + (cs.quote_amount || 400000) + '" placeholder="400,000"></div>' +
+      '<div style="grid-column:1/-1;"><label>상담 메모</label>' +
+      '<textarea id="cs-notes" rows="2" placeholder="고객 통화 내용 기록">' + esc(cs.notes || '') + '</textarea></div>' +
+      '</div>' +
+      '<div style="margin-top:10px;text-align:right;">' +
+      '<button type="button" class="btn primary small" id="btn-save-consult">상담 기록 저장 및 고객 전용 QR 상태창 반영</button>' +
+      '</div>' +
+      '</section>' +
       '<div class="parts-audit">' +
       '<strong>공임나라형 투명 정산 · 품질검수 체크</strong><br>' +
       '• 부품 조달: 본사 리본 표준 부품 실비 공개 (고객 직접 구입 시 공임만 정산 가능)<br>' +
@@ -231,6 +285,27 @@
       freight.addEventListener('input', recalc);
       if (freight.value) recalc();
     }
+    var bsc = $('#btn-save-consult');
+    if (bsc) {
+      bsc.addEventListener('click', function () {
+        var data = {
+          product_size: $('#cs-size').value,
+          manufacturer: $('#cs-mfg').value,
+          years_used: $('#cs-years').value,
+          problem_detail: $('#cs-problem').value,
+          duration_of_issue: $('#cs-duration').value,
+          diagnostic_solution: $('#cs-solution').value,
+          freight_quote: Number($('#cs-freight').value) || 0,
+          quote_amount: Number($('#cs-quote').value) || 400000,
+          notes: $('#cs-notes').value
+        };
+        api.saveConsultation(o.order_id, data).then(function () {
+          toast('상담 기록이 저장되었습니다. (고객 전용 QR 페이지 자동 연동)');
+          refresh().then(function () { openOrder(o.order_id); });
+        }).catch(function (e) { toast(e.message, true); });
+      });
+    }
+
     var bc = $('#btn-confirm');
     if (bc) bc.addEventListener('click', function () {
       if (!lastCalc) return;
@@ -505,6 +580,67 @@
         renderNetwork();
         toast('본사 교육·품질 인증 완료로 처리되었습니다.');
       } catch (err) {}
+    });
+  }
+
+  /* ============================================================
+   * 5. 제휴사 상품 등록 및 1년 수익 배분
+   * ============================================================ */
+  function renderProducts() {
+    var tb = $('#admin-products-table tbody');
+    if (!tb) return;
+    var list = state.products || [];
+    tb.innerHTML = list.length ? list.map(function (p) {
+      return '<tr>' +
+        '<td class="mono">' + esc(p.id) + '</td>' +
+        '<td><b>' + esc(p.vendor_name) + '</b></td>' +
+        '<td>' + esc(p.name) + (p.specs ? '<br><span class="hint">' + esc(p.specs) + '</span>' : '') + '</td>' +
+        '<td class="num"><b>' + won(p.price) + '</b></td>' +
+        '<td class="num">' + won(p.supply_price) + '</td>' +
+        '<td class="num"><span class="chip" style="background:#fee500;color:#191919;font-weight:700;">' + p.partner_share_pct + '% (' + won(Math.round(p.price * p.partner_share_pct / 100)) + ')</span></td>' +
+        '<td><span class="chip COMPLETED">' + esc(p.status) + '</span></td>' +
+        '</tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">등록된 제휴 상품이 없습니다.</td></tr>';
+  }
+
+  function renderAffiliateSales() {
+    var tb = $('#admin-affiliate-table tbody');
+    if (!tb) return;
+    var list = state.affiliateSales || [];
+    tb.innerHTML = list.length ? list.map(function (s) {
+      return '<tr>' +
+        '<td>' + fmtDate(s.created_at) + '</td>' +
+        '<td><span class="mono">' + esc(s.agent_id) + '</span></td>' +
+        '<td>' + esc(s.customer_phone) + '</td>' +
+        '<td><b>' + esc(s.product_name) + '</b></td>' +
+        '<td class="num">' + won(s.sale_amount) + '</td>' +
+        '<td class="num">' + s.commission_rate + '%</td>' +
+        '<td class="num" style="color:#a50034;font-weight:700;">+' + won(s.commission_amount) + '</td>' +
+        '<td class="hint">' + fmtDate(s.valid_until) + '</td>' +
+        '<td><span class="chip COMPLETED">' + esc(s.status) + '</span></td>' +
+        '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">1년 수익 배분 실적이 없습니다.</td></tr>';
+  }
+
+  var prodForm = $('#product-reg-form');
+  if (prodForm) {
+    prodForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var prod = {
+        vendor_name: $('#prod-vendor').value,
+        category: $('#prod-category').value,
+        name: $('#prod-name').value,
+        price: Number($('#prod-price').value),
+        supply_price: Number($('#prod-supply').value),
+        partner_share_pct: Number($('#prod-share').value),
+        specs: $('#prod-specs').value,
+        description: $('#prod-desc').value
+      };
+      api.saveProduct(prod).then(function (saved) {
+        toast('제휴 상품이 등록되었습니다. (QR 영업자 1년 배분율 ' + saved.partner_share_pct + '%)');
+        prodForm.reset();
+        refresh();
+      }).catch(function (err) { toast(err.message, true); });
     });
   }
 

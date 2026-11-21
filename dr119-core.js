@@ -54,6 +54,8 @@
     MARGINS: 'dr119_margins',
     CONTRACTS: 'dr119_contracts',
     PENALTIES: 'dr119_penalties',
+    PRODUCTS: 'dr119_products',
+    AFFILIATE_SALES: 'dr119_affiliate_sales',
     ATTRIBUTION: 'dr119_attribution' // 고객 브라우저의 First-touch 귀속 정보
   };
 
@@ -316,6 +318,77 @@
     { id: 'WATER_PURIFIER', name: '정수기 렌탈', share_pct: 15 }
   ];
 
+  var SEED_PRODUCTS = [
+    {
+      id: 'PROD_REBORN_1000',
+      vendor_name: '(주)오리온이앤에스 / 리본팩토리',
+      name: 'Dr.119 리본 인증중고 초음파 세척기 (1000형 표준)',
+      category: 'ULTRASONIC_REBORN',
+      price: 1850000,
+      supply_price: 1500000,
+      partner_share_pct: 10,
+      specs: '1000 x 700 x 850mm · 단상 220V 2.5kW · 신품 진동자 교체',
+      description: '단종·폐업 기기를 본사 공장에서 정밀 복원한 안심 인증 중고. 1년 무상 AS 보증.',
+      image_url: 'icons/dr119-logo.svg',
+      status: 'ACTIVE'
+    },
+    {
+      id: 'PROD_DETERGENT_BULK',
+      vendor_name: '주식회사 웰글로벌',
+      name: 'Dr.119 친환경 초음파 전용 활성세제 (20L 정기배송)',
+      category: 'DETERGENT',
+      price: 66000,
+      supply_price: 45000,
+      partner_share_pct: 15,
+      specs: '친환경 1종 주방세제 인증 · 침착 유분 10초 분해 활성제 배합',
+      description: '세척 효율 40% 증가 및 진동자 수명 연장 특화 전용 세제. 매월 정기 배송.',
+      image_url: 'icons/dr119-logo.svg',
+      status: 'ACTIVE'
+    },
+    {
+      id: 'PROD_NEW_1200',
+      vendor_name: '탑소닉 파트너스',
+      name: '신제품 탑소닉 스마트 초음파 세척기 (1200형 대형)',
+      category: 'ULTRASONIC_NEW',
+      price: 3200000,
+      supply_price: 2600000,
+      partner_share_pct: 10,
+      specs: '1200 x 750 x 850mm · 삼상 380V / 단상 220V 선택 · BLT 진동자',
+      description: '최신형 스마트 터치 조작부, 에너지 절약형 초음파 발진기 탑재.',
+      image_url: 'icons/dr119-logo.svg',
+      status: 'ACTIVE'
+    }
+  ];
+
+  var SEED_AFFILIATE_SALES = [
+    {
+      sale_id: 'AFF-202611-001',
+      agent_id: 'SEOUL_01',
+      customer_phone: '010-3333-4444',
+      product_id: 'PROD_DETERGENT_BULK',
+      product_name: 'Dr.119 친환경 초음파 전용 활성세제 (20L 정기배송)',
+      sale_amount: 66000,
+      commission_rate: 15,
+      commission_amount: 9900,
+      valid_until: '2027-11-01T00:00:00Z',
+      status: 'ACCUMULATED',
+      created_at: '2026-11-15T10:00:00Z'
+    },
+    {
+      sale_id: 'AFF-202611-002',
+      agent_id: 'SEOUL_01',
+      customer_phone: '010-3333-4444',
+      product_id: 'PROD_REBORN_1000',
+      product_name: 'Dr.119 리본 인증중고 초음파 세척기 (1000형 표준)',
+      sale_amount: 1850000,
+      commission_rate: 10,
+      commission_amount: 185000,
+      valid_until: '2027-11-01T00:00:00Z',
+      status: 'CONFIRMED',
+      created_at: '2026-11-18T14:30:00Z'
+    }
+  ];
+
   /* ================================================================
    * 8. API 계층 (배포: Supabase PostgreSQL REST / 로컬·테스트: localStorage Mock)
    * ================================================================ */
@@ -343,6 +416,9 @@
   /** 저장소용 경량 사본 (원본 미디어 data_url 제거, 썸네일만 유지) */
   function toStoredOrder(payload, partners) {
     var o = clone(payload);
+    var now = new Date();
+    o.order_id = o.order_id || generateOrderId(now);
+    o.created_at = o.created_at || now.toISOString();
     o.media = (o.media || []).map(function (m) {
       return { name: m.name, type: m.type, size: m.size, thumb_url: m.thumb_url || null };
     });
@@ -726,7 +802,113 @@
 
     // --- 고객 측 First-touch 저장 ---
     getAttribution: function () { return read(KEYS.ATTRIBUTION, null); },
-    saveAttribution: function (a) { return write(KEYS.ATTRIBUTION, a); }
+    saveAttribution: function (a) { return write(KEYS.ATTRIBUTION, a); },
+
+    // --- 1차 전화 상담 및 정밀 진단 기록 ---
+    saveConsultation: function (orderId, data) {
+      if (!orderId) return Promise.reject(new Error('주문 ID가 필요합니다.'));
+      var orders = read(KEYS.ORDERS, []);
+      var o = orders.find(function (x) { return x.order_id === orderId; });
+      if (!o) return Promise.reject(new Error('주문을 찾을 수 없습니다.'));
+      var now = new Date().toISOString();
+      o.consultation = {
+        product_size: data.product_size || '',
+        manufacturer: data.manufacturer || '',
+        years_used: data.years_used || '',
+        problem_detail: data.problem_detail || '',
+        duration_of_issue: data.duration_of_issue || '',
+        diagnostic_solution: data.diagnostic_solution || 'REBORN_400K',
+        freight_quote: Number(data.freight_quote) || 0,
+        quote_amount: Number(data.quote_amount) || 400000,
+        notes: data.notes || '',
+        consulted_at: now,
+        consulted_by: data.consulted_by || 'HQ_COUNSELOR'
+      };
+      o.consultation_status = 'COMPLETED';
+      o.history = (o.history || []).concat([{ at: now, status: 'CONSULTED', by: data.consulted_by || 'HQ_COUNSELOR', note: '1차 전화 상담 및 견적 안내 완료' }]);
+      write(KEYS.ORDERS, orders);
+      return Promise.resolve(clone(o));
+    },
+
+    // --- 고객 전용 수리·상담 상태 조회 (전화번호 또는 주문번호) ---
+    getCustomerOrder: function (query) {
+      if (!query) return Promise.resolve(null);
+      var q = String(query).trim();
+      var qDigits = q.replace(/[^0-9]/g, '');
+      var orders = read(KEYS.ORDERS, []);
+      var match = orders.find(function (o) {
+        if (o.order_id && o.order_id.toUpperCase() === q.toUpperCase()) return true;
+        var pDigits = (o.customer && o.customer.phone ? String(o.customer.phone) : '').replace(/[^0-9]/g, '');
+        return qDigits.length >= 8 && pDigits === qDigits;
+      });
+      return Promise.resolve(match ? clone(match) : null);
+    },
+
+    // --- 입점/제휴사 등록 상품 관리 ---
+    getProducts: function () {
+      return Promise.resolve(read(KEYS.PRODUCTS, SEED_PRODUCTS));
+    },
+    saveProduct: function (prod) {
+      if (!prod.name || !prod.vendor_name || !prod.price) {
+        return Promise.reject(new Error('상품명, 제휴사명, 가격은 필수입니다.'));
+      }
+      var list = read(KEYS.PRODUCTS, SEED_PRODUCTS);
+      var item = {
+        id: prod.id || ('PROD-' + Date.now().toString(36).toUpperCase()),
+        vendor_name: String(prod.vendor_name).trim(),
+        name: String(prod.name).trim(),
+        category: prod.category || 'ULTRASONIC_REBORN',
+        price: Number(prod.price) || 0,
+        supply_price: Number(prod.supply_price) || 0,
+        partner_share_pct: Number(prod.partner_share_pct) || 10,
+        specs: String(prod.specs || '').trim(),
+        description: String(prod.description || '').trim(),
+        image_url: prod.image_url || 'icons/dr119-logo.svg',
+        status: prod.status || 'ACTIVE',
+        created_at: prod.created_at || new Date().toISOString()
+      };
+      var idx = list.findIndex(function (x) { return x.id === item.id; });
+      if (idx >= 0) list[idx] = item;
+      else list.unshift(item);
+      write(KEYS.PRODUCTS, list);
+      return Promise.resolve(item);
+    },
+
+    // --- QR 영업자 1년간 수익 배분 추적 ---
+    getAffiliateSales: function (agentId) {
+      var all = read(KEYS.AFFILIATE_SALES, SEED_AFFILIATE_SALES);
+      if (!agentId) return Promise.resolve(all);
+      var aid = sanitizeAgentId(agentId);
+      var filtered = all.filter(function (s) { return s.agent_id === aid; });
+      return Promise.resolve(filtered);
+    },
+    recordAffiliateSale: function (sale) {
+      if (!sale.agent_id || !sale.customer_phone || !sale.product_name) {
+        return Promise.reject(new Error('영업자 ID, 고객 연락처, 상품명은 필수입니다.'));
+      }
+      var all = read(KEYS.AFFILIATE_SALES, SEED_AFFILIATE_SALES);
+      var now = new Date();
+      var oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      var amount = Number(sale.sale_amount) || 0;
+      var rate = Number(sale.commission_rate) || 10;
+      var comm = Math.round(amount * (rate / 100));
+      var rec = {
+        sale_id: 'AFF-' + Date.now().toString(36).toUpperCase(),
+        agent_id: sanitizeAgentId(sale.agent_id),
+        customer_phone: normalizePhone(sale.customer_phone) || sale.customer_phone,
+        product_id: sale.product_id || null,
+        product_name: sale.product_name,
+        sale_amount: amount,
+        commission_rate: rate,
+        commission_amount: comm,
+        valid_until: oneYearLater,
+        status: 'ACCUMULATED',
+        created_at: now.toISOString()
+      };
+      all.unshift(rec);
+      write(KEYS.AFFILIATE_SALES, all);
+      return Promise.resolve(rec);
+    }
   };
 
   /* ------------------------------------------------------------
@@ -834,6 +1016,8 @@
     useRemoteDB: useRemoteDB,
     SEED_PARTNERS: SEED_PARTNERS,
     SEED_MARGINS: SEED_MARGINS,
+    SEED_PRODUCTS: SEED_PRODUCTS,
+    SEED_AFFILIATE_SALES: SEED_AFFILIATE_SALES,
     api: api
   };
 });

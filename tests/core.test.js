@@ -161,3 +161,70 @@ test('본사 관리자 비밀번호 SHA-256 검증 및 세션 토큰', () => {
   assert.equal(D.verifyAdminToken(D.ADMIN_AUTH_HASH), true);
   assert.equal(D.verifyAdminToken('1'), false);
 });
+
+test('1차 전화 상담 기록 저장 및 고객 전용 조회 연동', async () => {
+  // 모의 주문 제출
+  const subRes = await D.api.submitOrder({
+    customer: { phone: '010-7777-8888', region: '경기 수원시' },
+    service: { type: 'DOCTOR_VISIT', label: '전문 닥터 방문' },
+    attribution: { agent_id: 'SEOUL_01' },
+    media: []
+  });
+  assert.ok(subRes.order_id);
+
+  // 관리자 1차 전화 상담 기록 저장
+  const consultData = {
+    product_size: '1000형 (표준)',
+    manufacturer: '클린조이',
+    years_used: '3~5년',
+    problem_detail: '진동자 파손 및 발진기 출력 저하',
+    duration_of_issue: '2주일 이상 지속',
+    diagnostic_solution: 'REBORN_400K',
+    freight_quote: 120000,
+    quote_amount: 400000,
+    notes: '공장 입고 전면 신품급 진동자 교체 권장'
+  };
+  const updatedOrder = await D.api.saveConsultation(subRes.order_id, consultData);
+  assert.equal(updatedOrder.consultation_status, 'COMPLETED');
+  assert.equal(updatedOrder.consultation.manufacturer, '클린조이');
+  assert.equal(updatedOrder.consultation.years_used, '3~5년');
+
+  // 고객이 전화번호 또는 주문번호로 조회
+  const foundByPhone = await D.api.getCustomerOrder('010-7777-8888');
+  assert.ok(foundByPhone);
+  assert.equal(foundByPhone.order_id, subRes.order_id);
+  assert.equal(foundByPhone.consultation.product_size, '1000형 (표준)');
+});
+
+test('입점 상품 등록 및 QR 영업자 1년간 수익 배분 추적', async () => {
+  // 상품 등록
+  const newProd = await D.api.saveProduct({
+    vendor_name: '오리온이앤에스',
+    name: '테스트 리본 세척기 900형',
+    category: 'ULTRASONIC_REBORN',
+    price: 1500000,
+    supply_price: 1200000,
+    partner_share_pct: 10
+  });
+  assert.ok(newProd.id);
+
+  // 영업자 QR 유입 고객 상품 구매 발생 → 1년 수익 배분 기록
+  const sale = await D.api.recordAffiliateSale({
+    agent_id: 'SEOUL_01',
+    customer_phone: '010-8888-9999',
+    product_id: newProd.id,
+    product_name: newProd.name,
+    sale_amount: 1500000,
+    commission_rate: 10
+  });
+  assert.equal(sale.commission_amount, 150000);
+  assert.equal(sale.agent_id, 'SEOUL_01');
+
+  // 영업자 대시보드 조회
+  const agentSales = await D.api.getAffiliateSales('SEOUL_01');
+  assert.ok(agentSales.length >= 1);
+  const mySale = agentSales.find(s => s.sale_id === sale.sale_id);
+  assert.ok(mySale);
+  assert.equal(mySale.commission_amount, 150000);
+  assert.ok(new Date(mySale.valid_until).getTime() > Date.now()); // 1년 만기 유효
+});

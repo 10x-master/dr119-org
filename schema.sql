@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS orders (
   -- 첨부 미디어 메타/썸네일 및 상태 변경 이력 JSON
   media                   JSONB NOT NULL DEFAULT '[]',
   history                 JSONB NOT NULL DEFAULT '[]',
+  -- 1차 전화 상담 및 정밀 진단 기록 (사이즈, 제조사, 사용연수, 고장부위, 지속기간, 솔루션, 견적)
+  consultation            JSONB NOT NULL DEFAULT '{}',
   CONSTRAINT chk_fixed_400k_settlement CHECK (
     (freight_cost IS NULL AND labor_fee IS NULL) OR
     (
@@ -110,6 +112,37 @@ INSERT INTO margins (id, name, share_pct) VALUES
   ('INSURANCE', '영업배상 보험', 20),
   ('WATER_PURIFIER', '정수기 렌탈', 15)
 ON CONFLICT (id) DO NOTHING;
+
+-- 6. 입점/제휴사 등록 상품 (리본 인증중고, 신품 세척기, 친환경 전용 세제, 대여 기기 등)
+CREATE TABLE IF NOT EXISTS products (
+  id                TEXT PRIMARY KEY,
+  vendor_name       TEXT NOT NULL,
+  name              TEXT NOT NULL,
+  category          TEXT NOT NULL,
+  price             INTEGER NOT NULL,
+  supply_price      INTEGER NOT NULL,
+  partner_share_pct NUMERIC(5, 2) NOT NULL DEFAULT 10.0,
+  specs             TEXT NOT NULL DEFAULT '',
+  description       TEXT NOT NULL DEFAULT '',
+  image_url         TEXT NOT NULL DEFAULT '',
+  status            TEXT NOT NULL DEFAULT 'ACTIVE',
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 7. QR 영업자 1년간 수익 배분 실적
+CREATE TABLE IF NOT EXISTS affiliate_sales (
+  sale_id           TEXT PRIMARY KEY,
+  agent_id          TEXT NOT NULL REFERENCES agents(agent_id) ON UPDATE CASCADE,
+  customer_phone    TEXT NOT NULL,
+  product_id        TEXT,
+  product_name      TEXT NOT NULL,
+  sale_amount       INTEGER NOT NULL,
+  commission_rate   NUMERIC(5, 2) NOT NULL,
+  commission_amount INTEGER NOT NULL,
+  valid_until       TIMESTAMPTZ NOT NULL,
+  status            TEXT NOT NULL DEFAULT 'ACCUMULATED',
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 -- ============================================================================
 -- Supabase RLS (Row Level Security) 및 PostgREST anon/authenticated 권한

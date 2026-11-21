@@ -695,4 +695,134 @@
       });
     }
   })();
+
+  /* ================================================================
+   * 8) 고객 전용 수리·상담 실시간 조회 & 모바일 제휴 지원 모달
+   * ================================================================ */
+  (function () {
+    var statusDlg = document.getElementById('customer-status-dialog');
+    var openStatusBtn = document.getElementById('btn-open-status');
+    var closeStatusBtn = document.getElementById('status-dialog-close');
+    var searchInput = document.getElementById('status-search-input');
+    var searchBtn = document.getElementById('btn-status-search');
+    var resultBox = document.getElementById('status-result-box');
+    var emptyMsg = document.getElementById('status-empty-msg');
+
+    function openStatusModal(prefill) {
+      if (!statusDlg) return;
+      if (prefill && searchInput) searchInput.value = prefill;
+      if (typeof statusDlg.showModal === 'function') {
+        if (!statusDlg.open) statusDlg.showModal();
+      } else {
+        statusDlg.setAttribute('open', '');
+      }
+      if (prefill) doSearch();
+    }
+    function closeStatusModal() {
+      if (!statusDlg) return;
+      if (typeof statusDlg.close === 'function' && statusDlg.open) statusDlg.close();
+      else statusDlg.removeAttribute('open');
+    }
+
+    function doSearch() {
+      var q = searchInput ? searchInput.value.trim() : '';
+      if (!q) return;
+      D.api.getCustomerOrder(q).then(function (o) {
+        if (!o) {
+          if (resultBox) resultBox.style.display = 'none';
+          if (emptyMsg) {
+            emptyMsg.style.display = 'block';
+            emptyMsg.textContent = '일치하는 접수 내역을 찾을 수 없습니다. 연락처나 접수번호를 다시 확인해 주세요.';
+          }
+          return;
+        }
+        if (emptyMsg) emptyMsg.style.display = 'none';
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          var cs = o.consultation || {};
+          var orderIdEl = document.getElementById('st-order-id');
+          var badgeEl = document.getElementById('st-status-badge');
+          var custInfoEl = document.getElementById('st-customer-info');
+          var consultDetailsEl = document.getElementById('st-consult-details');
+
+          if (orderIdEl) orderIdEl.textContent = '접수번호: ' + o.order_id;
+          if (badgeEl) badgeEl.textContent = D.ORDER_STATUS[o.status] || o.status;
+          if (custInfoEl) {
+            custInfoEl.textContent = '접수일시: ' + (o.created_at ? o.created_at.slice(0, 10) : '-') + ' · 연락처: ' + (o.customer ? o.customer.phone : '-');
+          }
+          if (consultDetailsEl) {
+            if (o.consultation_status === 'COMPLETED') {
+              consultDetailsEl.innerHTML =
+                '• 기기 규격: <b>' + (cs.product_size || '표준') + '</b> (' + (cs.manufacturer || '제조사 확인') + ') · ' + (cs.years_used || '사용연수 확인') + '<br>' +
+                '• 고장 증상: ' + (cs.problem_detail || '상세 점검') + ' (' + (cs.duration_of_issue || '지속기간') + ')<br>' +
+                '• 권장 처방: <b>공장 입고 40만 전면 재생 (단종·폐업 기기 올수리 복원)</b><br>' +
+                '• 견적 안내: 재생 공임 400,000원 (왕복 화물 실비 ' + (cs.freight_quote ? Number(cs.freight_quote).toLocaleString('ko-KR') + '원' : '별도') + ')<br>' +
+                (cs.notes ? '• 상담 메모: ' + cs.notes : '');
+            } else {
+              consultDetailsEl.innerHTML = '현재 본사 기술 상담팀이 접수된 사진을 검토 중입니다. 곧 1차 전화 상담을 통해 맞춤형 견적을 안내해 드립니다.';
+            }
+          }
+        }
+      }).catch(function (err) {
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '조회 중 오류가 발생했습니다: ' + err.message;
+        }
+      });
+    }
+
+    if (openStatusBtn) openStatusBtn.addEventListener('click', function (e) { e.preventDefault(); openStatusModal(); });
+    if (closeStatusBtn) closeStatusBtn.addEventListener('click', closeStatusModal);
+    if (searchBtn) searchBtn.addEventListener('click', doSearch);
+    if (searchInput) {
+      searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+    }
+
+    // URL 파라미터 자동 팝업 (?order_id=... 또는 ?check_status=...)
+    try {
+      var p = new URLSearchParams(window.location.search);
+      var oid = p.get('order_id');
+      if (oid) openStatusModal(oid);
+    } catch (e) {}
+
+    // B2B 간편 문의 모달
+    var b2bDlg = document.getElementById('b2b-inquiry-dialog');
+    var openB2bBtn = document.getElementById('btn-open-b2b');
+    var closeB2bBtn = document.getElementById('b2b-dialog-close');
+    var b2bForm = document.getElementById('b2b-inquiry-form');
+
+    function openB2b() {
+      if (!b2bDlg) return;
+      if (typeof b2bDlg.showModal === 'function') {
+        if (!b2bDlg.open) b2bDlg.showModal();
+      } else {
+        b2bDlg.setAttribute('open', '');
+      }
+    }
+    function closeB2b() {
+      if (!b2bDlg) return;
+      if (typeof b2bDlg.close === 'function' && b2bDlg.open) b2bDlg.close();
+      else b2bDlg.removeAttribute('open');
+    }
+
+    if (openB2bBtn) openB2bBtn.addEventListener('click', function (e) { e.preventDefault(); openB2b(); });
+    if (closeB2bBtn) closeB2bBtn.addEventListener('click', closeB2b);
+    if (b2bForm) {
+      b2bForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var lead = {
+          role: document.getElementById('b2b-type').value,
+          name: document.getElementById('b2b-name').value,
+          phone: document.getElementById('b2b-phone').value,
+          region: document.getElementById('b2b-region').value,
+          memo: document.getElementById('b2b-memo').value
+        };
+        D.api.submitPartnerLead(lead).then(function () {
+          alert('제휴 지원서가 정상 접수되었습니다. 본사 제휴팀에서 24시간 이내에 1:1 유선 상담을 드립니다.');
+          b2bForm.reset();
+          closeB2b();
+        }).catch(function (err) { alert('접수 실패: ' + err.message); });
+      });
+    }
+  })();
 })();

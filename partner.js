@@ -43,14 +43,21 @@
     render();
   });
   $('#inbox-filter').addEventListener('change', renderInbox);
-  $('#agent-filter').addEventListener('change', renderAccounts);
+  $('#agent-filter').addEventListener('change', function () { renderAccounts(); renderAffiliateSales(); });
 
   function load() {
-    return Promise.all([api.listOrders(), api.getPartners(), api.getMargins(), api.getContracts(), api.getPenalties()])
-      .then(function (r) {
-        state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
-        if (!state.me) state.me = resolveMe();
-      });
+    return Promise.all([
+      api.listOrders(),
+      api.getPartners(),
+      api.getMargins(),
+      api.getContracts(),
+      api.getPenalties(),
+      api.getAffiliateSales ? api.getAffiliateSales() : Promise.resolve([])
+    ]).then(function (r) {
+      state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
+      state.affiliateSales = r[5] || [];
+      if (!state.me) state.me = resolveMe();
+    });
   }
 
   function myDist() { return state.partners.distributors.find(function (d) { return d.id === state.me; }); }
@@ -76,7 +83,7 @@
     $('#agent-filter').innerHTML = '<option value="">전체 QR</option>' + agents.map(function (a) {
       return '<option value="' + esc(a.agent_id) + '"' + (a.agent_id === cur ? ' selected' : '') + '>' + esc(a.agent_id + ' · ' + a.name) + '</option>';
     }).join('');
-    renderKPIs(); renderInbox(); renderAccounts(); renderPassive(); renderQR();
+    renderKPIs(); renderInbox(); renderAccounts(); renderPassive(); renderQR(); renderAffiliateSales();
   }
 
   /* ---------- 패시브 인컴 모니터링 KPI ---------- */
@@ -186,6 +193,38 @@
       return '<tr><td class="mono">' + esc(a.agent_id) + '</td><td>' + esc(a.name) + '</td><td>' + (a.role === 'DOCTOR' ? '닥터' : '총판') + '</td>' +
         '<td><span class="qr-link">https://dr119.org/?agent_id=' + esc(a.agent_id) + '</span></td></tr>';
     }).join('');
+  }
+
+  /* ---------- 5. 내 QR 1년 수익 배분 실적 ---------- */
+  function renderAffiliateSales() {
+    var tb = $('#affiliate-table tbody');
+    var tf = $('#affiliate-table tfoot');
+    if (!tb) return;
+    var mine = {};
+    myAgents().forEach(function (a) { mine[a.agent_id] = true; });
+    var filter = $('#agent-filter') ? $('#agent-filter').value : '';
+    var list = (state.affiliateSales || []).filter(function (s) {
+      if (!mine[s.agent_id]) return false;
+      if (filter && s.agent_id !== filter) return false;
+      return true;
+    });
+    tb.innerHTML = list.length ? list.map(function (s) {
+      return '<tr>' +
+        '<td>' + fmtDate(s.created_at) + '</td>' +
+        '<td><b>' + esc(s.customer_phone) + '</b></td>' +
+        '<td>' + esc(s.product_name) + '</td>' +
+        '<td class="num">' + won(s.sale_amount) + '</td>' +
+        '<td class="num">' + s.commission_rate + '%</td>' +
+        '<td class="num pos strong">+' + won(s.commission_amount) + '</td>' +
+        '<td class="hint">' + fmtDate(s.valid_until) + '</td>' +
+        '<td><span class="chip COMPLETED">' + esc(s.status) + '</span></td>' +
+        '</tr>';
+    }).join('') : '<tr><td colspan="8" class="empty">아직 내 QR 고객의 1년 수익 배분 상품 구매 내역이 없습니다.</td></tr>';
+
+    var total = list.reduce(function (sum, s) { return sum + s.commission_amount; }, 0);
+    if (tf) {
+      tf.innerHTML = '<tr><td colspan="5">내 QR 1년 수익 배분 수수료 합계</td><td class="num pos strong">+' + won(total) + '</td><td colspan="2"></td></tr>';
+    }
   }
 
   function refresh() { return load().then(render); }
