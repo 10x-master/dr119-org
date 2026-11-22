@@ -830,18 +830,45 @@
       return Promise.resolve(clone(o));
     },
 
-    // --- 고객 전용 수리·상담 상태 조회 (전화번호 또는 주문번호) ---
-    getCustomerOrder: function (query) {
-      if (!query) return Promise.resolve(null);
+    // --- 고객 전용 수리·상담 상태 조회 (전화번호 또는 주문번호, 카카오 인증 및 보안 검증) ---
+    getCustomerOrders: function (query, secCode) {
+      if (!query) return Promise.resolve([]);
       var q = String(query).trim();
       var qDigits = q.replace(/[^0-9]/g, '');
-      var orders = read(KEYS.ORDERS, []);
-      var match = orders.find(function (o) {
+
+      function checkMatch(o) {
+        if (!o) return false;
+        // 1. 접수번호 정확 일치
         if (o.order_id && o.order_id.toUpperCase() === q.toUpperCase()) return true;
+
+        // 2. 전화번호 일치
         var pDigits = (o.customer && o.customer.phone ? String(o.customer.phone) : '').replace(/[^0-9]/g, '');
-        return qDigits.length >= 8 && pDigits === qDigits;
+        if (qDigits.length >= 8 && pDigits === qDigits) {
+          // 보안 검증 (휴대폰 뒷 4자리 또는 보안코드)
+          if (secCode) {
+            var pin = String(secCode).replace(/[^0-9]/g, '');
+            var last4 = pDigits.slice(-4);
+            return pin === last4;
+          }
+          return true;
+        }
+        return false;
+      }
+
+      if (useRemoteDB()) {
+        return api.listOrders().then(function (orders) {
+          return (orders || []).filter(checkMatch).map(clone);
+        });
+      }
+
+      var orders = read(KEYS.ORDERS, []);
+      return Promise.resolve(orders.filter(checkMatch).map(clone));
+    },
+
+    getCustomerOrder: function (query, secCode) {
+      return api.getCustomerOrders(query, secCode).then(function (list) {
+        return list && list.length ? list[0] : null;
       });
-      return Promise.resolve(match ? clone(match) : null);
     },
 
     // --- 입점/제휴사 등록 상품 관리 ---

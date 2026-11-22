@@ -189,11 +189,20 @@ test('1차 전화 상담 기록 저장 및 고객 전용 조회 연동', async (
   assert.equal(updatedOrder.consultation.manufacturer, '클린조이');
   assert.equal(updatedOrder.consultation.years_used, '3~5년');
 
-  // 고객이 전화번호 또는 주문번호로 조회
+  // 고객이 전화번호 또는 주문번호로 조회 (카카오 인증 / 휴대폰 뒷4자리 보안 검증)
   const foundByPhone = await D.api.getCustomerOrder('010-7777-8888');
   assert.ok(foundByPhone);
   assert.equal(foundByPhone.order_id, subRes.order_id);
   assert.equal(foundByPhone.consultation.product_size, '1000형 (표준)');
+
+  // 휴대폰 뒷 4자리 일치 시 조회 허용
+  const foundWithPin = await D.api.getCustomerOrder('010-7777-8888', '8888');
+  assert.ok(foundWithPin);
+  assert.equal(foundWithPin.order_id, subRes.order_id);
+
+  // 휴대폰 뒷 4자리 불일치 시 타인 조회 차단 (null 반환)
+  const blockedWrongPin = await D.api.getCustomerOrder('010-7777-8888', '1234');
+  assert.equal(blockedWrongPin, null);
 });
 
 test('입점 상품 등록 및 QR 영업자 1년간 수익 배분 추적', async () => {

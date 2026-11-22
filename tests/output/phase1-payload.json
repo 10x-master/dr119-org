@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "order_id": "DR-20261121-S0JDY",
-  "created_at": "2026-11-21T09:00:55.551Z",
+  "order_id": "DR-20261122-BGKWM",
+  "created_at": "2026-11-22T12:19:49.408Z",
   "customer": {
     "phone": "010-1234-5678",
     "region": "서울 강남구"
@@ -15,8 +15,8 @@
   "attribution": {
     "agent_id": "SEOUL_01",
     "model": "FIRST_TOUCH",
-    "first_touch_at": "2026-11-21T09:00:53.530Z",
-    "landing_url": "http://127.0.0.1:52409/index.html?agent_id=seoul_01"
+    "first_touch_at": "2026-11-22T12:19:46.800Z",
+    "landing_url": "http://127.0.0.1:54358/index.html?agent_id=seoul_01"
   },
   "media": [
     {
@@ -39,6 +39,6 @@
   ],
   "client": {
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
-    "submitted_url": "http://127.0.0.1:52409/index.html?agent_id=BUSAN_01"
+    "submitted_url": "http://127.0.0.1:54358/index.html?agent_id=BUSAN_01"
   }
 }

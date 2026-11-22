@@ -697,20 +697,90 @@
   })();
 
   /* ================================================================
-   * 8) 고객 전용 수리·상담 실시간 조회 & 모바일 제휴 지원 모달
+   * 8) 고객 전용 수리·상담 실시간 조회 (카카오 간편 로그인 & 안심 보안 조회)
    * ================================================================ */
   (function () {
     var statusDlg = document.getElementById('customer-status-dialog');
     var openStatusBtn = document.getElementById('btn-open-status');
     var closeStatusBtn = document.getElementById('status-dialog-close');
     var searchInput = document.getElementById('status-search-input');
+    var secPinInput = document.getElementById('status-sec-pin');
     var searchBtn = document.getElementById('btn-status-search');
     var resultBox = document.getElementById('status-result-box');
     var emptyMsg = document.getElementById('status-empty-msg');
+    var kakaoStatusBtn = document.getElementById('btn-kakao-status-login');
+    var kakaoUserBox = document.getElementById('status-kakao-user');
+    var kakaoPhoneSpan = document.getElementById('status-kakao-phone');
+    var kakaoLogoutBtn = document.getElementById('btn-status-kakao-logout');
+    var viewStatusNowBtn = document.getElementById('btn-view-status-now');
+
+    function maskPhone(p) {
+      var norm = D.normalizePhone(p);
+      if (!norm) return p || '-';
+      return norm.replace(/^(\d{3})-(\d{3,4})-(\d{4})$/, function (_, a, b, c) {
+        return a + '-****-' + c;
+      });
+    }
+
+    function checkKakaoSession() {
+      var saved = '';
+      try { saved = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
+      if (saved && kakaoUserBox && kakaoPhoneSpan) {
+        kakaoPhoneSpan.textContent = maskPhone(saved);
+        kakaoUserBox.style.display = 'flex';
+        return saved;
+      }
+      if (kakaoUserBox) kakaoUserBox.style.display = 'none';
+      return null;
+    }
+
+    function renderOrder(o) {
+      if (!o) {
+        if (resultBox) resultBox.style.display = 'none';
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '일치하는 접수 내역을 찾을 수 없습니다. 접수번호나 연락처 및 뒷 4자리를 확인해 주세요.';
+        }
+        return;
+      }
+      if (emptyMsg) emptyMsg.style.display = 'none';
+      if (resultBox) {
+        resultBox.style.display = 'block';
+        var cs = o.consultation || {};
+        var orderIdEl = document.getElementById('st-order-id');
+        var badgeEl = document.getElementById('st-status-badge');
+        var custInfoEl = document.getElementById('st-customer-info');
+        var consultDetailsEl = document.getElementById('st-consult-details');
+
+        if (orderIdEl) orderIdEl.textContent = '접수번호: ' + o.order_id;
+        if (badgeEl) badgeEl.textContent = D.ORDER_STATUS[o.status] || o.status;
+        if (custInfoEl) {
+          custInfoEl.textContent = '접수일시: ' + (o.created_at ? o.created_at.slice(0, 10) : '-') + ' · 고객 연락처: ' + maskPhone(o.customer ? o.customer.phone : '-');
+        }
+        if (consultDetailsEl) {
+          if (o.consultation_status === 'COMPLETED') {
+            consultDetailsEl.innerHTML =
+              '• 기기 규격: <b>' + (cs.product_size || '표준') + '</b> (' + (cs.manufacturer || '제조사 확인') + ') · ' + (cs.years_used || '사용연수 확인') + '<br>' +
+              '• 고장 증상: ' + (cs.problem_detail || '상세 점검') + ' (' + (cs.duration_of_issue || '지속기간') + ')<br>' +
+              '• 권장 처방: <b>공장 입고 40만 전면 재생 (단종·폐업 기기 올수리 복원)</b><br>' +
+              '• 견적 안내: 재생 공임 400,000원 (왕복 화물 실비 ' + (cs.freight_quote ? Number(cs.freight_quote).toLocaleString('ko-KR') + '원' : '별도') + ')<br>' +
+              (cs.notes ? '• 상담 메모: ' + cs.notes : '');
+          } else {
+            consultDetailsEl.innerHTML = '현재 본사 기술 상담팀이 접수된 사진을 검토 중입니다. 곧 1차 전화 상담을 통해 맞춤형 견적을 안내해 드립니다.';
+          }
+        }
+      }
+    }
 
     function openStatusModal(prefill) {
       if (!statusDlg) return;
-      if (prefill && searchInput) searchInput.value = prefill;
+      var loggedInPhone = checkKakaoSession();
+      if (prefill) {
+        if (searchInput) searchInput.value = prefill;
+      } else if (loggedInPhone && searchInput && !searchInput.value) {
+        // 이미 카카오 인증된 고객인 경우 자동 조회
+        D.api.getCustomerOrder(loggedInPhone).then(renderOrder).catch(function () {});
+      }
       if (typeof statusDlg.showModal === 'function') {
         if (!statusDlg.open) statusDlg.showModal();
       } else {
@@ -718,6 +788,7 @@
       }
       if (prefill) doSearch();
     }
+
     function closeStatusModal() {
       if (!statusDlg) return;
       if (typeof statusDlg.close === 'function' && statusDlg.open) statusDlg.close();
@@ -726,43 +797,33 @@
 
     function doSearch() {
       var q = searchInput ? searchInput.value.trim() : '';
-      if (!q) return;
-      D.api.getCustomerOrder(q).then(function (o) {
-        if (!o) {
-          if (resultBox) resultBox.style.display = 'none';
+      if (!q) {
+        var kPhone = checkKakaoSession();
+        if (kPhone) q = kPhone;
+        else return;
+      }
+
+      var pin = secPinInput ? secPinInput.value.trim() : '';
+      var isOrderId = /^ORD-|^ORD/i.test(q) || (q.length >= 10 && q.indexOf('-') > 0 && !/^01[0-9]/.test(q));
+
+      // 휴대폰 번호로 조회하는 경우 타인 열람 방지를 위한 2차 검증(뒷 4자리)
+      if (!isOrderId) {
+        var savedKPhone = '';
+        try { savedKPhone = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
+        var isOwnKakao = savedKPhone && (savedKPhone.replace(/[^0-9]/g, '') === q.replace(/[^0-9]/g, ''));
+
+        if (!isOwnKakao && !pin) {
           if (emptyMsg) {
             emptyMsg.style.display = 'block';
-            emptyMsg.textContent = '일치하는 접수 내역을 찾을 수 없습니다. 연락처나 접수번호를 다시 확인해 주세요.';
+            emptyMsg.textContent = '개인정보 보호를 위해 휴대폰 번호 조회 시 [뒷 4자리]를 함께 입력해 주세요.';
           }
+          if (secPinInput) secPinInput.focus();
           return;
         }
-        if (emptyMsg) emptyMsg.style.display = 'none';
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          var cs = o.consultation || {};
-          var orderIdEl = document.getElementById('st-order-id');
-          var badgeEl = document.getElementById('st-status-badge');
-          var custInfoEl = document.getElementById('st-customer-info');
-          var consultDetailsEl = document.getElementById('st-consult-details');
+      }
 
-          if (orderIdEl) orderIdEl.textContent = '접수번호: ' + o.order_id;
-          if (badgeEl) badgeEl.textContent = D.ORDER_STATUS[o.status] || o.status;
-          if (custInfoEl) {
-            custInfoEl.textContent = '접수일시: ' + (o.created_at ? o.created_at.slice(0, 10) : '-') + ' · 연락처: ' + (o.customer ? o.customer.phone : '-');
-          }
-          if (consultDetailsEl) {
-            if (o.consultation_status === 'COMPLETED') {
-              consultDetailsEl.innerHTML =
-                '• 기기 규격: <b>' + (cs.product_size || '표준') + '</b> (' + (cs.manufacturer || '제조사 확인') + ') · ' + (cs.years_used || '사용연수 확인') + '<br>' +
-                '• 고장 증상: ' + (cs.problem_detail || '상세 점검') + ' (' + (cs.duration_of_issue || '지속기간') + ')<br>' +
-                '• 권장 처방: <b>공장 입고 40만 전면 재생 (단종·폐업 기기 올수리 복원)</b><br>' +
-                '• 견적 안내: 재생 공임 400,000원 (왕복 화물 실비 ' + (cs.freight_quote ? Number(cs.freight_quote).toLocaleString('ko-KR') + '원' : '별도') + ')<br>' +
-                (cs.notes ? '• 상담 메모: ' + cs.notes : '');
-            } else {
-              consultDetailsEl.innerHTML = '현재 본사 기술 상담팀이 접수된 사진을 검토 중입니다. 곧 1차 전화 상담을 통해 맞춤형 견적을 안내해 드립니다.';
-            }
-          }
-        }
+      D.api.getCustomerOrder(q, pin).then(function (o) {
+        renderOrder(o);
       }).catch(function (err) {
         if (emptyMsg) {
           emptyMsg.style.display = 'block';
@@ -771,11 +832,91 @@
       });
     }
 
+    function handleKakaoLogin() {
+      if (window.Kakao && window.__DR119_KAKAO_KEY__) {
+        try {
+          if (!window.Kakao.isInitialized()) window.Kakao.init(window.__DR119_KAKAO_KEY__);
+          if (window.Kakao.Auth && typeof window.Kakao.Auth.login === 'function') {
+            window.Kakao.Auth.login({
+              success: function () {
+                window.Kakao.API.request({
+                  url: '/v2/user/me',
+                  success: function (res) {
+                    var kp = res && res.kakao_account && res.kakao_account.phone_number;
+                    if (kp) {
+                      var norm = D.normalizePhone(kp.replace(/^\+82\s?/, '0'));
+                      if (norm) {
+                        try { localStorage.setItem(KAKAO_PHONE_KEY, norm); } catch (e) {}
+                        checkKakaoSession();
+                        D.api.getCustomerOrder(norm).then(renderOrder);
+                      }
+                    }
+                  }
+                });
+              }
+            });
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // SDK 미연동 시: 기존 저장된 간편 연동 계정 확인 또는 즉시 번호 확인 연동
+      var saved = '';
+      try { saved = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
+      if (!saved) {
+        var input = prompt('카카오 연동을 위해 접수하신 휴대폰 번호를 입력해 주세요.\n(한 번 연동하면 다음부터 터치 한 번으로 자동 조회됩니다)', '');
+        if (input) {
+          var norm = D.normalizePhone(input);
+          if (norm) {
+            try { localStorage.setItem(KAKAO_PHONE_KEY, norm); } catch (e) {}
+            saved = norm;
+          } else {
+            alert('유효한 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)');
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+
+      checkKakaoSession();
+      D.api.getCustomerOrder(saved).then(renderOrder).catch(function (err) {
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '조회 실패: ' + err.message;
+        }
+      });
+    }
+
+    if (kakaoStatusBtn) kakaoStatusBtn.addEventListener('click', handleKakaoLogin);
+    if (kakaoLogoutBtn) {
+      kakaoLogoutBtn.addEventListener('click', function () {
+        try { localStorage.removeItem(KAKAO_PHONE_KEY); } catch (e) {}
+        checkKakaoSession();
+        if (resultBox) resultBox.style.display = 'none';
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '카카오 로그아웃되었습니다. 조회하실 정보를 입력하거나 다시 로그인해 주세요.';
+        }
+      });
+    }
+
+    if (viewStatusNowBtn) {
+      viewStatusNowBtn.addEventListener('click', function () {
+        var doneOidEl = document.getElementById('done-order-id');
+        var oid = doneOidEl ? doneOidEl.textContent.trim() : '';
+        openStatusModal(oid !== '-' ? oid : '');
+      });
+    }
+
     if (openStatusBtn) openStatusBtn.addEventListener('click', function (e) { e.preventDefault(); openStatusModal(); });
     if (closeStatusBtn) closeStatusBtn.addEventListener('click', closeStatusModal);
     if (searchBtn) searchBtn.addEventListener('click', doSearch);
     if (searchInput) {
       searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+    }
+    if (secPinInput) {
+      secPinInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
     }
 
     // URL 파라미터 자동 팝업 (?order_id=... 또는 ?check_status=...)
