@@ -237,3 +237,47 @@ test('입점 상품 등록 및 QR 영업자 1년간 수익 배분 추적', async
   assert.equal(mySale.commission_amount, 150000);
   assert.ok(new Date(mySale.valid_until).getTime() > Date.now()); // 1년 만기 유효
 });
+
+test('주방·설비·인테리어 역경매 및 3% 수수료, 전국 화물 실시간 운임 계산 엔진 검증', async () => {
+  // 1. 전국 24시콜 기준 실시간 화물 운임 계산 (반월 ↔ 진주 330km)
+  const freight = await D.api.calcFreightRate('경기 화성 반월동', '경남 진주시');
+  assert.equal(freight.distance_km, 330);
+  assert.equal(freight.consolidated_price, 140000); // 14만원 혼적 실비
+  assert.equal(freight.charter_price, 220000); // 22만원 독차
+  assert.equal(freight.commission_rate_pct, 3.0);
+
+  // 2. 신규 역경매 등록 (식당 사장님 요청)
+  const newAuc = await D.api.createAuction({
+    title: '테스트 중식당 닥트 공사 및 식기세척기 구매',
+    category: 'FACILITY',
+    desired_price: 3500000,
+    customer_phone: '010-9988-1122',
+    region: '서울 영등포구',
+    notes: '빠른 시공 요망'
+  });
+  assert.ok(newAuc.auction_id);
+  assert.equal(newAuc.status, 'OPEN');
+
+  // 3. 제조·유통사 최저가 경쟁 입찰 (진입 허들 완화)
+  const bid1 = await D.api.submitBid({
+    auction_id: newAuc.auction_id,
+    dealer_name: '대한종합설비 (유통사)',
+    bid_price: 3200000,
+    warranty_months: 24,
+    delivery_days: 2,
+    benefits: '무상 배송 및 2년 무상 보증'
+  });
+  assert.ok(bid1.bid_id);
+  assert.equal(bid1.bid_price, 3200000);
+
+  // 4. 입찰 목록 조회 및 최저가 정렬
+  const bids = await D.api.getAuctionBids(newAuc.auction_id);
+  assert.ok(bids.length >= 1);
+  assert.equal(bids[0].bid_price, 3200000);
+
+  // 5. 사장님 낙찰 확정
+  const acceptRes = await D.api.acceptBid(newAuc.auction_id, bid1.bid_id);
+  assert.equal(acceptRes.ok, true);
+  assert.equal(acceptRes.auction.status, 'ACCEPTED');
+  assert.equal(acceptRes.bid.status, 'ACCEPTED');
+});

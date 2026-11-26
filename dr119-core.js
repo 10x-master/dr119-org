@@ -56,6 +56,9 @@
     PENALTIES: 'dr119_penalties',
     PRODUCTS: 'dr119_products',
     AFFILIATE_SALES: 'dr119_affiliate_sales',
+    AUCTIONS: 'dr119_auctions',
+    AUCTION_DEALERS: 'dr119_auction_dealers',
+    AUCTION_BIDS: 'dr119_auction_bids',
     ATTRIBUTION: 'dr119_attribution' // 고객 브라우저의 First-touch 귀속 정보
   };
 
@@ -386,6 +389,159 @@
       valid_until: '2027-11-01T00:00:00Z',
       status: 'CONFIRMED',
       created_at: '2026-11-18T14:30:00Z'
+    }
+  ];
+
+  var SEED_AUCTION_DEALERS = [
+    {
+      dealer_id: 'DL_TOP',
+      company_name: '(주)탑소닉 테크놀로지',
+      dealer_type: 'MANUFACTURER',
+      biz_no: '214-86-98765',
+      rep_name: '김정훈',
+      phone: '010-4499-1122',
+      region: '수도권·충청',
+      rating: 4.9,
+      review_count: 38,
+      status: 'ACTIVE'
+    },
+    {
+      dealer_id: 'DL_DONGYANG',
+      company_name: '동양종합주방유통',
+      dealer_type: 'DISTRIBUTOR',
+      biz_no: '120-81-12345',
+      rep_name: '박동양',
+      phone: '010-3321-5544',
+      region: '전국',
+      rating: 4.8,
+      review_count: 52,
+      status: 'ACTIVE'
+    },
+    {
+      dealer_id: 'DL_AIRTECH',
+      company_name: '에어텍 닥트·공조설비',
+      dealer_type: 'FACILITY',
+      biz_no: '108-11-77889',
+      rep_name: '최환기',
+      phone: '010-5522-9988',
+      region: '수도권',
+      rating: 5.0,
+      review_count: 27,
+      status: 'ACTIVE'
+    },
+    {
+      dealer_id: 'DL_KITCHEN_DESIGN',
+      company_name: '주방디자인랩 인테리어',
+      dealer_type: 'INTERIOR',
+      biz_no: '211-09-54321',
+      rep_name: '정공간',
+      phone: '010-7766-3344',
+      region: '전국',
+      rating: 4.9,
+      review_count: 41,
+      status: 'ACTIVE'
+    }
+  ];
+
+  var SEED_AUCTIONS = [
+    {
+      auction_id: 'AUC-202611-001',
+      customer_phone: '010-5544-2233',
+      title: '업소용 초음파 세척기 1000형 구매 및 설치',
+      category: 'EQUIPMENT',
+      size_spec: '1000 x 700 x 850mm (단상 220V)',
+      desired_price: 1800000,
+      region: '서울 마포구',
+      notes: '삼겹살 구이전문점 개업 예정. 기름때 세척력 우수하고 소음 적은 제품 희망.',
+      status: 'OPEN',
+      selected_bid_id: null,
+      bid_count: 2,
+      lowest_bid: 1580000,
+      deadline: '2026-12-05T18:00:00Z',
+      created_at: '2026-11-26T10:00:00Z'
+    },
+    {
+      auction_id: 'AUC-202611-002',
+      customer_phone: '010-9988-7766',
+      title: '주방 닥트 후드 환기설비 신설 공사 (시로코팬 2마력 포함)',
+      category: 'FACILITY',
+      size_spec: '후드 길이 3600mm / 배기라인 15m',
+      desired_price: 2400000,
+      region: '경기 수원시 팔달구',
+      notes: '중식당 주방 환기 개선. 화력 높은 웍 2개 사용 예정으로 흡입력 필수.',
+      status: 'OPEN',
+      selected_bid_id: null,
+      bid_count: 2,
+      lowest_bid: 2150000,
+      deadline: '2026-12-07T18:00:00Z',
+      created_at: '2026-11-26T12:00:00Z'
+    },
+    {
+      auction_id: 'AUC-202611-003',
+      customer_phone: '010-1122-3344',
+      title: '주방 트렌치·그리스트랩 배관 이설 및 미끄럼방지 타일 방수',
+      category: 'INTERIOR',
+      size_spec: '주방 면적 약 12평 / 그리스트랩 1개 이설',
+      desired_price: 3200000,
+      region: '인천 남동구 구월동',
+      notes: '기존 배수 트렌치 물고임 심함. 악취 방지 트랩 및 방수 공사 필요.',
+      status: 'OPEN',
+      selected_bid_id: null,
+      bid_count: 1,
+      lowest_bid: 2900000,
+      deadline: '2026-12-10T18:00:00Z',
+      created_at: '2026-11-26T15:00:00Z'
+    }
+  ];
+
+  var SEED_AUCTION_BIDS = [
+    {
+      bid_id: 'BID-001-1',
+      auction_id: 'AUC-202611-001',
+      dealer_id: 'DL_DONGYANG',
+      dealer_name: '동양종합주방유통 (유통사)',
+      bid_price: 1650000,
+      warranty_months: 12,
+      delivery_days: 2,
+      benefits: '수도권 무료 배송·설치 지원, 전용 친환경 활성세제 3통(10L) 무상 증정',
+      status: 'BIDDING',
+      created_at: '2026-11-26T11:00:00Z'
+    },
+    {
+      bid_id: 'BID-001-2',
+      auction_id: 'AUC-202611-001',
+      dealer_id: 'DL_TOP',
+      dealer_name: '(주)탑소닉 테크놀로지 (제조사)',
+      bid_price: 1580000,
+      warranty_months: 24,
+      delivery_days: 1,
+      benefits: '제조사 본사 직영 2년 무상 보증, 진동자 파손 시 1:1 즉시 맞교환 보장',
+      status: 'BIDDING',
+      created_at: '2026-11-26T11:30:00Z'
+    },
+    {
+      bid_id: 'BID-002-1',
+      auction_id: 'AUC-202611-002',
+      dealer_id: 'DL_AIRTECH',
+      dealer_name: '에어텍 닥트·공조설비 (설비시공사)',
+      bid_price: 2150000,
+      warranty_months: 24,
+      delivery_days: 2,
+      benefits: '저소음 고효율 시로코팬 2마력 정품 시공, 소음 진동 방지 방진스프링 무료 시공',
+      status: 'BIDDING',
+      created_at: '2026-11-26T13:00:00Z'
+    },
+    {
+      bid_id: 'BID-003-1',
+      auction_id: 'AUC-202611-003',
+      dealer_id: 'DL_KITCHEN_DESIGN',
+      dealer_name: '주방디자인랩 인테리어 (시공사)',
+      bid_price: 2900000,
+      warranty_months: 36,
+      delivery_days: 3,
+      benefits: '우레탄 도막 3중 방수 시공, SUS304 고급 그리스트랩 교체, 야간 시공 가능',
+      status: 'BIDDING',
+      created_at: '2026-11-26T16:00:00Z'
     }
   ];
 
@@ -935,6 +1091,169 @@
       all.unshift(rec);
       write(KEYS.AFFILIATE_SALES, all);
       return Promise.resolve(rec);
+    },
+
+    // --- 주방용품·설비·인테리어 역경매 시스템 (헤이딜러형 실시간 입찰) ---
+    getAuctions: function (category) {
+      var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      if (category && category !== 'ALL') {
+        list = list.filter(function (a) { return a.category === category; });
+      }
+      return Promise.resolve(list);
+    },
+    createAuction: function (data) {
+      if (!data.title || !data.category || !data.customer_phone) {
+        return Promise.reject(new Error('품목명, 카테고리, 연락처는 필수입니다.'));
+      }
+      var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var now = new Date();
+      var deadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      var item = {
+        auction_id: 'AUC-' + Date.now().toString(36).toUpperCase(),
+        customer_phone: normalizePhone(data.customer_phone) || data.customer_phone,
+        title: String(data.title).trim(),
+        category: data.category,
+        size_spec: String(data.size_spec || '').trim(),
+        desired_price: Number(data.desired_price) || 0,
+        region: String(data.region || '전국').trim(),
+        notes: String(data.notes || '').trim(),
+        status: 'OPEN',
+        selected_bid_id: null,
+        bid_count: 0,
+        lowest_bid: Number(data.desired_price) || 0,
+        deadline: data.deadline || deadline,
+        created_at: now.toISOString()
+      };
+      list.unshift(item);
+      write(KEYS.AUCTIONS, list);
+      return Promise.resolve(item);
+    },
+    getAuctionBids: function (auctionId) {
+      var all = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
+      if (!auctionId) return Promise.resolve(all);
+      var bids = all.filter(function (b) { return b.auction_id === auctionId; });
+      bids.sort(function (a, b) { return a.bid_price - b.bid_price; });
+      return Promise.resolve(bids);
+    },
+    submitBid: function (bid) {
+      if (!bid.auction_id || !bid.dealer_name || !bid.bid_price) {
+        return Promise.reject(new Error('경매 번호, 입찰 업체명, 입찰 금액은 필수입니다.'));
+      }
+      var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
+      var allAuctions = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var price = Number(bid.bid_price) || 0;
+      var newBid = {
+        bid_id: 'BID-' + Date.now().toString(36).toUpperCase(),
+        auction_id: bid.auction_id,
+        dealer_id: bid.dealer_id || ('DL_' + Date.now().toString(36).toUpperCase()),
+        dealer_name: String(bid.dealer_name).trim(),
+        bid_price: price,
+        warranty_months: Number(bid.warranty_months) || 12,
+        delivery_days: Number(bid.delivery_days) || 3,
+        benefits: String(bid.benefits || '').trim(),
+        status: 'BIDDING',
+        created_at: new Date().toISOString()
+      };
+      allBids.unshift(newBid);
+      write(KEYS.AUCTION_BIDS, allBids);
+
+      // 경매 최저 입찰가 및 입찰수 자동 업데이트
+      var targetAuc = allAuctions.find(function (a) { return a.auction_id === bid.auction_id; });
+      if (targetAuc) {
+        targetAuc.bid_count = (targetAuc.bid_count || 0) + 1;
+        if (!targetAuc.lowest_bid || price < targetAuc.lowest_bid) {
+          targetAuc.lowest_bid = price;
+        }
+        write(KEYS.AUCTIONS, allAuctions);
+      }
+
+      return Promise.resolve(newBid);
+    },
+    acceptBid: function (auctionId, bidId) {
+      var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
+      var allAuctions = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var bid = allBids.find(function (b) { return b.bid_id === bidId; });
+      var auc = allAuctions.find(function (a) { return a.auction_id === auctionId; });
+      if (!bid || !auc) return Promise.reject(new Error('경매 또는 입찰 정보를 찾을 수 없습니다.'));
+
+      bid.status = 'ACCEPTED';
+      auc.status = 'ACCEPTED';
+      auc.selected_bid_id = bidId;
+
+      write(KEYS.AUCTION_BIDS, allBids);
+      write(KEYS.AUCTIONS, allAuctions);
+      return Promise.resolve({ ok: true, auction: auc, bid: bid });
+    },
+    getAuctionDealers: function () {
+      return Promise.resolve(read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS));
+    },
+    registerAuctionDealer: function (dealer) {
+      if (!dealer.company_name || !dealer.biz_no || !dealer.phone) {
+        return Promise.reject(new Error('업체명, 사업자번호, 연락처는 필수입니다.'));
+      }
+      var list = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+      var item = {
+        dealer_id: 'DL_' + Date.now().toString(36).toUpperCase(),
+        company_name: String(dealer.company_name).trim(),
+        dealer_type: dealer.dealer_type || 'DISTRIBUTOR',
+        biz_no: String(dealer.biz_no).trim(),
+        rep_name: String(dealer.rep_name || '대표').trim(),
+        phone: normalizePhone(dealer.phone) || dealer.phone,
+        region: String(dealer.region || '전국').trim(),
+        rating: 5.0,
+        review_count: 0,
+        status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      };
+      list.unshift(item);
+      write(KEYS.AUCTION_DEALERS, list);
+      return Promise.resolve(item);
+    },
+
+    // --- 전국 24시콜 기준 실시간 화물 운임 계산 엔진 (1톤 표준) ---
+    calcFreightRate: function (origin, destination, customKm) {
+      var km = Number(customKm) || 0;
+      if (!km) {
+        var text = (origin + ' ' + destination);
+        if (/진주|부산|창원|울산|김해|통영/i.test(text) && /반월|화성|안산|서울|경기|인천/i.test(text)) km = 330;
+        else if (/대구|포항|구미|경주/i.test(text) && /서울|경기|인천|화성/i.test(text)) km = 270;
+        else if (/광주|목포|순천|여수/i.test(text) && /서울|경기|인천|화성/i.test(text)) km = 290;
+        else if (/전주|익산|군산/i.test(text) && /서울|경기|인천|화성/i.test(text)) km = 200;
+        else if (/대전|세종|천안|청주/i.test(text) && /서울|경기|인천|화성/i.test(text)) km = 130;
+        else if (/강릉|속초|동해/i.test(text) && /서울|경기|인천|화성/i.test(text)) km = 210;
+        else km = 45;
+      }
+
+      var charter = 0;
+      var consolidated = 0;
+
+      if (km <= 30) {
+        charter = 50000; consolidated = 40000;
+      } else if (km <= 60) {
+        charter = 70000; consolidated = 50000;
+      } else if (km <= 100) {
+        charter = 95000; consolidated = 65000;
+      } else if (km <= 150) {
+        charter = 130000; consolidated = 85000;
+      } else if (km <= 200) {
+        charter = 160000; consolidated = 100000;
+      } else if (km <= 260) {
+        charter = 190000; consolidated = 120000;
+      } else {
+        charter = 220000;
+        consolidated = 140000; // 반월 ↔ 진주 등 300km 이상 표준 실비
+      }
+
+      return Promise.resolve({
+        distance_km: km,
+        origin: origin || '경기 화성시 반월동 (본사 팩토리)',
+        destination: destination || '경남 진주시',
+        charter_price: charter,
+        consolidated_price: consolidated,
+        discount_rate: Math.round((1 - consolidated / charter) * 100) + '% 절감',
+        commission_rate_pct: 3.0,
+        call24_standard: true
+      });
     }
   };
 
@@ -1045,6 +1364,9 @@
     SEED_MARGINS: SEED_MARGINS,
     SEED_PRODUCTS: SEED_PRODUCTS,
     SEED_AFFILIATE_SALES: SEED_AFFILIATE_SALES,
+    SEED_AUCTIONS: SEED_AUCTIONS,
+    SEED_AUCTION_BIDS: SEED_AUCTION_BIDS,
+    SEED_AUCTION_DEALERS: SEED_AUCTION_DEALERS,
     api: api
   };
 });

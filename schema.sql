@@ -144,6 +144,49 @@ CREATE TABLE IF NOT EXISTS affiliate_sales (
   created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 8. 주방용품 역경매 (식당 사장님 구매/견적 요청)
+CREATE TABLE IF NOT EXISTS auctions (
+  auction_id        TEXT PRIMARY KEY,
+  customer_phone    TEXT NOT NULL,
+  title             TEXT NOT NULL,
+  category          TEXT NOT NULL,          -- ULTRASONIC, DISHWASHER, INDUCTION, SINK, DETERGENT, OTHER
+  size_spec         TEXT NOT NULL DEFAULT '',
+  desired_price     INTEGER,                -- 희망 구매 예산
+  region            TEXT NOT NULL,
+  notes             TEXT NOT NULL DEFAULT '',
+  status            TEXT NOT NULL DEFAULT 'OPEN', -- OPEN, ACCEPTED, CLOSED, EXPIRED
+  selected_bid_id   TEXT,
+  deadline          TIMESTAMPTZ NOT NULL,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 9. 간편 등록 제조사 및 유통사 (진입 허들 완화)
+CREATE TABLE IF NOT EXISTS auction_dealers (
+  dealer_id         TEXT PRIMARY KEY,
+  company_name      TEXT NOT NULL,
+  dealer_type       TEXT NOT NULL DEFAULT 'DISTRIBUTOR', -- MANUFACTURER, DISTRIBUTOR, WHOLESALE
+  biz_no            TEXT NOT NULL,
+  rep_name          TEXT NOT NULL,
+  phone             TEXT NOT NULL,
+  region            TEXT NOT NULL DEFAULT '전국',
+  status            TEXT NOT NULL DEFAULT 'ACTIVE',      -- 즉시 활성화
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 10. 역경매 실시간 입찰 (제조사·유통사 최저가 및 무상보증 제안)
+CREATE TABLE IF NOT EXISTS auction_bids (
+  bid_id            TEXT PRIMARY KEY,
+  auction_id        TEXT NOT NULL REFERENCES auctions(auction_id) ON UPDATE CASCADE,
+  dealer_id         TEXT NOT NULL,
+  dealer_name       TEXT NOT NULL,
+  bid_price         INTEGER NOT NULL,
+  warranty_months   INTEGER NOT NULL DEFAULT 12,
+  delivery_days     INTEGER NOT NULL DEFAULT 3,
+  benefits          TEXT NOT NULL DEFAULT '',           -- 추가 혜택 (예: 세제 3개월 무료, 무료 배송/설치)
+  status            TEXT NOT NULL DEFAULT 'BIDDING',    -- BIDDING, ACCEPTED, REJECTED
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================================================
 -- Supabase RLS (Row Level Security) 및 PostgREST anon/authenticated 권한
 -- ============================================================================

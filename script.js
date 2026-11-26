@@ -438,9 +438,9 @@
     phoneInput.removeAttribute('aria-invalid');
     if (regionError) regionError.textContent = '';
     if (regionInput) regionInput.removeAttribute('aria-invalid');
-    if (!files.length) {
-      mediaError.textContent = '고장 부위 사진 또는 영상을 1개 이상 올려주세요.';
-      ok = false;
+    // 사진은 선택 사항 (빈 폼 제출 시에는 안내 표시)
+    if (!files.length && !phoneInput.value.trim() && (!regionInput || !regionInput.value.trim())) {
+      mediaError.textContent = '사진 등록은 선택 사항입니다. (등록 시 더 빠른 진단 가능)';
     }
     if (!D.normalizePhone(phoneInput.value)) {
       phoneError.textContent = '연락처를 정확히 입력해 주세요. (예: 010-1234-5678)';
