@@ -20,6 +20,7 @@
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-billing" id="t-billing">월간 총판 정산</button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-margins" id="t-margins">마진 세팅</button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-network" id="t-network">센터·닥터·교육 관리</button>
+        <button role="tab" class="tab" aria-selected="false" aria-controls="tab-auctions" id="t-auctions">역경매·인테리어·평가 <span class="count" id="badge-pending-dealers" data-zero>0</span></button>
         <button role="tab" class="tab" aria-selected="false" aria-controls="tab-products" id="t-products">제휴사 상품·1년 수익 배분</button>
       </nav>
       <span class="spacer"></span>
@@ -212,6 +213,80 @@
           <table class="grid compact" id="leads-table">
             <thead>
               <tr><th>신청일시</th><th>가입 트랙</th><th>성함/상호</th><th>활동 지역</th><th>연락처</th><th>교육·심사 상태</th><th>관리</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================== 4-2. 역경매 · 인테리어 · 파트너 100점 평가 관제 ===================== -->
+    <section id="tab-auctions" role="tabpanel" aria-labelledby="t-auctions" class="panel" hidden>
+      <div class="panel-head">
+        <h1>역경매 · 인테리어 · 파트너 100점 평가 관제</h1>
+      </div>
+      <p class="hint">본사 승인(APPROVED) 공급사만 입찰 가능 · 100점 평가(품질30+납기25+투명성20+만족도25)로 S/A/B/C 등급 자동 산정 (C등급·덤핑 2회 시 자동 정지)</p>
+      <div class="kpis" id="auctions-kpis"></div>
+
+      <article class="card" style="margin-bottom:20px;">
+        <h2>공급사 · 인테리어 시공사 승인 및 협회 교육·등급 관리</h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="admin-dealers-table">
+            <thead>
+              <tr>
+                <th>업체명 (구분)</th><th>사업자번호·연락처</th><th>허용 분야</th><th>협회 교육·인증</th><th>100점 평가 / 등급</th><th>상태</th><th>승인·관리</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card" style="margin-bottom:20px;">
+        <h2>파트너 100점 정량 평가 입력 (시공 완료·본사 검수)</h2>
+        <form id="partner-eval-form" class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end;">
+          <label>평가 대상 업체 *
+            <select id="ev-dealer" required></select>
+          </label>
+          <label>평가 주체
+            <select id="ev-type">
+              <option value="HQ_ADMIN">본사 검수팀</option>
+              <option value="ASSOCIATION">한국AI인테리어공간협회</option>
+              <option value="CUSTOMER">고객 평가 반영</option>
+            </select>
+          </label>
+          <label>시공·제품 품질 (0~30)
+            <input type="number" id="ev-quality" min="0" max="30" value="28" required>
+          </label>
+          <label>납기·일정 준수 (0~25)
+            <input type="number" id="ev-schedule" min="0" max="25" value="23" required>
+          </label>
+          <label>견적 투명성 (0~20)
+            <input type="number" id="ev-pricing" min="0" max="20" value="19" required>
+          </label>
+          <label>고객 만족·AS (0~25)
+            <input type="number" id="ev-service" min="0" max="25" value="23" required>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-weight:700;color:#b91c1c;">
+            <input type="checkbox" id="ev-dumping" style="width:auto;"> 허위·덤핑 추가금 적발
+          </label>
+          <label style="grid-column:1/-1;">검수 메모
+            <input type="text" id="ev-memo" placeholder="시공 상태, 자재 일치 여부, 고객 피드백 기록">
+          </label>
+          <div style="grid-column:1/-1;">
+            <button type="submit" class="btn primary">평가 점수 반영 및 등급 자동 산정</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="card">
+        <h2>실시간 역경매 · 인테리어 견적 현황 (최신 30건)</h2>
+        <div class="table-wrap">
+          <table class="grid compact" id="admin-auctions-table">
+            <thead>
+              <tr>
+                <th>경매ID / 분야</th><th>제목 · 지역 · 인테리어 정보</th><th>고객(마스킹)</th><th class="num">입찰 / 최저가</th><th>마감</th><th>상태</th><th>관리</th>
+              </tr>
             </thead>
             <tbody></tbody>
           </table>

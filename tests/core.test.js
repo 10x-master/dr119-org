@@ -289,3 +289,106 @@ test('주방·설비·인테리어 역경매 및 3% 수수료, 전국 화물 실
   assert.equal(acceptRes.auction.status, 'ACCEPTED');
   assert.equal(acceptRes.bid.status, 'ACCEPTED');
 });
+
+test('공급사 관리자 승인제 · 인테리어 2단계 실측 · 6자리 PIN 낙찰 · 100점 평가 자동 등급/정지 · 평면도 축적', async () => {
+  // 1. 인테리어 시공사 입점 신청 → 기본 PENDING (미승인)
+  const dlr = await D.api.registerAuctionDealer({
+    dealer_type: 'INTERIOR',
+    company_name: '협회인증공간인테리어',
+    biz_no: '123-45-67890',
+    rep_name: '김시공',
+    phone: '010-5555-6666',
+    pin: '112233',
+    region: '전국'
+  });
+  assert.equal(dlr.status, 'PENDING');
+  assert.deepEqual(dlr.allowed_categories, ['INTERIOR', 'FACILITY']);
+
+  // 2. 고객 기기+인테리어 원스톱 패키지 + 6자리 PIN + 아파트 평면도 등록
+  const auc = await D.api.createAuction({
+    title: '래미안 주방 인테리어·싱크볼 시공',
+    category: 'INTERIOR',
+    customer_phone: '010-2222-3333',
+    access_pin: '654321',
+    region: '서울 강남구',
+    area_pyeong: 18,
+    biz_type: '아파트 주방',
+    work_scope: '싱크볼 매립 + 바닥 타일',
+    apt_complex_name: '래미안 대치팰리스',
+    apt_type_spec: '84A㎡',
+    floor_plan_image: 'data:image/jpeg;base64,TESTPLAN'
+  });
+  assert.equal(auc.customer_phone_mask, '010-****-3333');
+  assert.ok(auc.access_pin_hash && auc.access_pin_hash.length === 64);
+
+  // 평면도 라이브러리 자동 축적 확인
+  const plans = await D.api.findFloorPlans('래미안 대치팰리스', '84A㎡');
+  assert.equal(plans.length, 1);
+
+  // 3. 미승인(PENDING) 공급사 입찰 시도 → 차단
+  await assert.rejects(() => D.api.submitBid({
+    auction_id: auc.auction_id,
+    dealer_id: dlr.dealer_id,
+    dealer_name: dlr.company_name,
+    bid_price: 4500000
+  }));
+
+  // 4. 관리자 승인 + 협회 인증 → 입찰 성공
+  await D.api.updateDealerApproval(dlr.dealer_id, { status: 'APPROVED', assoc_certified: true, education_status: 'COMPLETED' });
+  const verified = await D.api.verifyDealerCredentials('123-45-67890', '112233');
+  assert.equal(verified.status, 'APPROVED');
+
+  const bid = await D.api.submitBid({
+    auction_id: auc.auction_id,
+    dealer_id: dlr.dealer_id,
+    dealer_name: dlr.company_name,
+    bid_price: 4500000,
+    warranty_months: 24,
+    work_scope_detail: 'SUS304 싱크볼 + 바이오 실리콘'
+  });
+  assert.equal(bid.assoc_certified, true);
+
+  // 5. 잘못된 6자리 PIN으로 실측/낙찰 시도 → 차단
+  await assert.rejects(() => D.api.selectForSurvey(auc.auction_id, bid.bid_id, '000000'));
+  await assert.rejects(() => D.api.acceptBid(auc.auction_id, bid.bid_id, '000000'));
+
+  // 6. 올바른 6자리 PIN → 1차 실측 선정 → 최종 낙찰 확정 & 연락처 공개
+  const surveyRes = await D.api.selectForSurvey(auc.auction_id, bid.bid_id, '654321');
+  assert.equal(surveyRes.auction.status, 'SURVEYING');
+  const accRes = await D.api.acceptBid(auc.auction_id, bid.bid_id, '654321');
+  assert.equal(accRes.revealed_customer_phone, '010-2222-3333');
+  assert.equal(accRes.commission_amount, 135000);
+
+  // 7. 100점 정량 평가: 95점 → S등급 우수 인증 / 50점(덤핑 적발) → C등급 자동 정지
+  const evalS = await D.api.evaluatePartner({
+    dealer_id: dlr.dealer_id,
+    auction_id: auc.auction_id,
+    evaluator_type: 'ASSOCIATION',
+    quality_score: 29,
+    schedule_score: 24,
+    pricing_score: 19,
+    service_score: 23
+  });
+  assert.equal(evalS.dealer.grade, 'S');
+  assert.equal(evalS.dealer.eval_total_score, 95);
+
+  const badDlr = await D.api.registerAuctionDealer({
+    dealer_type: 'INTERIOR',
+    company_name: '덤핑불량시공',
+    biz_no: '999-99-99999',
+    phone: '010-9999-0000',
+    pin: '999999'
+  });
+  await D.api.updateDealerApproval(badDlr.dealer_id, { status: 'APPROVED' });
+  const evalC = await D.api.evaluatePartner({
+    dealer_id: badDlr.dealer_id,
+    evaluator_type: 'HQ_ADMIN',
+    quality_score: 10,
+    schedule_score: 10,
+    pricing_score: 5,
+    service_score: 10,
+    dumping_violation: true
+  });
+  assert.equal(evalC.dealer.grade, 'C');
+  assert.equal(evalC.dealer.status, 'SUSPENDED');
+});

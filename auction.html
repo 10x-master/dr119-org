@@ -496,17 +496,24 @@
             <input type="text" id="speed-item" placeholder="제품명·규격 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기 [600형 (소형/카페)]" required style="width:100%;height:38px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.84rem;font-weight:600;box-sizing:border-box;background:#ffffff;">
           </div>
 
-          <!-- 3단계: 연락처 입력 + 오른쪽 크고 높은 제출 버튼 -->
+          <!-- 3단계: 연락처 + 조회 비번 6자리 + 오른쪽 크고 높은 제출 버튼 -->
           <div>
             <label for="speed-phone" style="display:block;font-size:0.78rem;font-weight:800;color:#111111;margin-bottom:4px;">
-              <span style="color:#0d9488;">3.</span> 최저가 받을 연락처
+              <span style="color:#0d9488;">3.</span> 최저가 받을 연락처 · 비번 6자리
             </label>
-            <div style="display:flex;gap:8px;align-items:stretch;">
-              <input type="tel" id="speed-phone" placeholder="010-0000-0000" required style="flex:1;min-width:0;height:54px;padding:0 12px;border:1.5px solid #99f6e4;border-radius:10px;font-size:0.92rem;font-weight:700;box-sizing:border-box;background:#ffffff;">
-              <button type="submit" id="btn-speed-submit" style="flex:0 0 132px;height:54px;background:#0d9488;color:#ffffff;border:none;border-radius:10px;font-size:0.92rem;font-weight:900;cursor:pointer;line-height:1.25;box-shadow:0 4px 12px rgba(13,148,136,0.25);">
+            <div style="display:flex;gap:6px;align-items:stretch;">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+                <input type="tel" id="speed-phone" placeholder="010-0000-0000" maxlength="13" required style="width:100%;height:34px;padding:0 10px;border:1.5px solid #99f6e4;border-radius:8px;font-size:0.86rem;font-weight:700;box-sizing:border-box;background:#ffffff;">
+                <input type="password" id="speed-pin" inputmode="numeric" maxlength="6" placeholder="낙찰용 비번 6자리" required style="width:100%;height:32px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.82rem;font-weight:700;box-sizing:border-box;background:#ffffff;text-align:center;letter-spacing:0.06em;">
+              </div>
+              <button type="submit" id="btn-speed-submit" style="flex:0 0 116px;height:71px;background:#0d9488;color:#ffffff;border:none;border-radius:10px;font-size:0.9rem;font-weight:900;cursor:pointer;line-height:1.25;box-shadow:0 4px 12px rgba(13,148,136,0.25);">
                 최저가<br>견적 받기
               </button>
             </div>
+            <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:0.75rem;font-weight:700;color:#0f766e;cursor:pointer;">
+              <input type="checkbox" id="speed-pkg-interior" style="width:14px;height:14px;accent-color:#0d9488;">
+              주방 인테리어·방수·닥트 공사 함께 패키지 견적 받기
+            </label>
           </div>
         </form>
 
@@ -618,10 +625,59 @@
             <input type="text" id="req-region" placeholder="예: 서울 노원구 / 경기 수원시" required>
           </div>
 
-          <div class="auc-form-group">
-            <label for="req-phone">사장님 연락처 (안심번호 연결) *</label>
-            <input type="tel" id="req-phone" placeholder="010-0000-0000" required>
-            <p class="auc-form-hint">연락처는 입찰 중 공급사에게 노출되지 않으며, 최종 채택 시에만 해당 업체에 안전하게 연결됩니다.</p>
+          <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:10px;">
+            <div class="auc-form-group">
+              <label for="req-phone">사장님 연락처 (안심 마스킹 보호) *</label>
+              <input type="tel" id="req-phone" placeholder="010-0000-0000" maxlength="13" required>
+            </div>
+            <div class="auc-form-group">
+              <label for="req-pin">낙찰·조회용 비번 6자리 *</label>
+              <input type="password" id="req-pin" inputmode="numeric" maxlength="6" placeholder="숫자 6자리" required style="text-align:center;letter-spacing:0.08em;">
+            </div>
+          </div>
+          <p class="auc-form-hint" style="margin:-8px 0 14px;">연락처는 입찰 중 공급사에게 마스킹(010-****-5678) 처리되며, 6자리 비밀번호로 최종 낙찰 확정 시에만 선정 1곳에 공개됩니다.</p>
+
+          <!-- 인테리어·설비 전용 상세 입력 (분야가 인테리어/설비일 때 자동 강조) -->
+          <div id="req-interior-box" style="border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;padding:14px 0;margin-bottom:14px;">
+            <div style="font-size:0.86rem;font-weight:800;color:#0f766e;margin-bottom:10px;">인테리어 · 설비 공사 상세 및 아파트 평면도 첨부 (해당 시 입력)</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+              <div class="auc-form-group" style="margin-bottom:6px;">
+                <label for="req-pyeong">현장 면적 (평)</label>
+                <input type="number" id="req-pyeong" step="0.5" min="1" placeholder="예: 15">
+              </div>
+              <div class="auc-form-group" style="margin-bottom:6px;">
+                <label for="req-biztype">업종 / 공간 구분</label>
+                <input type="text" id="req-biztype" placeholder="예: 한식당 / 카페 / 아파트 주방">
+              </div>
+              <div class="auc-form-group" style="margin-bottom:6px;">
+                <label for="req-start-date">희망 시공·납품일</label>
+                <input type="date" id="req-start-date">
+              </div>
+            </div>
+            <div class="auc-form-group" style="margin-bottom:8px;">
+              <label for="req-work-scope">공사 범위</label>
+              <input type="text" id="req-work-scope" placeholder="예: 주방 바닥 우레탄 방수, 위생 타일, 후드/닥트, 철거 일괄">
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:end;">
+              <div class="auc-form-group" style="margin-bottom:6px;">
+                <label for="req-apt-name">아파트 단지명 (가정용 평면도 검색·축적)</label>
+                <input type="text" id="req-apt-name" placeholder="예: 래미안 대치팰리스">
+              </div>
+              <div class="auc-form-group" style="margin-bottom:6px;">
+                <label for="req-apt-type">평형/타입</label>
+                <input type="text" id="req-apt-type" placeholder="예: 84A㎡">
+              </div>
+              <button type="button" id="btn-find-floorplan" class="auc-btn outline" style="height:42px;margin-bottom:6px;white-space:nowrap;">평면도 찾기</button>
+            </div>
+            <div id="floorplan-search-status" style="font-size:0.78rem;color:#0f766e;margin-bottom:6px;"></div>
+            <div class="auc-form-group" style="margin-bottom:6px;">
+              <label for="req-floorplan-file">평면도 또는 현장 사진 첨부 (자동 라이브러리 축적)</label>
+              <input type="file" id="req-floorplan-file" accept="image/*" style="height:auto;padding:8px;">
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.84rem;font-weight:700;color:#0f766e;cursor:pointer;margin-top:6px;">
+              <input type="checkbox" id="req-pkg-interior" style="width:16px;height:16px;accent-color:#0d9488;">
+              주방기기 + 주방 인테리어/방수/닥트 원스톱 패키지 동시 발주
+            </label>
           </div>
 
           <div class="auc-form-group">
@@ -688,13 +744,13 @@
     <!-- TAB 4: 제조·유통·시공사 간편 입점 -->
     <section id="tab-dealer" class="auc-tab-content" style="display:none;">
       <div class="auc-form-box">
-        <h3 style="margin:0 0 12px;font-size:1.15rem;color:#0f172a;">제조사 · 유통사 · 전문시공사 10초 간편 입점</h3>
-        <p style="margin:0 0 16px;font-size:0.86rem;color:var(--auc-muted);">복잡한 서류 심사 없이 사업자번호와 기본 정보만으로 즉시 입점되어 전국 식당의 실시간 역경매에 입찰하실 수 있습니다.</p>
+        <h3 style="margin:0 0 12px;font-size:1.15rem;color:#0f172a;">제조사 · 유통사 · 인테리어 시공사 입점 신청 (본사 승인제)</h3>
+        <p style="margin:0 0 16px;font-size:0.86rem;color:var(--auc-muted);">본사 관리자 승인(APPROVED) 및 한국AI인테리어공간협회 교육·100점 등급 평가를 통과한 검증 업체만 역경매에 입찰할 수 있습니다.</p>
 
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.84rem;color:#166534;">
-          <strong>★ 플랫폼 수수료 3% 정률제 정책 안내</strong><br>
-          • 입점비 0원, 월 회비 0원, 입찰 참가비 0원 (초기 진입 허들 제로)<br>
-          • 최종 낙찰 및 거래 성사 시에만 낙찰가의 3% 에스크로 중개 수수료 부과
+        <div style="border-top:1px solid #0d9488;border-bottom:1px solid #e5e5e5;padding:12px 0;margin-bottom:16px;font-size:0.84rem;color:#111111;">
+          <strong style="color:#0f766e;">★ 플랫폼 수수료 3% 정률제 · 파트너 100점 평가 등급제</strong><br>
+          • 입점비·월 회비 0원 / 최종 낙찰 성사 시에만 낙찰가 3% 정산<br>
+          • S등급(90점↑) 우수 인증 배지 우선 노출 / C등급(60점↓)·덤핑 2회 적발 시 입찰 권한 자동 정지
         </div>
 
         <form id="auc-dealer-form">
@@ -704,28 +760,34 @@
               <option value="DISTRIBUTOR">주방기기 유통사 / 도매상</option>
               <option value="MANUFACTURER">주방기기 제조사 / 공장</option>
               <option value="FACILITY">닥트·배관·전기 설비시공 전문업체</option>
-              <option value="INTERIOR">주방 맞춤 인테리어·리모델링 업체</option>
+              <option value="INTERIOR">주방·매장 인테리어 시공사 (협회 연계)</option>
             </select>
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-name">상호명 (업체명) *</label>
-            <input type="text" id="dlr-name" placeholder="예: 동대***** (앞 두글자 표기)" required>
+            <input type="text" id="dlr-name" placeholder="예: (주)성원주방설비" required>
           </div>
 
-          <div class="auc-form-group">
-            <label for="dlr-biz">사업자등록번호 *</label>
-            <input type="text" id="dlr-biz" placeholder="예: 120-81-*****" required>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;">
+            <div class="auc-form-group">
+              <label for="dlr-biz">사업자등록번호 *</label>
+              <input type="text" id="dlr-biz" placeholder="예: 120-81-12345" required>
+            </div>
+            <div class="auc-form-group">
+              <label for="dlr-pin">입찰 인증 비번 6자리 *</label>
+              <input type="password" id="dlr-pin" inputmode="numeric" maxlength="6" placeholder="숫자 6자리" required style="text-align:center;letter-spacing:0.08em;">
+            </div>
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-rep">대표자명</label>
-            <input type="text" id="dlr-rep" placeholder="예: 홍길*">
+            <input type="text" id="dlr-rep" placeholder="예: 홍길동">
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-phone">담당자 연락처 *</label>
-            <input type="tel" id="dlr-phone" placeholder="010-00**-00**" required>
+            <input type="tel" id="dlr-phone" placeholder="010-0000-0000" maxlength="13" required>
           </div>
 
           <div class="auc-form-group">
@@ -733,7 +795,7 @@
             <input type="text" id="dlr-region" placeholder="예: 전국 / 수도권 / 영남권" value="전국">
           </div>
 
-          <button type="submit" class="auc-submit-btn">간편 입점 완료하고 입찰 시작하기</button>
+          <button type="submit" class="auc-submit-btn">입점 승인 신청 제출 (본사 검토 후 즉시 활성화)</button>
         </form>
       </div>
     </section>
@@ -756,22 +818,33 @@
     <div class="auc-modal-body">
       <div id="dtl-info-box" style="margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:0.86rem;"></div>
 
-      <h4 style="margin:0 0 10px;font-size:0.95rem;color:#0f172a;">참여 공급사 실시간 입찰 비교 (최저가 순)</h4>
+      <!-- 고객 낙찰 인증용 6자리 비번 입력 바 -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;padding:10px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;">
+        <span style="font-size:0.8rem;font-weight:800;color:#0f766e;white-space:nowrap;">고객 낙찰 비번</span>
+        <input type="password" id="dtl-customer-pin" inputmode="numeric" maxlength="6" placeholder="등록 시 설정한 6자리" style="flex:1;height:34px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.84rem;text-align:center;">
+      </div>
+
+      <h4 style="margin:0 0 10px;font-size:0.95rem;color:#0f172a;">참여 공급사 실시간 입찰 비교 (최저가 · S등급 우선)</h4>
       <div id="dtl-bids-list"></div>
 
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0;">
 
-      <!-- 딜러 전용 즉시 입찰 폼 -->
-      <h4 style="margin:0 0 8px;font-size:0.92rem;color:var(--auc-teal);">이 경매에 30초 실시간 입찰하기</h4>
+      <!-- 승인 공급사 전용 실시간 입찰 폼 -->
+      <h4 style="margin:0 0 8px;font-size:0.92rem;color:var(--auc-teal);">승인 공급사 전용 실시간 입찰 (미승인·C등급 차단)</h4>
       <form id="bid-submit-form" style="display:flex;flex-direction:column;gap:8px;font-size:0.84rem;">
         <input type="hidden" id="bid-auc-id">
-        <input type="text" id="bid-dlr-name" placeholder="입찰 업체명 (예: 동대***** (유통사))" required style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="bid-dlr-biz" placeholder="승인 사업자번호 또는 연락처 *" required style="flex:1.5;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+          <input type="password" id="bid-dlr-pin" inputmode="numeric" maxlength="6" placeholder="업체 비번 6자리 *" required style="flex:1;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;text-align:center;">
+        </div>
         <div style="display:flex;gap:6px;">
           <input type="number" id="bid-price" placeholder="제안 견적가 (원) *" required style="flex:2;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
           <input type="number" id="bid-warranty" placeholder="무상 AS(개월)" value="12" style="flex:1;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+          <input type="number" id="bid-days" placeholder="납기(일)" value="3" style="flex:0.8;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
         </div>
-        <input type="text" id="bid-benefits" placeholder="추가 혜택 (예: 무료 배송, 세제 3통 증정, 야간 시공)" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
-        <button type="submit" class="auc-btn primary" style="height:38px;margin-top:4px;">최저가 견적 입찰 제출 (수수료 3%)</button>
+        <input type="text" id="bid-scope" placeholder="자재 등급 · 시공 범위 명세 (인테리어 필수)" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+        <input type="text" id="bid-benefits" placeholder="추가 혜택 (예: 무료 배송, 세제 3통 증정, 하자보증서 발급)" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+        <button type="submit" class="auc-btn primary" style="height:38px;margin-top:4px;">승인 업체 인증 후 최저가 입찰 제출 (수수료 3%)</button>
       </form>
     </div>
   </dialog>
@@ -779,7 +852,7 @@
   <script src="dr119-core.js"></script>
   <script>
     (function () {
-      var D = window.Dr119Core;
+      var D = window.Dr119 || window.Dr119Core;
       var currentCat = 'ALL';
       var currentKw = '';
       var pageSize = 12;
@@ -961,33 +1034,56 @@
           document.getElementById('bid-auc-id').value = auc.auction_id;
 
           var infoBox = document.getElementById('dtl-info-box');
+          var intInfo = '';
+          if (auc.area_pyeong || auc.biz_type || auc.work_scope) {
+            intInfo = '<br>• <b>인테리어 상세:</b> ' + (auc.area_pyeong ? auc.area_pyeong + '평 ' : '') + D.escapeHTML(auc.biz_type || '') + (auc.work_scope ? ' · ' + D.escapeHTML(auc.work_scope) : '') + (auc.desired_start_date ? ' (희망일: ' + D.escapeHTML(auc.desired_start_date) + ')' : '');
+          }
+          var aptInfo = auc.apt_complex_name ? ('<br>• <b>아파트/평면도:</b> ' + D.escapeHTML(auc.apt_complex_name) + ' ' + D.escapeHTML(auc.apt_type_spec || '')) : '';
+          var maskedPhone = auc.customer_phone_mask || D.maskPhoneNumber(auc.customer_phone);
           infoBox.innerHTML =
-            '• <b>의뢰 고객:</b> ' + D.escapeHTML(auc.customer_name || '사장님*') + ' (' + D.escapeHTML(auc.customer_phone || '010-****-****') + ')<br>' +
+            '• <b>의뢰 고객:</b> ' + D.escapeHTML(auc.customer_name || '사장님*') + ' (' + D.escapeHTML(maskedPhone) + ')' +
+            (auc.project_group_id ? ' <span style="background:#0f766e;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">패키지 연계</span>' : '') + '<br>' +
             '• <b>규격/사양:</b> ' + D.escapeHTML(auc.size_spec || '-') + '<br>' +
-            '• <b>희망지역:</b> ' + D.escapeHTML(auc.region) + ' · <b>희망예산:</b> ' + (auc.desired_price ? Number(auc.desired_price).toLocaleString('ko-KR') + '원' : '자율견적') + '<br>' +
-            (auc.notes ? '• <b>사장님 요청 메모:</b> ' + D.escapeHTML(auc.notes) : '');
+            '• <b>희망지역:</b> ' + D.escapeHTML(auc.region) + ' · <b>마감:</b> ' + (auc.deadline ? new Date(auc.deadline).toLocaleString('ko-KR') : '-') +
+            intInfo + aptInfo +
+            (auc.notes ? '<br>• <b>사장님 요청 메모:</b> ' + D.escapeHTML(auc.notes) : '');
 
           var bidsContainer = document.getElementById('dtl-bids-list');
           if (!bids || !bids.length) {
-            bidsContainer.innerHTML = '<p style="color:#64748b;font-size:0.84rem;padding:10px 0;">아직 등록된 입찰이 없습니다. 첫 번째 최저가 견적을 제안해 보세요!</p>';
+            bidsContainer.innerHTML = '<p style="color:#64748b;font-size:0.84rem;padding:10px 0;">아직 등록된 입찰이 없습니다. 승인 공급사 로그인 후 첫 번째 최저가 견적을 제안해 보세요!</p>';
           } else {
+            var isInterior = auc.category === 'INTERIOR';
             bidsContainer.innerHTML = bids.map(function (b, idx) {
               var isBest = idx === 0;
               var isAccepted = b.status === 'ACCEPTED';
+              var isSurvey = b.status === 'SURVEY_SELECTED';
+              var grade = b.dealer_grade || 'A';
+              var gradeBadge = grade === 'S'
+                ? '<span style="background:#0f766e;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:800;">Dr.119 우수 S등급</span>'
+                : '<span style="background:#f1f5f9;color:#334155;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">' + grade + '등급</span>';
+              var assocBadge = b.assoc_certified ? ' <span style="background:#fef2f2;color:#b91c1c;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:800;">협회인증</span>' : '';
               return '<div style="background:' + (isBest ? '#f0fdfa' : '#ffffff') + ';border:1px solid ' + (isBest ? '#5eead4' : '#e2e8f0') + ';border-radius:10px;padding:12px;margin-bottom:8px;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:6px;flex-wrap:wrap;">' +
                   '<div>' +
                     '<span style="font-weight:800;font-size:0.92rem;">' + D.escapeHTML(b.dealer_name) + '</span> ' +
-                    (isBest ? '<span style="background:#0f766e;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">최저가 1위</span>' : '') +
-                    (isAccepted ? '<span style="background:#dc2626;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">낙찰 채택</span>' : '') +
+                    gradeBadge + assocBadge + ' ' +
+                    (isBest ? '<span style="background:#111;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">최저가 1위</span>' : '') +
+                    (isSurvey ? '<span style="background:#d97706;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">실측 선정</span>' : '') +
+                    (isAccepted ? '<span style="background:#dc2626;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;font-weight:700;">최종 낙찰</span>' : '') +
                   '</div>' +
                   '<strong style="font-size:1.1rem;color:#dc2626;">' + Number(b.bid_price).toLocaleString('ko-KR') + '원</strong>' +
                 '</div>' +
                 '<div style="font-size:0.8rem;color:#475569;margin-bottom:6px;">' +
                   '• 무상 AS: ' + b.warranty_months + '개월 · 납품/시공: ' + b.delivery_days + '일 이내' +
+                  (b.work_scope_detail ? '<br>• 자재·범위: ' + D.escapeHTML(b.work_scope_detail) : '') +
                   (b.benefits ? '<br>• 특별 혜택: ' + D.escapeHTML(b.benefits) : '') +
                 '</div>' +
-                (!isAccepted ? '<button type="button" class="auc-btn outline" style="width:100%;height:32px;font-size:0.8rem;" onclick="acceptThisBid(\'' + auc.auction_id + '\',\'' + b.bid_id + '\')">사장님: 이 견적으로 낙찰 확정 (3% 수수료)</button>' : '<div style="font-size:0.8rem;color:#0f766e;font-weight:700;text-align:center;">✓ 최종 낙찰 완료된 건입니다</div>') +
+                (!isAccepted ? (
+                  '<div style="display:flex;gap:6px;">' +
+                    (isInterior && !isSurvey ? '<button type="button" class="auc-btn outline" style="flex:1;height:32px;font-size:0.78rem;" onclick="selectSurveyBid(\'' + auc.auction_id + '\',\'' + b.bid_id + '\')">1차 현장 실측 선정</button>' : '') +
+                    '<button type="button" class="auc-btn primary" style="flex:1;height:32px;font-size:0.78rem;" onclick="acceptThisBid(\'' + auc.auction_id + '\',\'' + b.bid_id + '\')">최종 낙찰 확정 (연락처 공개)</button>' +
+                  '</div>'
+                ) : '<div style="font-size:0.8rem;color:#0f766e;font-weight:700;text-align:center;">✓ 최종 낙찰 완료된 건입니다</div>') +
               '</div>';
             }).join('');
           }
@@ -996,51 +1092,114 @@
         });
       };
 
+      window.selectSurveyBid = function (aucId, bidId) {
+        var pin = (document.getElementById('dtl-customer-pin') && document.getElementById('dtl-customer-pin').value.trim()) || '';
+        D.api.selectForSurvey(aucId, bidId, pin).then(function () {
+          alert('1차 현장 실측 업체로 선정되었습니다! 실측 완료 후 최종 낙찰을 확정해 주세요.');
+          openAuctionDetail(aucId);
+          renderAuctions();
+        }).catch(function (err) { alert(err.message); });
+      };
+
       window.acceptThisBid = function (aucId, bidId) {
-        if (!confirm('이 업체의 견적으로 낙찰을 확정하시겠습니까?\n낙찰 확정 시 3% 에스크로 수수료가 적용되며 안전 결제창이 연동됩니다.')) return;
-        D.api.acceptBid(aucId, bidId).then(function () {
-          alert('낙찰이 성공적으로 확정되었습니다! 담당 파트너가 고객님께 시공 일정을 유선 안내해 드립니다.');
+        var pin = (document.getElementById('dtl-customer-pin') && document.getElementById('dtl-customer-pin').value.trim()) || '';
+        if (!confirm('이 업체의 견적으로 최종 낙찰을 확정하시겠습니까?\n낙찰 확정 시 3% 수수료가 적용되며, 선정된 1개 업체에 연락처가 공개됩니다.')) return;
+        D.api.acceptBid(aucId, bidId, pin).then(function (res) {
+          alert('최종 낙찰이 확정되었습니다!\n선정 업체에 연결된 안심 연락처: ' + (res.revealed_customer_phone || '-') + '\n예상 중개 수수료(3%): ' + Number(res.commission_amount || 0).toLocaleString('ko-KR') + '원');
           if (dtlDialog) dtlDialog.close();
           renderAuctions();
         }).catch(function (err) { alert('낙찰 실패: ' + err.message); });
       };
 
-      // 딜러 입찰 등록
+      // 승인 공급사 전용 입찰 등록
       var bidForm = document.getElementById('bid-submit-form');
       if (bidForm) {
         bidForm.addEventListener('submit', function (e) {
           e.preventDefault();
-          var bidData = {
-            auction_id: document.getElementById('bid-auc-id').value,
-            dealer_name: document.getElementById('bid-dlr-name').value,
-            bid_price: Number(document.getElementById('bid-price').value),
-            warranty_months: Number(document.getElementById('bid-warranty').value) || 12,
-            benefits: document.getElementById('bid-benefits').value
-          };
-          D.api.submitBid(bidData).then(function () {
-            alert('최저가 입찰이 등록되었습니다!');
-            openAuctionDetail(bidData.auction_id);
+          var bizOrPhone = document.getElementById('bid-dlr-biz').value.trim();
+          var pin = document.getElementById('bid-dlr-pin').value.trim();
+          D.api.verifyDealerCredentials(bizOrPhone, pin).then(function (dlr) {
+            if (!dlr) throw new Error('등록된 공급사 정보 또는 6자리 비밀번호가 일치하지 않습니다.');
+            var bidData = {
+              auction_id: document.getElementById('bid-auc-id').value,
+              dealer_id: dlr.dealer_id,
+              dealer_name: dlr.company_name,
+              bid_price: Number(document.getElementById('bid-price').value),
+              warranty_months: Number(document.getElementById('bid-warranty').value) || 12,
+              delivery_days: Number(document.getElementById('bid-days').value) || 3,
+              work_scope_detail: document.getElementById('bid-scope').value,
+              benefits: document.getElementById('bid-benefits').value
+            };
+            return D.api.submitBid(bidData).then(function () { return bidData.auction_id; });
+          }).then(function (aucId) {
+            alert('승인 공급사 최저가 입찰이 등록되었습니다!');
+            bidForm.reset();
+            openAuctionDetail(aucId);
             renderAuctions();
-          }).catch(function (err) { alert('입찰 실패: ' + err.message); });
+          }).catch(function (err) { alert('입찰 불가: ' + err.message); });
         });
       }
 
-      // 사장님 역경매 요청 등록
+      // 아파트 평면도 라이브러리 검색
+      var uploadedFloorPlanDataUrl = null;
+      var fpFileInput = document.getElementById('req-floorplan-file');
+      if (fpFileInput) {
+        fpFileInput.addEventListener('change', function () {
+          var f = fpFileInput.files && fpFileInput.files[0];
+          if (!f) { uploadedFloorPlanDataUrl = null; return; }
+          var reader = new FileReader();
+          reader.onload = function () { uploadedFloorPlanDataUrl = reader.result; };
+          reader.readAsDataURL(f);
+        });
+      }
+      var fpFindBtn = document.getElementById('btn-find-floorplan');
+      if (fpFindBtn) {
+        fpFindBtn.addEventListener('click', function () {
+          var cn = document.getElementById('req-apt-name').value.trim();
+          var ts = document.getElementById('req-apt-type').value.trim();
+          var stEl = document.getElementById('floorplan-search-status');
+          D.api.findFloorPlans(cn, ts).then(function (plans) {
+            if (plans && plans.length) {
+              uploadedFloorPlanDataUrl = plans[0].image_data_url;
+              if (stEl) stEl.textContent = '✓ Dr.119 공용 평면도 라이브러리에서 [' + plans[0].complex_name + ' ' + plans[0].type_spec + '] 도면을 불러왔습니다! (누적 활용 ' + plans[0].usage_count + '회)';
+            } else {
+              if (stEl) stEl.innerHTML = '등록된 도면이 없습니다. 아래 파일 첨부로 평면도를 올려주시면 Dr.119 라이브러리에 자동 축적됩니다. (<a href="https://new.land.naver.com" target="_blank" rel="noopener" style="color:#0d9488;font-weight:700;">네이버 부동산 평면도 확인 ↗</a>)';
+            }
+          });
+        });
+      }
+
+      // 사장님 역경매·인테리어 요청 등록
       var reqForm = document.getElementById('auc-request-form');
       if (reqForm) {
         reqForm.addEventListener('submit', function (e) {
           e.preventDefault();
+          var pin = document.getElementById('req-pin').value.replace(/\D/g, '');
+          if (pin.length !== 6) {
+            alert('낙찰·조회용 간편 비밀번호 숫자 6자리를 입력해 주세요.');
+            return;
+          }
           var data = {
             category: document.getElementById('req-category').value,
             title: document.getElementById('req-title').value,
             size_spec: document.getElementById('req-specs').value,
-            desired_price: Number(document.getElementById('req-price').value) || 0,
+            desired_price: 0,
             region: document.getElementById('req-region').value,
             customer_phone: document.getElementById('req-phone').value,
+            access_pin: pin,
+            area_pyeong: document.getElementById('req-pyeong').value || null,
+            biz_type: document.getElementById('req-biztype').value,
+            work_scope: document.getElementById('req-work-scope').value,
+            desired_start_date: document.getElementById('req-start-date').value,
+            apt_complex_name: document.getElementById('req-apt-name').value,
+            apt_type_spec: document.getElementById('req-apt-type').value,
+            floor_plan_image: uploadedFloorPlanDataUrl,
+            include_interior_package: document.getElementById('req-pkg-interior').checked,
             notes: document.getElementById('req-notes').value
           };
           D.api.createAuction(data).then(function () {
-            alert('역경매 공고가 등록되었습니다! 전국 공급사들이 실시간으로 최저가 견적을 제안합니다.');
+            alert('역경매 공고가 등록되었습니다!' + (data.include_interior_package ? '\n(주방 인테리어 패키지 견적도 함께 자동 발주되었습니다.)' : '') + '\n설정한 6자리 비밀번호로 낙찰을 확정하실 수 있습니다.');
+            uploadedFloorPlanDataUrl = null;
             reqForm.reset();
             tabBtns[0].click();
             renderAuctions();
@@ -1048,21 +1207,27 @@
         });
       }
 
-      // 공급·시공사 10초 간편 입점
+      // 공급·인테리어 시공사 입점 승인 신청
       var dlrForm = document.getElementById('auc-dealer-form');
       if (dlrForm) {
         dlrForm.addEventListener('submit', function (e) {
           e.preventDefault();
+          var dPin = document.getElementById('dlr-pin').value.replace(/\D/g, '');
+          if (dPin.length !== 6) {
+            alert('입찰 인증용 비밀번호 숫자 6자리를 입력해 주세요.');
+            return;
+          }
           var dealer = {
             dealer_type: document.getElementById('dlr-type').value,
             company_name: document.getElementById('dlr-name').value,
             biz_no: document.getElementById('dlr-biz').value,
             rep_name: document.getElementById('dlr-rep').value,
             phone: document.getElementById('dlr-phone').value,
+            pin: dPin,
             region: document.getElementById('dlr-region').value
           };
           D.api.registerAuctionDealer(dealer).then(function () {
-            alert('입점 등록이 완료되었습니다! 3% 수수료 정책이 적용되며 지금 즉시 모든 경매에 입찰하실 수 있습니다.');
+            alert('입점 신청이 접수되었습니다!\n본사 관리자 승인(APPROVED) 완료 즉시 등록하신 사업자번호와 6자리 비밀번호로 입찰하실 수 있습니다.');
             dlrForm.reset();
             tabBtns[0].click();
           }).catch(function (err) { alert('입점 실패: ' + err.message); });
@@ -1176,8 +1341,10 @@
           var item = document.getElementById('speed-item').value.trim();
           var region = document.getElementById('speed-region').value.trim();
           var phone = document.getElementById('speed-phone').value.trim();
-          if (!item || !region || !phone) {
-            alert('필수 정보를 모두 입력해 주세요.');
+          var pin = (document.getElementById('speed-pin') && document.getElementById('speed-pin').value.replace(/\D/g, '')) || '';
+          var includeInterior = !!(document.getElementById('speed-pkg-interior') && document.getElementById('speed-pkg-interior').checked);
+          if (!item || !region || !phone || pin.length !== 6) {
+            alert('지역, 제품, 연락처 및 낙찰용 비밀번호 6자리를 모두 입력해 주세요.');
             return;
           }
           var category = 'EQUIPMENT';
@@ -1190,12 +1357,14 @@
             title: item + ' 구매·설치 견적 요청',
             region: region,
             customer_phone: phone,
+            access_pin: pin,
+            include_interior_package: includeInterior,
             desired_price: 0,
             notes: '전국 최저가 비교 견적 신청 (지역: ' + region + ')'
           };
 
           D.api.createAuction(data).then(function () {
-            alert('전국 최저가 비교 견적 신청이 완료되었습니다!\n등록되어 있는 전국 전문 업체들이 실시간으로 최저가를 제시합니다.');
+            alert('전국 최저가 비교 견적 신청이 완료되었습니다!' + (includeInterior ? '\n(주방 인테리어 패키지 견적도 함께 발주되었습니다.)' : '') + '\n설정한 6자리 비밀번호로 낙찰을 확정하실 수 있습니다.');
             speedForm.reset();
             renderAuctions();
             var liveTab = document.querySelector('[data-tab="tab-live"]');

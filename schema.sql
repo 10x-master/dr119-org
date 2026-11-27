@@ -144,48 +144,130 @@ CREATE TABLE IF NOT EXISTS affiliate_sales (
   created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. 주방용품 역경매 (식당 사장님 구매/견적 요청)
+-- 8. 주방기기·설비·인테리어 역경매 (식당/가정 고객 견적 요청 + 6자리 PIN 해시 + 인테리어/패키지 연계)
 CREATE TABLE IF NOT EXISTS auctions (
-  auction_id        TEXT PRIMARY KEY,
-  customer_phone    TEXT NOT NULL,
-  title             TEXT NOT NULL,
-  category          TEXT NOT NULL,          -- ULTRASONIC, DISHWASHER, INDUCTION, SINK, DETERGENT, OTHER
-  size_spec         TEXT NOT NULL DEFAULT '',
-  desired_price     INTEGER,                -- 희망 구매 예산
-  region            TEXT NOT NULL,
-  notes             TEXT NOT NULL DEFAULT '',
-  status            TEXT NOT NULL DEFAULT 'OPEN', -- OPEN, ACCEPTED, CLOSED, EXPIRED
-  selected_bid_id   TEXT,
-  deadline          TIMESTAMPTZ NOT NULL,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  auction_id           TEXT PRIMARY KEY,
+  project_group_id     TEXT,                                -- 기기+인테리어 원스톱 패키지 묶음 ID
+  customer_name        TEXT NOT NULL DEFAULT '',
+  customer_phone       TEXT NOT NULL,                       -- 실제 연락처 (낙찰 확정 업체에만 공개)
+  customer_phone_mask  TEXT NOT NULL DEFAULT '',            -- 마스킹 연락처 (010-****-5678, 공개용)
+  access_pin_hash      TEXT,                                -- 고객 조회·낙찰용 6자리 간편 비밀번호 SHA-256 해시
+  agent_id             TEXT,                                -- QR 최초 유입 영업자 귀속 (수수료 연계)
+  title                TEXT NOT NULL,
+  category             TEXT NOT NULL CHECK (category IN ('EQUIPMENT', 'FACILITY', 'INTERIOR', 'SUPPLIES')),
+  size_spec            TEXT NOT NULL DEFAULT '',
+  desired_price        INTEGER NOT NULL DEFAULT 0 CHECK (desired_price >= 0),
+  region               TEXT NOT NULL,
+  -- 인테리어·설비 전용 상세 필드
+  area_pyeong          NUMERIC(6, 1),                       -- 현장 평수 (평)
+  biz_type             TEXT NOT NULL DEFAULT '',            -- 업종 (한식/카페/고기집/아파트 가정 등)
+  work_scope           TEXT NOT NULL DEFAULT '',            -- 공사 범위 (방수/타일/닥트/철거/전면시공 등)
+  desired_start_date   TEXT NOT NULL DEFAULT '',            -- 희망 시공·납품일
+  apt_complex_name     TEXT NOT NULL DEFAULT '',            -- 아파트 단지명 (가정용·평면도 라이브러리 연계)
+  apt_type_spec        TEXT NOT NULL DEFAULT '',            -- 평형·타입 (예: 84A㎡)
+  floor_plan_id        TEXT,                                -- 연결된 평면도 라이브러리 ID
+  site_photos          JSONB NOT NULL DEFAULT '[]',         -- 현장 사진 썸네일/도면 메타
+  notes                TEXT NOT NULL DEFAULT '',
+  status               TEXT NOT NULL DEFAULT 'OPEN'
+                       CHECK (status IN ('OPEN', 'SURVEYING', 'ACCEPTED', 'CONTRACTED', 'COMPLETED', 'CLOSED', 'EXPIRED')),
+  selected_bid_id      TEXT,
+  bid_count            INTEGER NOT NULL DEFAULT 0,
+  lowest_bid           INTEGER NOT NULL DEFAULT 0,
+  commission_rate_pct  NUMERIC(5, 2) NOT NULL DEFAULT 3.0 CHECK (commission_rate_pct >= 0 AND commission_rate_pct <= 30),
+  deadline             TIMESTAMPTZ NOT NULL,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 9. 간편 등록 제조사 및 유통사 (진입 허들 완화)
+CREATE INDEX IF NOT EXISTS idx_auctions_category_status ON auctions (category, status);
+CREATE INDEX IF NOT EXISTS idx_auctions_project_group ON auctions (project_group_id);
+
+-- 9. 역경매 공급사 · 인테리어 시공사 (본사 관리자 승인제 + 협회 교육·평가 100점 등급제)
 CREATE TABLE IF NOT EXISTS auction_dealers (
-  dealer_id         TEXT PRIMARY KEY,
-  company_name      TEXT NOT NULL,
-  dealer_type       TEXT NOT NULL DEFAULT 'DISTRIBUTOR', -- MANUFACTURER, DISTRIBUTOR, WHOLESALE
-  biz_no            TEXT NOT NULL,
-  rep_name          TEXT NOT NULL,
-  phone             TEXT NOT NULL,
-  region            TEXT NOT NULL DEFAULT '전국',
-  status            TEXT NOT NULL DEFAULT 'ACTIVE',      -- 즉시 활성화
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  dealer_id            TEXT PRIMARY KEY,
+  company_name         TEXT NOT NULL,
+  dealer_type          TEXT NOT NULL DEFAULT 'DISTRIBUTOR'
+                       CHECK (dealer_type IN ('MANUFACTURER', 'DISTRIBUTOR', 'FACILITY', 'INTERIOR', 'WHOLESALE')),
+  allowed_categories   JSONB NOT NULL DEFAULT '["EQUIPMENT"]', -- 승인된 입찰 가능 분야 목록
+  biz_no               TEXT NOT NULL,
+  rep_name             TEXT NOT NULL,
+  phone                TEXT NOT NULL,
+  pin_hash             TEXT,                                -- 공급사 입찰 인증용 6자리 비밀번호 SHA-256 해시
+  region               TEXT NOT NULL DEFAULT '전국',         -- '전국' 또는 활동 시·도
+  -- 관리자 승인 상태 (PENDING → APPROVED 승인 시에만 입찰 가능 / SUSPENDED 정지 시 입찰 차단)
+  status               TEXT NOT NULL DEFAULT 'PENDING'
+                       CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED', 'ACTIVE')),
+  -- 한국AI인테리어공간협회 교육 이수 및 인증 여부
+  assoc_certified      BOOLEAN NOT NULL DEFAULT FALSE,
+  education_status     TEXT NOT NULL DEFAULT 'PENDING'
+                       CHECK (education_status IN ('PENDING', 'COMPLETED', 'EXEMPT')),
+  education_completed_at TIMESTAMPTZ,
+  -- 100점 만점 파트너 평가 누적 점수 및 등급 (S:90+, A:75~89, B:60~74, C:<60 자동 정지)
+  eval_quality_score   NUMERIC(5, 2) NOT NULL DEFAULT 27.0 CHECK (eval_quality_score BETWEEN 0 AND 30),
+  eval_schedule_score  NUMERIC(5, 2) NOT NULL DEFAULT 22.5 CHECK (eval_schedule_score BETWEEN 0 AND 25),
+  eval_pricing_score   NUMERIC(5, 2) NOT NULL DEFAULT 18.0 CHECK (eval_pricing_score BETWEEN 0 AND 20),
+  eval_service_score   NUMERIC(5, 2) NOT NULL DEFAULT 22.5 CHECK (eval_service_score BETWEEN 0 AND 25),
+  eval_total_score     NUMERIC(5, 2) NOT NULL DEFAULT 90.0 CHECK (eval_total_score BETWEEN 0 AND 100),
+  grade                TEXT NOT NULL DEFAULT 'A' CHECK (grade IN ('S', 'A', 'B', 'C')),
+  penalty_strikes      INTEGER NOT NULL DEFAULT 0 CHECK (penalty_strikes >= 0),
+  rating               NUMERIC(3, 2) NOT NULL DEFAULT 5.0,
+  review_count         INTEGER NOT NULL DEFAULT 0,
+  approved_at          TIMESTAMPTZ,
+  approved_by          TEXT,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. 역경매 실시간 입찰 (제조사·유통사 최저가 및 무상보증 제안)
+CREATE INDEX IF NOT EXISTS idx_auction_dealers_status_grade ON auction_dealers (status, grade);
+
+-- 10. 역경매 실시간 블라인드 입찰 (승인 공급사 전용 + 인테리어 2단계 실측/확정 지원)
 CREATE TABLE IF NOT EXISTS auction_bids (
-  bid_id            TEXT PRIMARY KEY,
-  auction_id        TEXT NOT NULL REFERENCES auctions(auction_id) ON UPDATE CASCADE,
-  dealer_id         TEXT NOT NULL,
-  dealer_name       TEXT NOT NULL,
-  bid_price         INTEGER NOT NULL,
-  warranty_months   INTEGER NOT NULL DEFAULT 12,
-  delivery_days     INTEGER NOT NULL DEFAULT 3,
-  benefits          TEXT NOT NULL DEFAULT '',           -- 추가 혜택 (예: 세제 3개월 무료, 무료 배송/설치)
-  status            TEXT NOT NULL DEFAULT 'BIDDING',    -- BIDDING, ACCEPTED, REJECTED
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  bid_id               TEXT PRIMARY KEY,
+  auction_id           TEXT NOT NULL REFERENCES auctions(auction_id) ON UPDATE CASCADE,
+  dealer_id            TEXT NOT NULL,
+  dealer_name          TEXT NOT NULL,
+  dealer_grade         TEXT NOT NULL DEFAULT 'A' CHECK (dealer_grade IN ('S', 'A', 'B', 'C')),
+  assoc_certified      BOOLEAN NOT NULL DEFAULT FALSE,
+  bid_price            INTEGER NOT NULL CHECK (bid_price > 0),
+  final_price          INTEGER,                             -- 인테리어 현장 실측 후 최종 확정가
+  warranty_months      INTEGER NOT NULL DEFAULT 12 CHECK (warranty_months >= 0),
+  delivery_days        INTEGER NOT NULL DEFAULT 3 CHECK (delivery_days >= 0),
+  work_scope_detail    TEXT NOT NULL DEFAULT '',            -- 인테리어 자재 등급·시공 범위 명세
+  benefits             TEXT NOT NULL DEFAULT '',            -- 추가 혜택 (무료 배송/설치, 하자보증서 등)
+  status               TEXT NOT NULL DEFAULT 'BIDDING'
+                       CHECK (status IN ('BIDDING', 'SURVEY_SELECTED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN')),
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_auction_bids_auction_price ON auction_bids (auction_id, bid_price);
+
+-- 11. 파트너 100점 정량 평가 이력 (시공 품질 30 + 납기 25 + 견적 투명성 20 + 고객만족·AS 25)
+CREATE TABLE IF NOT EXISTS partner_evaluations (
+  eval_id              TEXT PRIMARY KEY,
+  dealer_id            TEXT NOT NULL REFERENCES auction_dealers(dealer_id) ON UPDATE CASCADE,
+  auction_id           TEXT REFERENCES auctions(auction_id) ON UPDATE CASCADE,
+  evaluator_type       TEXT NOT NULL CHECK (evaluator_type IN ('CUSTOMER', 'HQ_ADMIN', 'ASSOCIATION')),
+  quality_score        INTEGER NOT NULL CHECK (quality_score BETWEEN 0 AND 30),
+  schedule_score       INTEGER NOT NULL CHECK (schedule_score BETWEEN 0 AND 25),
+  pricing_score        INTEGER NOT NULL CHECK (pricing_score BETWEEN 0 AND 20),
+  service_score        INTEGER NOT NULL CHECK (service_score BETWEEN 0 AND 25),
+  total_score          INTEGER NOT NULL CHECK (total_score = quality_score + schedule_score + pricing_score + service_score),
+  dumping_violation    BOOLEAN NOT NULL DEFAULT FALSE,      -- 허위 저가·부당 추가금 적발 여부
+  memo                 TEXT NOT NULL DEFAULT '',
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 12. 아파트·매장 공용 평면도 라이브러리 (개인정보 제거 후 단지명+평형 기준 자동 축적)
+CREATE TABLE IF NOT EXISTS floor_plans (
+  floor_plan_id        TEXT PRIMARY KEY,
+  region               TEXT NOT NULL DEFAULT '',
+  complex_name         TEXT NOT NULL,                       -- 단지명 (예: 래미안 대치팰리스)
+  type_spec            TEXT NOT NULL,                       -- 평형/타입 (예: 84A㎡)
+  area_pyeong          NUMERIC(6, 1),
+  image_data_url       TEXT NOT NULL,                       -- 리사이즈 JPEG/WebP 데이터 또는 스토리지 URL
+  usage_count          INTEGER NOT NULL DEFAULT 1,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_floor_plans_lookup ON floor_plans (complex_name, type_spec);
 
 -- ============================================================================
 -- Supabase RLS (Row Level Security) 및 PostgREST anon/authenticated 권한
@@ -196,6 +278,11 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE margins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE penalties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auctions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auction_dealers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auction_bids ENABLE ROW LEVEL SECURITY;
+ALTER TABLE partner_evaluations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE floor_plans ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "allow_all_distributors" ON distributors;
 CREATE POLICY "allow_all_distributors" ON distributors FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
@@ -215,5 +302,20 @@ CREATE POLICY "allow_all_contracts" ON contracts FOR ALL TO anon, authenticated 
 DROP POLICY IF EXISTS "allow_all_penalties" ON penalties;
 CREATE POLICY "allow_all_penalties" ON penalties FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON distributors, agents, orders, margins, contracts, penalties TO anon, authenticated;
+DROP POLICY IF EXISTS "allow_all_auctions" ON auctions;
+CREATE POLICY "allow_all_auctions" ON auctions FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_auction_dealers" ON auction_dealers;
+CREATE POLICY "allow_all_auction_dealers" ON auction_dealers FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_auction_bids" ON auction_bids;
+CREATE POLICY "allow_all_auction_bids" ON auction_bids FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_partner_evaluations" ON partner_evaluations;
+CREATE POLICY "allow_all_partner_evaluations" ON partner_evaluations FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_floor_plans" ON floor_plans;
+CREATE POLICY "allow_all_floor_plans" ON floor_plans FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON distributors, agents, orders, margins, contracts, penalties, auctions, auction_dealers, auction_bids, partner_evaluations, floor_plans TO anon, authenticated;
 NOTIFY pgrst, 'reload schema';

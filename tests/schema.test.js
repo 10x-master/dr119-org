@@ -56,5 +56,24 @@ test('schema.sql 실행: 시드 데이터 및 40만 원 정액제 CHECK 제약 �
     `).run('DR-TEST-OVER', '010-0000-0000', 'DOCTOR_VISIT', 400000, 'INCLUDED', 'DIST_SEOUL', 'CONFIRMED', 450000, -50000);
   });
 
+  // 역경매 · 공급사 승인제 · 100점 정량 평가 CHECK 제약 검증
+  db.prepare(`
+    INSERT INTO auction_dealers (dealer_id, company_name, dealer_type, biz_no, rep_name, phone, status, grade)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run('DL_TEST_1', '협회인증인테리어', 'INTERIOR', '123-45-67890', '김대표', '010-1111-2222', 'APPROVED', 'S');
+
+  db.prepare(`
+    INSERT INTO partner_evaluations (eval_id, dealer_id, evaluator_type, quality_score, schedule_score, pricing_score, service_score, total_score)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run('EV_TEST_1', 'DL_TEST_1', 'ASSOCIATION', 28, 24, 19, 24, 95);
+
+  // 총합 불일치 시 CHECK 제약 실패 확인
+  assert.throws(() => {
+    db.prepare(`
+      INSERT INTO partner_evaluations (eval_id, dealer_id, evaluator_type, quality_score, schedule_score, pricing_score, service_score, total_score)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run('EV_TEST_BAD', 'DL_TEST_1', 'HQ_ADMIN', 20, 20, 10, 10, 99);
+  });
+
   db.close();
 });

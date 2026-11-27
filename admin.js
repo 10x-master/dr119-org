@@ -46,13 +46,16 @@
       api.getContracts(),
       api.getPenalties(),
       api.getProducts ? api.getProducts() : Promise.resolve([]),
-      api.getAffiliateSales ? api.getAffiliateSales() : Promise.resolve([])
+      api.getAffiliateSales ? api.getAffiliateSales() : Promise.resolve([]),
+      api.getAuctions ? api.getAuctions() : Promise.resolve([]),
+      api.getAuctionDealers ? api.getAuctionDealers() : Promise.resolve([])
     ]).then(function (r) {
       state.orders = r[0]; state.partners = r[1]; state.margins = r[2]; state.contracts = r[3]; state.penalties = r[4];
       state.products = r[5] || []; state.affiliateSales = r[6] || [];
+      state.auctions = r[7] || []; state.auctionDealers = r[8] || [];
     });
   }
-  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); renderNetwork(); renderProducts(); renderAffiliateSales(); }
+  function renderAll() { renderOrders(); renderBilling(); renderMargins(); renderContracts(); renderPartners(); renderNetwork(); renderAuctionsAdmin(); renderProducts(); renderAffiliateSales(); }
 
   /* ------------------------------------------------------------ 탭 */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
@@ -753,6 +756,150 @@
     unlockAndBoot();
   } else {
     setAuthView(false);
+  }
+
+  /* ============================================================
+   * 4-2. 역경매 · 인테리어 · 파트너 100점 평가 관제
+   * ============================================================ */
+  function renderAuctionsAdmin() {
+    var kpiBox = $('#auctions-kpis');
+    var dealersTbody = $('#admin-dealers-table tbody');
+    var auctionsTbody = $('#admin-auctions-table tbody');
+    var evDealerSel = $('#ev-dealer');
+    if (!kpiBox || !dealersTbody || !auctionsTbody) return;
+
+    var dealers = state.auctionDealers || [];
+    var auctions = state.auctions || [];
+    var pendingDealers = dealers.filter(function (d) { return d.status === 'PENDING'; }).length;
+    var approvedDealers = dealers.filter(function (d) { return d.status === 'APPROVED' || d.status === 'ACTIVE'; }).length;
+    var openAuctions = auctions.filter(function (a) { return a.status === 'OPEN' || a.status === 'SURVEYING'; }).length;
+    var acceptedAuctions = auctions.filter(function (a) { return a.status === 'ACCEPTED' || a.status === 'COMPLETED'; });
+    var estComm = acceptedAuctions.reduce(function (s, a) { return s + Math.round((Number(a.lowest_bid) || 0) * 0.03); }, 0);
+
+    var badge = $('#badge-pending-dealers');
+    if (badge) {
+      badge.textContent = String(pendingDealers);
+      if (pendingDealers) badge.removeAttribute('data-zero'); else badge.setAttribute('data-zero', '');
+    }
+
+    kpiBox.innerHTML =
+      '<div class="kpi accent"><div class="label">승인 대기 공급사</div><div class="value">' + pendingDealers + '곳</div><div class="sub">활성 공급사 ' + approvedDealers + '곳</div></div>' +
+      '<div class="kpi"><div class="label">진행중 역경매·인테리어</div><div class="value">' + openAuctions + '건</div><div class="sub">누적 ' + auctions.length + '건</div></div>' +
+      '<div class="kpi"><div class="label">낙찰 완료</div><div class="value">' + acceptedAuctions.length + '건</div><div class="sub">실측·계약 진행 포함</div></div>' +
+      '<div class="kpi"><div class="label">예상 3% 중개 수수료</div><div class="value">' + won(estComm) + '</div><div class="sub">낙찰가 3% 기준</div></div>';
+
+    if (evDealerSel) {
+      var prev = evDealerSel.value;
+      evDealerSel.innerHTML = dealers.map(function (d) {
+        return '<option value="' + esc(d.dealer_id) + '">' + esc(d.company_name) + ' (' + esc(d.grade || 'A') + '등급 · ' + (d.eval_total_score || 0) + '점)</option>';
+      }).join('');
+      if (prev) evDealerSel.value = prev;
+    }
+
+    var gradeColor = { S: '#0f766e', A: '#1d4ed8', B: '#b45309', C: '#b91c1c' };
+    dealersTbody.innerHTML = dealers.slice(0, 30).map(function (d) {
+      var cats = Array.isArray(d.allowed_categories) ? d.allowed_categories.join(', ') : '-';
+      var g = d.grade || 'A';
+      var stLabel = d.status === 'PENDING' ? '승인대기' : (d.status === 'APPROVED' || d.status === 'ACTIVE' ? '승인완료' : (d.status === 'SUSPENDED' ? '자동정지' : d.status));
+      return '<tr>' +
+        '<td><strong>' + esc(d.company_name) + '</strong><br><span class="hint">' + esc(d.dealer_type) + ' · ' + esc(d.region || '전국') + '</span></td>' +
+        '<td>' + esc(d.biz_no) + '<br><span class="hint">' + esc(d.phone) + '</span></td>' +
+        '<td><span class="chip">' + esc(cats) + '</span></td>' +
+        '<td>' + (d.education_status === 'COMPLETED' ? '<span class="chip COMPLETED">교육이수</span>' : '<span class="chip">미이수</span>') +
+          (d.assoc_certified ? ' <span class="chip" style="background:#0f766e;color:#fff;">협회인증</span>' : '') + '</td>' +
+        '<td><strong style="color:' + (gradeColor[g] || '#111') + ';">' + esc(g) + '등급</strong> (' + (d.eval_total_score || 0) + '점)' +
+          (d.penalty_strikes ? '<br><span class="neg">적발 ' + d.penalty_strikes + '회</span>' : '') + '</td>' +
+        '<td><span class="chip ' + esc(d.status) + '">' + esc(stLabel) + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button type="button" class="btn small primary" data-dlr-act="approve" data-id="' + esc(d.dealer_id) + '">승인</button> ' +
+          '<button type="button" class="btn small" data-dlr-act="assoc" data-id="' + esc(d.dealer_id) + '">협회인증</button> ' +
+          '<button type="button" class="btn small" data-dlr-act="suspend" data-id="' + esc(d.dealer_id) + '">정지</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    auctionsTbody.innerHTML = auctions.slice(0, 30).map(function (a) {
+      var intMeta = a.area_pyeong ? (' · ' + a.area_pyeong + '평 ' + esc(a.work_scope || '')) : '';
+      var pkgTag = a.project_group_id ? ' <span class="chip" style="background:#0f766e;color:#fff;">패키지</span>' : '';
+      return '<tr>' +
+        '<td class="mono">' + esc(a.auction_id) + '<br><span class="chip">' + esc(a.category) + '</span>' + pkgTag + '</td>' +
+        '<td><strong>' + esc(a.title) + '</strong><br><span class="hint">' + esc(a.region) + intMeta + '</span></td>' +
+        '<td>' + esc(a.customer_name || '사장님*') + '<br><span class="hint">' + esc(a.customer_phone_mask || D.maskPhoneNumber(a.customer_phone)) + '</span></td>' +
+        '<td class="num">' + (a.bid_count || 0) + '건<br><strong>' + (a.lowest_bid ? won(a.lowest_bid) : '대기') + '</strong></td>' +
+        '<td>' + fmtDate(a.deadline) + '</td>' +
+        '<td><span class="chip ' + esc(a.status) + '">' + esc(a.status) + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button type="button" class="btn small" data-auc-act="extend" data-id="' + esc(a.auction_id) + '">+48h 연장</button> ' +
+          '<button type="button" class="btn small" data-auc-act="copy" data-id="' + esc(a.auction_id) + '">안내복사</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  var dealersTableEl = $('#admin-dealers-table tbody');
+  if (dealersTableEl) {
+    dealersTableEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-dlr-act]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-id');
+      var act = btn.getAttribute('data-dlr-act');
+      var d = (state.auctionDealers || []).find(function (x) { return x.dealer_id === id; });
+      if (!d) return;
+      var patch = {};
+      if (act === 'approve') patch = { status: 'APPROVED', education_status: 'COMPLETED' };
+      else if (act === 'suspend') patch = { status: 'SUSPENDED' };
+      else if (act === 'assoc') patch = { assoc_certified: !d.assoc_certified, education_status: 'COMPLETED' };
+      api.updateDealerApproval(id, patch).then(function () {
+        toast(d.company_name + ' 상태가 업데이트되었습니다.');
+        return refresh();
+      }).catch(function (err) { toast(err.message, true); });
+    });
+  }
+
+  var auctionsTableEl = $('#admin-auctions-table tbody');
+  if (auctionsTableEl) {
+    auctionsTableEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-auc-act]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-id');
+      var act = btn.getAttribute('data-auc-act');
+      if (act === 'extend') {
+        api.extendAuctionDeadline(id, 48).then(function () {
+          toast('입찰 마감 기한을 48시간 연장했습니다.');
+          return refresh();
+        }).catch(function (err) { toast(err.message, true); });
+      } else if (act === 'copy') {
+        var a = (state.auctions || []).find(function (x) { return x.auction_id === id; });
+        var msg = '[Dr.119 역경매 알림] ' + (a ? a.title : id) + ' (' + (a ? a.region : '') + ') 현재 ' + (a ? a.bid_count : 0) + '건 입찰 접수 / 최저가 ' + (a && a.lowest_bid ? won(a.lowest_bid) : '견적 대기') + ' — https://dr119.org/auction.html';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(msg).then(function () { toast('카톡/문자 안내 문구가 복사되었습니다.'); });
+        } else {
+          toast('안내 문구 준비 완료: ' + id);
+        }
+      }
+    });
+  }
+
+  var evalFormEl = $('#partner-eval-form');
+  if (evalFormEl) {
+    evalFormEl.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var payload = {
+        dealer_id: $('#ev-dealer').value,
+        evaluator_type: $('#ev-type').value,
+        quality_score: Number($('#ev-quality').value),
+        schedule_score: Number($('#ev-schedule').value),
+        pricing_score: Number($('#ev-pricing').value),
+        service_score: Number($('#ev-service').value),
+        dumping_violation: $('#ev-dumping').checked,
+        memo: $('#ev-memo').value
+      };
+      api.evaluatePartner(payload).then(function (res) {
+        toast('평가 반영 완료: ' + res.dealer.company_name + ' → ' + res.gradeInfo.label + ' (' + res.dealer.eval_total_score + '점)');
+        evalFormEl.reset();
+        return refresh();
+      }).catch(function (err) { toast(err.message, true); });
+    });
   }
 
   // 테스트/디버그용 노출

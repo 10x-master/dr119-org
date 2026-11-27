@@ -59,6 +59,8 @@
     AUCTIONS: 'dr119_auctions',
     AUCTION_DEALERS: 'dr119_auction_dealers',
     AUCTION_BIDS: 'dr119_auction_bids',
+    PARTNER_EVALUATIONS: 'dr119_partner_evaluations',
+    FLOOR_PLANS: 'dr119_floor_plans',
     ATTRIBUTION: 'dr119_attribution' // 고객 브라우저의 First-touch 귀속 정보
   };
 
@@ -583,6 +585,33 @@
   }
   function write(key, value) { storage.setItem(key, JSON.stringify(value)); return value; }
   function clone(v) { return v === undefined ? v : JSON.parse(JSON.stringify(v)); }
+
+  /** 연락처 마스킹 (010-1234-5678 → 010-****-5678) */
+  function maskPhoneNumber(phone) {
+    var norm = normalizePhone(phone) || String(phone || '').trim();
+    if (!norm) return '010-****-****';
+    return norm.replace(/^(\d{2,3})-(\d{3,4})-(\d{4})$/, '$1-****-$3');
+  }
+
+  /** 업체 구분별 기본 입찰 허용 분야 */
+  function defaultAllowedCategories(dealerType) {
+    if (dealerType === 'INTERIOR') return ['INTERIOR', 'FACILITY'];
+    if (dealerType === 'FACILITY') return ['FACILITY'];
+    if (dealerType === 'MANUFACTURER') return ['EQUIPMENT', 'SUPPLIES'];
+    return ['EQUIPMENT', 'SUPPLIES'];
+  }
+
+  /** 파트너 100점 정량 평가 → 자동 등급(S/A/B/C) 및 자동 정지 판정 */
+  function computePartnerGrade(totalScore, penaltyStrikes) {
+    var score = Number(totalScore) || 0;
+    var strikes = Number(penaltyStrikes) || 0;
+    if (strikes >= 2 || score < 60) {
+      return { grade: 'C', label: 'C등급 (자동 정지)', autoSuspend: true };
+    }
+    if (score >= 90) return { grade: 'S', label: 'S등급 (우수 인증)', autoSuspend: false };
+    if (score >= 75) return { grade: 'A', label: 'A등급 (정상)', autoSuspend: false };
+    return { grade: 'B', label: 'B등급 (주의)', autoSuspend: false };
+  }
 
   /** 고객 조회용 6자리 간편 비밀번호 해시 (평문 저장 방지) */
   function hashCustomerPin(pin) {
@@ -1133,7 +1162,7 @@
       return Promise.resolve(rec);
     },
 
-    // --- 주방용품·설비·인테리어 역경매 시스템 (실시간 최저가 비딩) ---
+    // --- 주방용품·설비·인테리어 역경매 시스템 (공급사 승인제 + 6자리 PIN + 인테리어 2단계 실측 + 100점 평가 등급제) ---
     getAuctions: function (category) {
       var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
       if (category && category !== 'ALL') {
@@ -1147,49 +1176,161 @@
       }
       var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
       var now = new Date();
-      var deadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      var deadlineHours = Number(data.deadline_hours) || 48;
+      var deadline = new Date(now.getTime() + deadlineHours * 3600 * 1000).toISOString();
+      var normPhone = normalizePhone(data.customer_phone) || String(data.customer_phone).trim();
+      var pinHash = data.access_pin ? hashCustomerPin(data.access_pin) : (data.access_pin_hash || null);
+      var attr = read(KEYS.ATTRIBUTION, null);
+      var agentId = sanitizeAgentId(data.agent_id || (attr && attr.agent_id));
+      var groupId = data.include_interior_package ? ('PKG-' + Date.now().toString(36).toUpperCase()) : (data.project_group_id || null);
+
+      // 아파트 평면도 라이브러리 자동 축적
+      var floorPlanId = data.floor_plan_id || null;
+      if (data.apt_complex_name && data.apt_type_spec && data.floor_plan_image) {
+        var plans = read(KEYS.FLOOR_PLANS, []);
+        var existingFp = plans.find(function (fp) {
+          return fp.complex_name === String(data.apt_complex_name).trim() && fp.type_spec === String(data.apt_type_spec).trim();
+        });
+        if (existingFp) {
+          existingFp.usage_count = (existingFp.usage_count || 1) + 1;
+          floorPlanId = existingFp.floor_plan_id;
+        } else {
+          floorPlanId = 'FP-' + Date.now().toString(36).toUpperCase();
+          plans.unshift({
+            floor_plan_id: floorPlanId,
+            region: String(data.region || '').trim(),
+            complex_name: String(data.apt_complex_name).trim(),
+            type_spec: String(data.apt_type_spec).trim(),
+            area_pyeong: data.area_pyeong ? Number(data.area_pyeong) : null,
+            image_data_url: data.floor_plan_image,
+            usage_count: 1,
+            created_at: now.toISOString()
+          });
+        }
+        write(KEYS.FLOOR_PLANS, plans);
+      }
+
       var item = {
         auction_id: 'AUC-' + Date.now().toString(36).toUpperCase(),
-        customer_phone: normalizePhone(data.customer_phone) || data.customer_phone,
+        project_group_id: groupId,
+        customer_name: String(data.customer_name || '사장님*').trim(),
+        customer_phone: normPhone,
+        customer_phone_mask: maskPhoneNumber(normPhone),
+        access_pin_hash: pinHash,
+        agent_id: agentId,
         title: String(data.title).trim(),
         category: data.category,
         size_spec: String(data.size_spec || '').trim(),
         desired_price: Number(data.desired_price) || 0,
         region: String(data.region || '전국').trim(),
+        area_pyeong: data.area_pyeong ? Number(data.area_pyeong) : null,
+        biz_type: String(data.biz_type || '').trim(),
+        work_scope: String(data.work_scope || '').trim(),
+        desired_start_date: String(data.desired_start_date || '').trim(),
+        apt_complex_name: String(data.apt_complex_name || '').trim(),
+        apt_type_spec: String(data.apt_type_spec || '').trim(),
+        floor_plan_id: floorPlanId,
+        site_photos: Array.isArray(data.site_photos) ? data.site_photos : [],
         notes: String(data.notes || '').trim(),
         status: 'OPEN',
         selected_bid_id: null,
         bid_count: 0,
         lowest_bid: Number(data.desired_price) || 0,
+        commission_rate_pct: 3.0,
         deadline: data.deadline || deadline,
         created_at: now.toISOString()
       };
       list.unshift(item);
+
+      // 기기+인테리어 원스톱 패키지 동시 발주
+      if (data.include_interior_package && data.category !== 'INTERIOR') {
+        var pkgItem = Object.assign({}, clone(item), {
+          auction_id: 'AUC-' + (Date.now() + 1).toString(36).toUpperCase() + 'I',
+          category: 'INTERIOR',
+          title: '[패키지 연계] ' + item.region + ' 주방 인테리어·방수·닥트 동시 시공 견적',
+          work_scope: item.work_scope || '바닥 방수·위생 타일·후드/닥트 연계 시공',
+          notes: '주방기기(' + item.title + ')와 묶음 패키지 발주 — 동시 시공 할인 견적 환영'
+        });
+        list.unshift(pkgItem);
+      }
+
       write(KEYS.AUCTIONS, list);
       return Promise.resolve(item);
+    },
+    extendAuctionDeadline: function (auctionId, extraHours) {
+      var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var auc = list.find(function (a) { return a.auction_id === auctionId; });
+      if (!auc) return Promise.reject(new Error('경매를 찾을 수 없습니다.'));
+      var hrs = Number(extraHours) || 48;
+      var baseMs = Math.max(Date.now(), Date.parse(auc.deadline || '') || Date.now());
+      auc.deadline = new Date(baseMs + hrs * 3600 * 1000).toISOString();
+      if (auc.status === 'EXPIRED' || auc.status === 'CLOSED') auc.status = 'OPEN';
+      write(KEYS.AUCTIONS, list);
+      return Promise.resolve(clone(auc));
     },
     getAuctionBids: function (auctionId) {
       var all = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
       if (!auctionId) return Promise.resolve(all);
       var bids = all.filter(function (b) { return b.auction_id === auctionId; });
-      bids.sort(function (a, b) { return a.bid_price - b.bid_price; });
+      // 최저가 우선 정렬 (동가 시 S등급 우수 파트너 우선)
+      var gradeRank = { S: 0, A: 1, B: 2, C: 3 };
+      bids.sort(function (a, b) {
+        if (a.bid_price !== b.bid_price) return a.bid_price - b.bid_price;
+        return (gradeRank[a.dealer_grade] || 1) - (gradeRank[b.dealer_grade] || 1);
+      });
       return Promise.resolve(bids);
     },
     submitBid: function (bid) {
       if (!bid.auction_id || !bid.dealer_name || !bid.bid_price) {
         return Promise.reject(new Error('경매 번호, 입찰 업체명, 입찰 금액은 필수입니다.'));
       }
-      var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
       var allAuctions = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var targetAuc = allAuctions.find(function (a) { return a.auction_id === bid.auction_id; });
+      if (!targetAuc) return Promise.reject(new Error('존재하지 않는 역경매입니다.'));
+      if (targetAuc.status !== 'OPEN' && targetAuc.status !== 'SURVEYING') {
+        return Promise.reject(new Error('이미 마감되었거나 낙찰 완료된 경매입니다.'));
+      }
+      if (targetAuc.deadline && Date.parse(targetAuc.deadline) < Date.now()) {
+        return Promise.reject(new Error('입찰 마감 시간이 경과하여 입찰할 수 없습니다.'));
+      }
+
+      var dealerGrade = bid.dealer_grade || 'A';
+      var assocCertified = !!bid.assoc_certified;
+      if (bid.dealer_id) {
+        var dealers = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+        var dlr = dealers.find(function (d) { return d.dealer_id === bid.dealer_id; });
+        if (dlr) {
+          if (dlr.status !== 'APPROVED' && dlr.status !== 'ACTIVE') {
+            return Promise.reject(new Error('본사 관리자 승인 완료된 공급사만 입찰할 수 있습니다. (현재 상태: ' + dlr.status + ')'));
+          }
+          if (dlr.grade === 'C') {
+            return Promise.reject(new Error('평가 등급(C등급)으로 인해 입찰 권한이 정지된 업체입니다.'));
+          }
+          var allowed = Array.isArray(dlr.allowed_categories) ? dlr.allowed_categories : defaultAllowedCategories(dlr.dealer_type);
+          if (allowed.indexOf(targetAuc.category) === -1 && allowed.indexOf('ALL') === -1) {
+            return Promise.reject(new Error('승인된 전문 분야(' + allowed.join(', ') + ') 외 경매에는 입찰할 수 없습니다.'));
+          }
+          dealerGrade = dlr.grade || 'A';
+          assocCertified = !!dlr.assoc_certified;
+        }
+      }
+
+      var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
       var price = Number(bid.bid_price) || 0;
+      if (price <= 0) return Promise.reject(new Error('입찰 금액은 0원보다 커야 합니다.'));
+
       var newBid = {
         bid_id: 'BID-' + Date.now().toString(36).toUpperCase(),
         auction_id: bid.auction_id,
         dealer_id: bid.dealer_id || ('DL_' + Date.now().toString(36).toUpperCase()),
         dealer_name: String(bid.dealer_name).trim(),
+        dealer_grade: dealerGrade,
+        assoc_certified: assocCertified,
         bid_price: price,
+        final_price: null,
         warranty_months: Number(bid.warranty_months) || 12,
         delivery_days: Number(bid.delivery_days) || 3,
+        work_scope_detail: String(bid.work_scope_detail || '').trim(),
         benefits: String(bid.benefits || '').trim(),
         status: 'BIDDING',
         created_at: new Date().toISOString()
@@ -1197,57 +1338,219 @@
       allBids.unshift(newBid);
       write(KEYS.AUCTION_BIDS, allBids);
 
-      // 경매 최저 입찰가 및 입찰수 자동 업데이트
-      var targetAuc = allAuctions.find(function (a) { return a.auction_id === bid.auction_id; });
-      if (targetAuc) {
-        targetAuc.bid_count = (targetAuc.bid_count || 0) + 1;
-        if (!targetAuc.lowest_bid || price < targetAuc.lowest_bid) {
-          targetAuc.lowest_bid = price;
-        }
-        write(KEYS.AUCTIONS, allAuctions);
+      targetAuc.bid_count = (targetAuc.bid_count || 0) + 1;
+      if (!targetAuc.lowest_bid || price < targetAuc.lowest_bid) {
+        targetAuc.lowest_bid = price;
       }
+      write(KEYS.AUCTIONS, allAuctions);
 
       return Promise.resolve(newBid);
     },
-    acceptBid: function (auctionId, bidId) {
+    selectForSurvey: function (auctionId, bidId, customerPin) {
+      var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
+      var allAuctions = read(KEYS.AUCTIONS, SEED_AUCTIONS);
+      var bid = allBids.find(function (b) { return b.bid_id === bidId && b.auction_id === auctionId; });
+      var auc = allAuctions.find(function (a) { return a.auction_id === auctionId; });
+      if (!bid || !auc) return Promise.reject(new Error('경매 또는 입찰 정보를 찾을 수 없습니다.'));
+      if (auc.access_pin_hash && hashCustomerPin(customerPin) !== auc.access_pin_hash) {
+        return Promise.reject(new Error('고객 간편 비밀번호 6자리가 일치하지 않습니다.'));
+      }
+      bid.status = 'SURVEY_SELECTED';
+      auc.status = 'SURVEYING';
+      write(KEYS.AUCTION_BIDS, allBids);
+      write(KEYS.AUCTIONS, allAuctions);
+      return Promise.resolve({ ok: true, auction: clone(auc), bid: clone(bid) });
+    },
+    acceptBid: function (auctionId, bidId, customerPin, opts) {
+      var options = opts || {};
       var allBids = read(KEYS.AUCTION_BIDS, SEED_AUCTION_BIDS);
       var allAuctions = read(KEYS.AUCTIONS, SEED_AUCTIONS);
       var bid = allBids.find(function (b) { return b.bid_id === bidId; });
       var auc = allAuctions.find(function (a) { return a.auction_id === auctionId; });
       if (!bid || !auc) return Promise.reject(new Error('경매 또는 입찰 정보를 찾을 수 없습니다.'));
+      if (!options.adminOverride && auc.access_pin_hash && hashCustomerPin(customerPin) !== auc.access_pin_hash) {
+        return Promise.reject(new Error('낙찰 확정을 위해 등록 시 설정한 6자리 간편 비밀번호가 필요합니다.'));
+      }
 
-      bid.status = 'ACCEPTED';
+      allBids.forEach(function (b) {
+        if (b.auction_id === auctionId) {
+          b.status = (b.bid_id === bidId) ? 'ACCEPTED' : 'REJECTED';
+        }
+      });
       auc.status = 'ACCEPTED';
       auc.selected_bid_id = bidId;
 
       write(KEYS.AUCTION_BIDS, allBids);
       write(KEYS.AUCTIONS, allAuctions);
-      return Promise.resolve({ ok: true, auction: auc, bid: bid });
+
+      var rate = Number(auc.commission_rate_pct) || 3.0;
+      var finalAmt = Number(bid.final_price || bid.bid_price) || 0;
+      var commissionAmount = Math.round(finalAmt * (rate / 100));
+
+      // QR 영업자 귀속 실적 자동 연동
+      if (auc.agent_id) {
+        try {
+          api.recordAffiliateSale({
+            agent_id: auc.agent_id,
+            customer_phone: auc.customer_phone,
+            product_id: auc.auction_id,
+            product_name: '[역경매 낙찰] ' + auc.title,
+            sale_amount: finalAmt,
+            commission_rate: rate
+          });
+        } catch (e) {}
+      }
+
+      return Promise.resolve({
+        ok: true,
+        auction: clone(auc),
+        bid: clone(bid),
+        revealed_customer_phone: auc.customer_phone,
+        commission_amount: commissionAmount
+      });
     },
     getAuctionDealers: function () {
-      return Promise.resolve(read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS));
+      var list = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS).map(function (d) {
+        if (!d.allowed_categories) d.allowed_categories = defaultAllowedCategories(d.dealer_type);
+        if (!d.grade) d.grade = 'A';
+        if (d.eval_total_score === undefined) d.eval_total_score = 90;
+        if (!d.education_status) d.education_status = d.status === 'ACTIVE' || d.status === 'APPROVED' ? 'COMPLETED' : 'PENDING';
+        return d;
+      });
+      return Promise.resolve(list);
     },
     registerAuctionDealer: function (dealer) {
       if (!dealer.company_name || !dealer.biz_no || !dealer.phone) {
         return Promise.reject(new Error('업체명, 사업자번호, 연락처는 필수입니다.'));
       }
       var list = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+      var dType = dealer.dealer_type || 'DISTRIBUTOR';
       var item = {
         dealer_id: 'DL_' + Date.now().toString(36).toUpperCase(),
         company_name: String(dealer.company_name).trim(),
-        dealer_type: dealer.dealer_type || 'DISTRIBUTOR',
+        dealer_type: dType,
+        allowed_categories: Array.isArray(dealer.allowed_categories) && dealer.allowed_categories.length
+          ? dealer.allowed_categories : defaultAllowedCategories(dType),
         biz_no: String(dealer.biz_no).trim(),
         rep_name: String(dealer.rep_name || '대표').trim(),
         phone: normalizePhone(dealer.phone) || dealer.phone,
+        pin_hash: dealer.pin ? hashCustomerPin(dealer.pin) : null,
         region: String(dealer.region || '전국').trim(),
+        status: 'PENDING', // 관리자 승인 대기
+        assoc_certified: false,
+        education_status: 'PENDING',
+        eval_quality_score: 26,
+        eval_schedule_score: 21,
+        eval_pricing_score: 17,
+        eval_service_score: 21,
+        eval_total_score: 85,
+        grade: 'A',
+        penalty_strikes: 0,
         rating: 5.0,
         review_count: 0,
-        status: 'ACTIVE',
         created_at: new Date().toISOString()
       };
       list.unshift(item);
       write(KEYS.AUCTION_DEALERS, list);
       return Promise.resolve(item);
+    },
+    updateDealerApproval: function (dealerId, patch) {
+      var list = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+      var d = list.find(function (x) { return x.dealer_id === dealerId; });
+      if (!d) return Promise.reject(new Error('공급사를 찾을 수 없습니다.'));
+      if (patch.status) d.status = patch.status;
+      if (patch.status === 'APPROVED') {
+        d.approved_at = new Date().toISOString();
+        d.approved_by = 'HQ_ADMIN';
+      }
+      if (typeof patch.assoc_certified === 'boolean') d.assoc_certified = patch.assoc_certified;
+      if (patch.education_status) {
+        d.education_status = patch.education_status;
+        if (patch.education_status === 'COMPLETED') d.education_completed_at = new Date().toISOString();
+      }
+      if (Array.isArray(patch.allowed_categories) && patch.allowed_categories.length) {
+        d.allowed_categories = patch.allowed_categories;
+      }
+      write(KEYS.AUCTION_DEALERS, list);
+      return Promise.resolve(clone(d));
+    },
+    verifyDealerCredentials: function (bizNoOrPhone, pin) {
+      var cleanKey = String(bizNoOrPhone || '').replace(/[^0-9]/g, '');
+      var pinHash = hashCustomerPin(pin);
+      if (!cleanKey || !pinHash) return Promise.resolve(null);
+      var list = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+      var found = list.find(function (d) {
+        var b = String(d.biz_no || '').replace(/[^0-9]/g, '');
+        var p = String(d.phone || '').replace(/[^0-9]/g, '');
+        return (b === cleanKey || p === cleanKey) && d.pin_hash === pinHash;
+      });
+      return Promise.resolve(found ? clone(found) : null);
+    },
+    evaluatePartner: function (ev) {
+      if (!ev || !ev.dealer_id) return Promise.reject(new Error('평가 대상 공급사 ID가 필요합니다.'));
+      var q = Math.max(0, Math.min(30, Number(ev.quality_score) || 0));
+      var sc = Math.max(0, Math.min(25, Number(ev.schedule_score) || 0));
+      var pr = Math.max(0, Math.min(20, Number(ev.pricing_score) || 0));
+      var sv = Math.max(0, Math.min(25, Number(ev.service_score) || 0));
+      var total = q + sc + pr + sv;
+
+      var dealers = read(KEYS.AUCTION_DEALERS, SEED_AUCTION_DEALERS);
+      var d = dealers.find(function (x) { return x.dealer_id === ev.dealer_id; });
+      if (!d) return Promise.reject(new Error('공급사를 찾을 수 없습니다.'));
+
+      var evals = read(KEYS.PARTNER_EVALUATIONS, []);
+      var rec = {
+        eval_id: 'EV-' + Date.now().toString(36).toUpperCase(),
+        dealer_id: ev.dealer_id,
+        auction_id: ev.auction_id || null,
+        evaluator_type: ev.evaluator_type || 'HQ_ADMIN',
+        quality_score: q,
+        schedule_score: sc,
+        pricing_score: pr,
+        service_score: sv,
+        total_score: total,
+        dumping_violation: !!ev.dumping_violation,
+        memo: String(ev.memo || '').trim(),
+        created_at: new Date().toISOString()
+      };
+      evals.unshift(rec);
+      write(KEYS.PARTNER_EVALUATIONS, evals);
+
+      // 누적 평균 점수 및 자동 등급/정지 산정
+      var myEvals = evals.filter(function (x) { return x.dealer_id === ev.dealer_id; });
+      var avg = function (field) {
+        return Math.round((myEvals.reduce(function (s, x) { return s + x[field]; }, 0) / myEvals.length) * 10) / 10;
+      };
+      d.eval_quality_score = avg('quality_score');
+      d.eval_schedule_score = avg('schedule_score');
+      d.eval_pricing_score = avg('pricing_score');
+      d.eval_service_score = avg('service_score');
+      d.eval_total_score = Math.round((d.eval_quality_score + d.eval_schedule_score + d.eval_pricing_score + d.eval_service_score) * 10) / 10;
+      d.review_count = myEvals.length;
+      d.rating = Math.round((d.eval_total_score / 20) * 10) / 10;
+      d.penalty_strikes = myEvals.filter(function (x) { return x.dumping_violation; }).length;
+
+      var g = computePartnerGrade(d.eval_total_score, d.penalty_strikes);
+      d.grade = g.grade;
+      if (g.autoSuspend) d.status = 'SUSPENDED';
+
+      write(KEYS.AUCTION_DEALERS, dealers);
+      return Promise.resolve({ evaluation: rec, dealer: clone(d), gradeInfo: g });
+    },
+    getPartnerEvaluations: function (dealerId) {
+      var evals = read(KEYS.PARTNER_EVALUATIONS, []);
+      if (dealerId) evals = evals.filter(function (x) { return x.dealer_id === dealerId; });
+      return Promise.resolve(evals);
+    },
+    findFloorPlans: function (complexName, typeSpec) {
+      var plans = read(KEYS.FLOOR_PLANS, []);
+      var cn = String(complexName || '').trim().toLowerCase();
+      var ts = String(typeSpec || '').trim().toLowerCase();
+      return Promise.resolve(plans.filter(function (fp) {
+        if (cn && String(fp.complex_name || '').toLowerCase().indexOf(cn) === -1) return false;
+        if (ts && String(fp.type_spec || '').toLowerCase().indexOf(ts) === -1) return false;
+        return true;
+      }));
     },
 
     // --- 전국 24시콜 기준 실시간 화물 운임 계산 엔진 (1톤 표준) ---
@@ -1377,6 +1680,9 @@
     ADMIN_AUTH_HASH: ADMIN_AUTH_HASH,
     sha256Hex: sha256Hex,
     hashCustomerPin: hashCustomerPin,
+    maskPhoneNumber: maskPhoneNumber,
+    defaultAllowedCategories: defaultAllowedCategories,
+    computePartnerGrade: computePartnerGrade,
     verifyAdminPassword: verifyAdminPassword,
     verifyAdminToken: verifyAdminToken,
     sanitizeAgentId: sanitizeAgentId,
