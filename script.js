@@ -15,6 +15,7 @@
   var cameraInput = document.getElementById('camera-media');
   var preview = document.getElementById('preview');
   var phoneInput = document.getElementById('phone');
+  var intakePinInput = document.getElementById('intake-pin');
   var regionInput = document.getElementById('region');
   var symptomInput = document.getElementById('symptom_note');
   var voiceBtn = document.getElementById('voice-btn');
@@ -28,6 +29,7 @@
   var doneBox = document.getElementById('done');
   var mediaError = document.getElementById('media-error');
   var phoneError = document.getElementById('phone-error');
+  var pinError = document.getElementById('pin-error');
   var regionError = document.getElementById('region-error');
 
   /** 선택된 파일 목록 (File 객체) & 인증 수단 */
@@ -268,6 +270,16 @@
     }
   });
 
+  if (intakePinInput) {
+    intakePinInput.addEventListener('input', function () {
+      intakePinInput.value = intakePinInput.value.replace(/\D/g, '').slice(0, 6);
+      if (intakePinInput.getAttribute('aria-invalid') === 'true' && /^\d{6}$/.test(intakePinInput.value)) {
+        intakePinInput.removeAttribute('aria-invalid');
+        if (pinError) pinError.textContent = '';
+      }
+    });
+  }
+
   if (regionInput) {
     regionInput.addEventListener('input', function () {
       if (regionInput.getAttribute('aria-invalid') === 'true' && regionInput.value.trim()) {
@@ -403,6 +415,8 @@
     var svc = D.SERVICE_TYPES[typeCode];
     var now = new Date();
     var cust = { phone: D.normalizePhone(phoneInput.value) };
+    var pinVal = intakePinInput ? intakePinInput.value.replace(/\D/g, '').slice(0, 6) : '';
+    if (pinVal.length === 6) cust.pin = pinVal;
     var region = regionInput ? regionInput.value.trim() : '';
     if (region) cust.region = region;
     var note = symptomInput ? symptomInput.value.trim() : '';
@@ -436,6 +450,8 @@
     mediaError.textContent = '';
     phoneError.textContent = '';
     phoneInput.removeAttribute('aria-invalid');
+    if (pinError) pinError.textContent = '';
+    if (intakePinInput) intakePinInput.removeAttribute('aria-invalid');
     if (regionError) regionError.textContent = '';
     if (regionInput) regionInput.removeAttribute('aria-invalid');
     // 사진은 선택 사항 (빈 폼 제출 시에는 안내 표시)
@@ -447,6 +463,15 @@
       phoneInput.setAttribute('aria-invalid', 'true');
       if (ok) phoneInput.focus();
       ok = false;
+    }
+    if (intakePinInput) {
+      var pinDigits = intakePinInput.value.replace(/\D/g, '');
+      if (pinDigits.length !== 6) {
+        if (pinError) pinError.textContent = '조회용 간편 비밀번호 숫자 6자리를 입력해 주세요.';
+        intakePinInput.setAttribute('aria-invalid', 'true');
+        if (ok) intakePinInput.focus();
+        ok = false;
+      }
     }
     if (regionInput && !regionInput.value.trim()) {
       if (regionError) regionError.textContent = '지역을 입력해 주세요. (예: 서울 강남구 / 부산 해운대구)';
@@ -739,7 +764,7 @@
         if (resultBox) resultBox.style.display = 'none';
         if (emptyMsg) {
           emptyMsg.style.display = 'block';
-          emptyMsg.textContent = '일치하는 접수 내역을 찾을 수 없습니다. 접수번호나 연락처 및 뒷 4자리를 확인해 주세요.';
+          emptyMsg.textContent = '일치하는 접수 내역을 찾을 수 없습니다. 연락처(또는 접수번호)와 간편 비밀번호 6자리를 확인해 주세요.';
         }
         return;
       }
@@ -772,21 +797,21 @@
       }
     }
 
-    function openStatusModal(prefill) {
+    function openStatusModal(prefill, fromReceipt) {
       if (!statusDlg) return;
       var loggedInPhone = checkKakaoSession();
       if (prefill) {
         if (searchInput) searchInput.value = prefill;
       } else if (loggedInPhone && searchInput && !searchInput.value) {
         // 이미 카카오 인증된 고객인 경우 자동 조회
-        D.api.getCustomerOrder(loggedInPhone).then(renderOrder).catch(function () {});
+        D.api.getCustomerOrder(loggedInPhone, '', { verifiedByKakao: true }).then(renderOrder).catch(function () {});
       }
       if (typeof statusDlg.showModal === 'function') {
         if (!statusDlg.open) statusDlg.showModal();
       } else {
         statusDlg.setAttribute('open', '');
       }
-      if (prefill) doSearch();
+      if (prefill) doSearch({ fromReceipt: !!fromReceipt });
     }
 
     function closeStatusModal() {
@@ -795,25 +820,15 @@
       else statusDlg.removeAttribute('open');
     }
 
-    function doSearch() {
+    function doSearch(searchOpts) {
+      var opts = searchOpts || {};
       var q = searchInput ? searchInput.value.trim() : '';
       if (!q) {
         var kPhone = checkKakaoSession();
         if (kPhone) {
           q = kPhone;
           if (searchInput) searchInput.value = kPhone;
-        } else {
-          // 접수된 최근 폰 번호가 있으면 자동 사용
-          try {
-            var lastSubmitted = localStorage.getItem('dr119_last_order');
-            if (lastSubmitted) {
-              var lo = JSON.parse(lastSubmitted);
-              if (lo && lo.customer && lo.customer.phone) {
-                q = lo.customer.phone;
-                if (searchInput) searchInput.value = q;
-              }
-            }
-          } catch (e) {}
+          opts.verifiedByKakao = true;
         }
       }
 
@@ -826,17 +841,23 @@
         return;
       }
 
-      var pin = secPinInput ? secPinInput.value.trim() : '';
-      var digits = q.replace(/[^0-9]/g, '');
-      // PIN이 비어있으면 휴대폰 번호 끝 4자리 자동 보완
-      if (!pin && digits.length >= 8) {
-        pin = digits.slice(-4);
-        if (secPinInput) secPinInput.value = pin;
+      var pin = secPinInput ? secPinInput.value.replace(/\D/g, '').slice(0, 6) : '';
+      if (secPinInput) secPinInput.value = pin;
+
+      // 카카오 본인 인증 완료 또는 접수 직후 확인이 아닌 경우 6자리 간편 비밀번호 필수 검증
+      if (!opts.verifiedByKakao && !opts.fromReceipt && pin.length !== 6) {
+        if (resultBox) resultBox.style.display = 'none';
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '본인 확인을 위해 접수 시 설정하신 간편 비밀번호 숫자 6자리를 입력해 주세요.';
+        }
+        if (secPinInput) secPinInput.focus();
+        return;
       }
 
       if (emptyMsg) emptyMsg.style.display = 'none';
 
-      D.api.getCustomerOrder(q, pin).then(function (o) {
+      D.api.getCustomerOrder(q, pin, opts).then(function (o) {
         renderOrder(o);
       }).catch(function (err) {
         if (emptyMsg) {
@@ -847,26 +868,7 @@
     }
 
     function handleKakaoLogin() {
-      // 1) 입력창에 휴대폰 번호가 이미 입력되어 있는 경우 해당 번호로 즉시 연동 및 자동 조회
-      var currentInput = searchInput ? searchInput.value.trim() : '';
-      var inputDigits = currentInput.replace(/[^0-9]/g, '');
-      if (inputDigits.length >= 8) {
-        var normInput = D.normalizePhone(inputDigits);
-        if (normInput) {
-          try { localStorage.setItem(KAKAO_PHONE_KEY, normInput); } catch (e) {}
-          checkKakaoSession();
-          if (secPinInput) secPinInput.value = normInput.slice(-4);
-          D.api.getCustomerOrder(normInput).then(renderOrder).catch(function (err) {
-            if (emptyMsg) {
-              emptyMsg.style.display = 'block';
-              emptyMsg.textContent = '조회 결과가 없습니다: ' + err.message;
-            }
-          });
-          return;
-        }
-      }
-
-      // 2) 카카오 공식 SDK 연동 시도
+      // 1) 카카오 공식 SDK OAuth 인증 시도 (실제 카카오 본인 인증)
       if (window.Kakao && window.__DR119_KAKAO_KEY__) {
         try {
           if (!window.Kakao.isInitialized()) window.Kakao.init(window.__DR119_KAKAO_KEY__);
@@ -883,12 +885,28 @@
                         try { localStorage.setItem(KAKAO_PHONE_KEY, norm); } catch (e) {}
                         checkKakaoSession();
                         if (searchInput) searchInput.value = norm;
-                        if (secPinInput) secPinInput.value = norm.slice(-4);
-                        D.api.getCustomerOrder(norm).then(renderOrder);
+                        D.api.getCustomerOrder(norm, '', { verifiedByKakao: true }).then(renderOrder);
+                        return;
                       }
+                    }
+                    if (emptyMsg) {
+                      emptyMsg.style.display = 'block';
+                      emptyMsg.textContent = '카카오 계정에서 전화번호 정보를 가져오지 못했습니다. 아래 연락처와 간편 비밀번호 6자리로 조회해 주세요.';
+                    }
+                  },
+                  fail: function () {
+                    if (emptyMsg) {
+                      emptyMsg.style.display = 'block';
+                      emptyMsg.textContent = '카카오 계정 정보 조회에 실패했습니다. 아래 연락처와 간편 비밀번호 6자리로 조회해 주세요.';
                     }
                   }
                 });
+              },
+              fail: function () {
+                if (emptyMsg) {
+                  emptyMsg.style.display = 'block';
+                  emptyMsg.textContent = '카카오 로그인 창 연결에 실패했습니다. 아래 연락처와 간편 비밀번호 6자리로 조회해 주세요.';
+                }
               }
             });
             return;
@@ -896,46 +914,12 @@
         } catch (e) {}
       }
 
-      // 3) 최근 접수된 이력이 있는 경우 원클릭 연동
-      var saved = '';
-      try { saved = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
-      if (!saved) {
-        try {
-          var lastOrderStr = localStorage.getItem('dr119_last_order');
-          if (lastOrderStr) {
-            var loObj = JSON.parse(lastOrderStr);
-            if (loObj && loObj.customer && loObj.customer.phone) {
-              saved = D.normalizePhone(loObj.customer.phone);
-              if (saved) {
-                try { localStorage.setItem(KAKAO_PHONE_KEY, saved); } catch (e) {}
-              }
-            }
-          }
-        } catch (e) {}
-      }
-
-      if (saved) {
-        checkKakaoSession();
-        if (searchInput) searchInput.value = saved;
-        if (secPinInput) secPinInput.value = saved.slice(-4);
-        D.api.getCustomerOrder(saved).then(renderOrder).catch(function (err) {
-          if (emptyMsg) {
-            emptyMsg.style.display = 'block';
-            emptyMsg.textContent = '조회 실패: ' + err.message;
-          }
-        });
-        return;
-      }
-
-      // 4) 저장된 번호나 입력값이 없는 경우 안내 및 포커스 이동 (브라우저 블로킹 prompt 제거)
+      // 2) SDK 미로드/도메인 미연결 시 안내 (비밀번호 없는 무단 조회 차단)
       if (emptyMsg) {
         emptyMsg.style.display = 'block';
-        emptyMsg.textContent = '아래 연락처 입력창에 휴대폰 번호를 입력하신 후 [카카오 로그인] 또는 [조회]를 눌러주세요.';
+        emptyMsg.textContent = '카카오 간편 로그인을 사용할 수 없는 환경입니다. 아래 연락처와 간편 비밀번호 6자리로 안전하게 조회해 주세요.';
       }
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.placeholder = '휴대폰 번호 입력 후 조회 (예: 010-1234-5678)';
-      }
+      if (searchInput) searchInput.focus();
     }
 
     if (kakaoStatusBtn) kakaoStatusBtn.addEventListener('click', handleKakaoLogin);
@@ -955,17 +939,20 @@
       viewStatusNowBtn.addEventListener('click', function () {
         var doneOidEl = document.getElementById('done-order-id');
         var oid = doneOidEl ? doneOidEl.textContent.trim() : '';
-        openStatusModal(oid !== '-' ? oid : '');
+        openStatusModal(oid !== '-' ? oid : '', true);
       });
     }
 
     if (openStatusBtn) openStatusBtn.addEventListener('click', function (e) { e.preventDefault(); openStatusModal(); });
     if (closeStatusBtn) closeStatusBtn.addEventListener('click', closeStatusModal);
-    if (searchBtn) searchBtn.addEventListener('click', doSearch);
+    if (searchBtn) searchBtn.addEventListener('click', function () { doSearch(); });
     if (searchInput) {
       searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
     }
     if (secPinInput) {
+      secPinInput.addEventListener('input', function () {
+        secPinInput.value = secPinInput.value.replace(/\D/g, '').slice(0, 6);
+      });
       secPinInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
     }
 

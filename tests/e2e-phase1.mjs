@@ -124,12 +124,12 @@ try {
 
   // 3) 빈 제출 → 검증 에러
   await cdp.eval(`document.getElementById('submit-btn').click()`);
-  check(R, '필수값 누락 시 제출 차단', await cdp.eval(`!!document.getElementById('media-error').textContent && !!document.getElementById('phone-error').textContent && !!document.getElementById('region-error').textContent && document.getElementById('done').hidden`));
+  check(R, '필수값 누락 시 제출 차단', await cdp.eval(`!!document.getElementById('media-error').textContent && !!document.getElementById('phone-error').textContent && !!document.getElementById('pin-error').textContent && !!document.getElementById('region-error').textContent && document.getElementById('done').hidden`));
 
-  // 4) 정상 제출 (방문 설치)
+  // 4) 정상 제출 (방문 설치 + 6자리 간편 비밀번호)
   await cdp.setFiles('#media', [img, vid]);
   check(R, '사진/영상 미리보기 2건', (await cdp.eval(`document.querySelectorAll('#preview li').length`)) === 2);
-  await cdp.eval(`(() => { const p=document.getElementById('phone'); p.value='01012345678'; p.dispatchEvent(new Event('input')); const rg=document.getElementById('region'); rg.value='서울 강남구'; rg.dispatchEvent(new Event('input')); })()`);
+  await cdp.eval(`(() => { const p=document.getElementById('phone'); p.value='01012345678'; p.dispatchEvent(new Event('input')); const pin=document.getElementById('intake-pin'); pin.value='246810'; pin.dispatchEvent(new Event('input')); const rg=document.getElementById('region'); rg.value='서울 강남구'; rg.dispatchEvent(new Event('input')); })()`);
   check(R, '연락처 자동 하이픈', (await cdp.eval(`document.getElementById('phone').value`)) === '010-1234-5678');
   const payload = await cdp.eval(`new Promise(r => { addEventListener('dr119:submitted', e => r(e.detail), { once: true }); document.getElementById('submit-btn').click(); })`);
   check(R, 'payload.attribution.agent_id = SEOUL_01', payload.attribution.agent_id === 'SEOUL_01' && payload.attribution.model === 'FIRST_TOUCH');
@@ -161,6 +161,9 @@ try {
     kp.value = '01098765432';
     kp.dispatchEvent(new Event('input'));
     document.getElementById('kakao-confirm-btn').click();
+    const pin = document.getElementById('intake-pin');
+    pin.value = '135790';
+    pin.dispatchEvent(new Event('input'));
     const rg = document.getElementById('region');
     rg.value = '부산 해운대구';
     rg.dispatchEvent(new Event('input'));
@@ -183,10 +186,18 @@ try {
   const leads = await cdp.eval(`JSON.parse(localStorage.getItem('dr119_partner_leads') || '[]')`);
   check(R, '파트너 가입 신청 저장 (dr119_partner_leads)', leads.length === 1 && leads[0].role === 'LOCAL_CENTER' && leads[0].phone === '010-3333-4444');
 
-  // 6) Mock API 저장 확인 (원본 제거, 썸네일만)
+  // 6) Mock API 저장 확인 (원본 제거, 썸네일만) + 6자리 비밀번호 보안 조회 검증
   const stored = await cdp.eval(`JSON.parse(localStorage.getItem('dr119_orders'))`);
-  check(R, 'Mock API 저장 2건 + 총판 자동 매핑(DIST_SEOUL)', stored.length === 2 && stored.every((o) => o.assigned_distributor_id === 'DIST_SEOUL' && o.status === 'RECEIVED'));
+  check(R, 'Mock API 저장 2건 + 총판 자동 매핑(DIST_SEOUL) + PIN 평문 비저장(해시 저장)', stored.length === 2 && stored.every((o) => o.assigned_distributor_id === 'DIST_SEOUL' && o.status === 'RECEIVED' && !('pin' in o.customer) && typeof o.customer.pin_hash === 'string' && o.customer.pin_hash.length === 64));
   check(R, '저장본은 원본 data_url 제거·썸네일 유지', stored.every((o) => o.media.every((m) => !('data_url' in m))) && stored[1].media[0].thumb_url.startsWith('data:image/jpeg'));
+  const pinSecurity = await cdp.eval(`(async () => {
+    const noPin = await window.Dr119.api.getCustomerOrder('010-1234-5678', '');
+    const wrongPin = await window.Dr119.api.getCustomerOrder('010-1234-5678', '999999');
+    const last4Only = await window.Dr119.api.getCustomerOrder('010-1234-5678', '5678');
+    const rightPin = await window.Dr119.api.getCustomerOrder('010-1234-5678', '246810');
+    return { noPin: !!noPin, wrongPin: !!wrongPin, last4Only: !!last4Only, rightPin: !!(rightPin && rightPin.customer.phone === '010-1234-5678') };
+  })()`);
+  check(R, '6자리 간편 비밀번호 보안 검증 (무비번·오답·뒷4자리 차단 / 6자리 일치 통과)', !pinSecurity.noPin && !pinSecurity.wrongPin && !pinSecurity.last4Only && pinSecurity.rightPin, JSON.stringify(pinSecurity));
 
   fs.writeFileSync(path.join(OUT, 'phase1-payload.json'), JSON.stringify({ ...payload, media: payload.media.map((m) => ({ ...m, data_url: m.data_url.slice(0, 60) + '…(생략)', thumb_url: m.thumb_url && m.thumb_url.slice(0, 60) + '…' })) }, null, 2));
   const errs = cdp.logs.filter((l) => l.type === 'exception' || l.type === 'error');

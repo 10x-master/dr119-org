@@ -301,15 +301,22 @@
                 </div>
               </fieldset>
 
-              <!-- STEP 2: 연락처 · 지역 세로 배치 -->
+              <!-- STEP 2: 연락처 · 조회용 간편 비밀번호 6자리 · 지역 -->
               <fieldset class="step">
-                <legend class="sr-only">연락처 · 지역</legend>
+                <legend class="sr-only">연락처 · 비밀번호 · 지역</legend>
                 <div class="contact-row">
                   <div class="contact-stack">
-                    <div class="form-field">
-                      <label for="phone" class="sr-only">연락처</label>
-                      <input type="tel" id="phone" name="phone" inputmode="numeric" autocomplete="tel"
-                             placeholder="연락처 (010-0000-0000)" maxlength="13" class="phone-input" required>
+                    <div style="display:flex;gap:6px;width:100%;">
+                      <div class="form-field" style="flex:1.55;min-width:0;">
+                        <label for="phone" class="sr-only">연락처</label>
+                        <input type="tel" id="phone" name="phone" inputmode="numeric" autocomplete="tel"
+                               placeholder="연락처 (010-0000-0000)" maxlength="13" class="phone-input" required>
+                      </div>
+                      <div class="form-field" style="flex:1;min-width:0;">
+                        <label for="intake-pin" class="sr-only">조회 비밀번호 6자리</label>
+                        <input type="password" id="intake-pin" name="intake_pin" inputmode="numeric" autocomplete="new-password"
+                               placeholder="비번 6자리" title="내 접수 내역 조회용 간편 비밀번호 6자리 (숫자)" maxlength="6" class="phone-input" required style="text-align:center;letter-spacing:0.06em;">
+                      </div>
                     </div>
                     <div class="form-field">
                       <label for="region" class="sr-only">지역</label>
@@ -327,6 +334,7 @@
                   </div>
                 </div>
                 <p class="field-error" id="phone-error" role="alert"></p>
+                <p class="field-error" id="pin-error" role="alert"></p>
                 <p class="field-error" id="region-error" role="alert"></p>
               </fieldset>
 
@@ -853,14 +861,14 @@
       <!-- 구분선 -->
       <div style="display:flex;align-items:center;margin:8px 0 10px;color:#94a3b8;font-size:0.78rem;">
         <span style="flex:1;border-bottom:1px solid #e2e8f0;"></span>
-        <span style="padding:0 8px;">또는 접수정보로 안심 조회</span>
+        <span style="padding:0 8px;">또는 연락처 + 간편 비밀번호 6자리 조회</span>
         <span style="flex:1;border-bottom:1px solid #e2e8f0;"></span>
       </div>
 
-      <!-- 연락처 + 본인확인 뒷 4자리 폼 -->
+      <!-- 연락처 + 간편 비밀번호 6자리 폼 -->
       <div style="display:flex;gap:6px;margin-bottom:12px;">
-        <input type="text" id="status-search-input" placeholder="연락처 (예: 010-1234-5678) 또는 접수번호" style="flex:2;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;">
-        <input type="password" id="status-sec-pin" maxlength="4" placeholder="뒷 4자리" title="본인 확인용 휴대폰 뒷 4자리" style="flex:1;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;text-align:center;">
+        <input type="text" id="status-search-input" placeholder="연락처 (010-1234-5678) 또는 접수번호" style="flex:2;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;">
+        <input type="password" id="status-sec-pin" inputmode="numeric" maxlength="6" placeholder="비번 6자리" title="접수 시 설정한 간편 비밀번호 6자리" style="flex:1.1;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;text-align:center;letter-spacing:0.06em;">
         <button type="button" class="btn primary" id="btn-status-search" style="height:40px;padding:0 14px;font-size:0.88rem;">조회</button>
       </div>
 
@@ -885,7 +893,7 @@
           </ol>
         </div>
       </div>
-      <p id="status-empty-msg" style="margin:12px 0 0;font-size:0.84rem;color:#64748b;text-align:center;">접수하신 연락처나 접수번호를 입력하시면 1차 상담 진단 내역과 수리 진행 상황을 실시간 확인하실 수 있습니다.</p>
+      <p id="status-empty-msg" style="margin:12px 0 0;font-size:0.84rem;color:#64748b;text-align:center;">접수 시 입력하신 연락처와 간편 비밀번호 6자리(또는 접수번호)로 1차 상담 진단 내역과 수리 진행 상황을 안전하게 확인하실 수 있습니다.</p>
     </div>
   </dialog>
 

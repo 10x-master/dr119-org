@@ -584,6 +584,13 @@
   function write(key, value) { storage.setItem(key, JSON.stringify(value)); return value; }
   function clone(v) { return v === undefined ? v : JSON.parse(JSON.stringify(v)); }
 
+  /** 고객 조회용 6자리 간편 비밀번호 해시 (평문 저장 방지) */
+  function hashCustomerPin(pin) {
+    var clean = String(pin == null ? '' : pin).replace(/[^0-9]/g, '');
+    if (!clean) return null;
+    return sha256Hex('dr119-cust-pin:' + clean);
+  }
+
   /** 저장소용 경량 사본 (원본 미디어 data_url 제거, 썸네일만 유지) */
   function toStoredOrder(payload, partners) {
     var o = clone(payload);
@@ -600,6 +607,16 @@
     if (o.customer && o.customer.region) initialEntry.region = String(o.customer.region).slice(0, 120);
     if (o.customer && o.customer.note) initialEntry.note = String(o.customer.note).slice(0, 500);
     if (o.customer && o.customer.auth_provider) initialEntry.auth_provider = String(o.customer.auth_provider).slice(0, 40);
+    if (o.customer && o.customer.pin) {
+      var hashed = hashCustomerPin(o.customer.pin);
+      if (hashed) {
+        o.customer.pin_hash = hashed;
+        initialEntry.pin_hash = hashed;
+      }
+      delete o.customer.pin;
+    } else if (o.customer && o.customer.pin_hash) {
+      initialEntry.pin_hash = String(o.customer.pin_hash);
+    }
     o.history = [initialEntry];
     return o;
   }
@@ -644,6 +661,7 @@
     if (hist[0] && hist[0].region) cust.region = hist[0].region;
     if (hist[0] && hist[0].note) cust.note = hist[0].note;
     if (hist[0] && hist[0].auth_provider) cust.auth_provider = hist[0].auth_provider;
+    if (hist[0] && hist[0].pin_hash) cust.pin_hash = hist[0].pin_hash;
     return {
       schema_version: 1,
       order_id: r.order_id,
@@ -1001,27 +1019,34 @@
       return Promise.resolve(clone(o));
     },
 
-    // --- 고객 전용 수리·상담 상태 조회 (전화번호 또는 주문번호, 카카오 인증 및 보안 검증) ---
-    getCustomerOrders: function (query, secCode) {
+    // --- 고객 전용 수리·상담 상태 조회 (전화번호+6자리 비밀번호 또는 주문번호, 카카오 인증) ---
+    getCustomerOrders: function (query, secCode, opts) {
       if (!query) return Promise.resolve([]);
+      var options = opts || {};
       var q = String(query).trim();
       var qDigits = q.replace(/[^0-9]/g, '');
+      var pin = String(secCode == null ? '' : secCode).replace(/[^0-9]/g, '');
 
       function checkMatch(o) {
         if (!o) return false;
-        // 1. 접수번호 정확 일치
-        if (o.order_id && o.order_id.toUpperCase() === q.toUpperCase()) return true;
+        var storedPinHash = (o.customer && o.customer.pin_hash) || (o.history && o.history[0] && o.history[0].pin_hash) || null;
 
-        // 2. 전화번호 일치
+        // 1. 접수번호 정확 일치 (접수 직후 확인 또는 비밀번호 일치 시 허용)
+        if (o.order_id && o.order_id.toUpperCase() === q.toUpperCase()) {
+          if (options.verifiedByKakao || options.fromReceipt || !storedPinHash) return true;
+          return pin.length === 6 && hashCustomerPin(pin) === storedPinHash;
+        }
+
+        // 2. 전화번호 일치 (카카오 본인 인증 완료 또는 6자리 간편 비밀번호 필수 검증)
         var pDigits = (o.customer && o.customer.phone ? String(o.customer.phone) : '').replace(/[^0-9]/g, '');
         if (qDigits.length >= 8 && pDigits === qDigits) {
-          // 보안 검증 (휴대폰 뒷 4자리 또는 보안코드)
-          if (secCode) {
-            var pin = String(secCode).replace(/[^0-9]/g, '');
-            var last4 = pDigits.slice(-4);
-            return pin === last4;
+          if (options.verifiedByKakao === true) return true;
+          if (!pin) return false;
+          if (storedPinHash) {
+            return pin.length === 6 && hashCustomerPin(pin) === storedPinHash;
           }
-          return true;
+          // 기존(구버전) 접수건 호환: 핀 해시가 없는 레거시 주문만 뒷 4자리 허용
+          return pin === pDigits.slice(-4);
         }
         return false;
       }
@@ -1036,8 +1061,8 @@
       return Promise.resolve(orders.filter(checkMatch).map(clone));
     },
 
-    getCustomerOrder: function (query, secCode) {
-      return api.getCustomerOrders(query, secCode).then(function (list) {
+    getCustomerOrder: function (query, secCode, opts) {
+      return api.getCustomerOrders(query, secCode, opts).then(function (list) {
         return list && list.length ? list[0] : null;
       });
     },
@@ -1351,6 +1376,7 @@
     ADMIN_SESSION_KEY: ADMIN_SESSION_KEY,
     ADMIN_AUTH_HASH: ADMIN_AUTH_HASH,
     sha256Hex: sha256Hex,
+    hashCustomerPin: hashCustomerPin,
     verifyAdminPassword: verifyAdminPassword,
     verifyAdminToken: verifyAdminToken,
     sanitizeAgentId: sanitizeAgentId,
