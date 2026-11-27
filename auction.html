@@ -322,11 +322,11 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;align-items:center;">
           <div>
             <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000;">
-              <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/fD3e2rR8YmY" title="탑소닉 초음파세척기 꾼 방영 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/qupKrZxETnQ" title="식당 식세기 오래 쓰는 방법? 26년 노하우로 만든 초음파 식세기 | 성공의 정석 꾼" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:0.78rem;color:#64748b;">
               <span>성공의 정석 꾼 방영 시연</span>
-              <a href="https://www.youtube.com/watch?v=fD3e2rR8YmY" target="_blank" rel="noopener noreferrer" style="color:#ea1917;font-weight:700;text-decoration:none;">유튜브 영상 보기 ↗</a>
+              <a href="https://www.youtube.com/watch?v=qupKrZxETnQ" target="_blank" rel="noopener noreferrer" style="color:#ea1917;font-weight:700;text-decoration:none;">유튜브 영상 보기 ↗</a>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
@@ -905,8 +905,12 @@
 
       window.setSpeedItem = function (itemName) {
         var input = document.getElementById('speed-item');
+        var sizeBox = document.getElementById('ultrasonic-size-chips');
+        if (sizeBox) {
+          sizeBox.style.display = (itemName === '초음파 세척기') ? 'block' : 'none';
+        }
         if (input) {
-          input.value = itemName;
+          input.value = (itemName === '초음파 세척기') ? '초음파 세척기 [800형 (표준 1구)]' : itemName;
           input.focus();
         }
         var btns = document.querySelectorAll('.speed-tag-btn');
@@ -914,6 +918,28 @@
           if (itemName && b.textContent.trim() === itemName) b.classList.add('active');
           else if (!itemName && b.textContent.trim() === '직접입력') b.classList.add('active');
           else b.classList.remove('active');
+        });
+      };
+
+      window.setSpeedSize = function (sizeLabel) {
+        var input = document.getElementById('speed-item');
+        if (input) {
+          input.value = '초음파 세척기 [' + sizeLabel + ']';
+        }
+        var chips = document.querySelectorAll('.size-chip');
+        chips.forEach(function (c) {
+          var isMatch = c.getAttribute('onclick') && c.getAttribute('onclick').indexOf(sizeLabel) !== -1;
+          if (isMatch) {
+            c.classList.add('active');
+            c.style.background = '#0f766e';
+            c.style.color = '#ffffff';
+            c.style.border = 'none';
+          } else {
+            c.classList.remove('active');
+            c.style.background = '#f1f5f9';
+            c.style.color = '#334155';
+            c.style.border = '1px solid #cbd5e1';
+          }
         });
       };
 
