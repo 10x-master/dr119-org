@@ -1108,7 +1108,7 @@
       return Promise.resolve(rec);
     },
 
-    // --- 주방용품·설비·인테리어 역경매 시스템 (헤이딜러형 실시간 입찰) ---
+    // --- 주방용품·설비·인테리어 역경매 시스템 (실시간 최저가 비딩) ---
     getAuctions: function (category) {
       var list = read(KEYS.AUCTIONS, SEED_AUCTIONS);
       if (category && category !== 'ALL') {
