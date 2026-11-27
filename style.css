@@ -755,10 +755,11 @@ body {
 @media (min-width: 960px) {
   .top-stage { padding: 18px 0 26px; }
   .hero-intake-grid {
-    grid-template-columns: 5fr 7fr;
-    gap: 40px;
+    grid-template-columns: 8fr 4fr;
+    gap: 32px;
+    align-items: start;
   }
-  .intake-col { padding: 18px 22px; }
+  .intake-col { padding: 18px 20px; }
 }
 
 /* Done View */

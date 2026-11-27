@@ -203,34 +203,78 @@
     <!-- PC 1화면 2단 레이아웃 / 모바일 1단 첫 화면 꽉 차는 접수 카드 -->
     <section class="top-stage" aria-labelledby="hero-title">
       <div class="wrap hero-intake-grid">
-        <!-- 좌측: 탑소닉 초음파 세척기 공식 영상 및 브랜드 소개 -->
-        <div class="hero">
-          <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.03);">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-              <span style="background:#fee2e2;color:#991b1b;font-size:0.75rem;font-weight:800;padding:2px 8px;border-radius:4px;">국산 우수 브랜드</span>
-              <span style="background:#e0f2fe;color:#0369a1;font-size:0.75rem;font-weight:800;padding:2px 8px;border-radius:4px;">닥터119 기술 자문</span>
-            </div>
-            <h1 id="hero-title" style="font-size:1.38rem;font-weight:900;color:#0f172a;line-height:1.35;margin:0 0 6px;">초음파 세척기 고장 긴급 수리<br><span style="font-size:1.05rem;color:#0f766e;font-weight:800;">(주)탑소닉 26년 기술 자문 지원</span></h1>
-            <p class="hero-wit" style="font-size:0.86rem;color:#475569;margin:0 0 12px;line-height:1.5;">SBS BIZ '성공의 정석, 꾼' 방영 · 부품 원가와 화물 실비를 100% 투명 공개하고 표준 공임만 받습니다.</p>
+        <!-- 좌측: 탑소닉 브랜드 쇼케이스 및 SBS BIZ 방영 영상 (전체의 약 2/3 차지) -->
+        <div class="hero" style="padding:0;">
+          <div style="background:transparent;border:none;box-shadow:none;padding:0;">
             
-            <!-- 탑소닉 동영상 플레이어 -->
-            <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 3px 12px rgba(0,0,0,0.08);margin-bottom:10px;">
-              <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/fD3e2rR8YmY" title="탑소닉 성공의 정석 꾼 방영 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                  <span style="background:#fee2e2;color:#991b1b;font-size:0.75rem;font-weight:800;padding:2px 8px;border-radius:4px;">국산 우수 브랜드</span>
+                  <span style="background:#e0f2fe;color:#0369a1;font-size:0.75rem;font-weight:800;padding:2px 8px;border-radius:4px;">닥터119 기술 자문 파트너</span>
+                  <span style="background:#f1f5f9;color:#334155;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:4px;">SBS BIZ '성공의 정석, 꾼' 방영</span>
+                </div>
+                <h1 id="hero-title" style="font-size:1.48rem;font-weight:900;color:#0f172a;line-height:1.3;margin:0 0 4px;letter-spacing:-0.02em;">초음파 세척기 고장 긴급 수리<br><span style="font-size:1.15rem;color:#0f766e;font-weight:800;">(주)탑소닉 26년 기술 자문 지원</span></h1>
+                <p class="hero-wit" style="font-size:0.86rem;color:#475569;margin:0;line-height:1.5;">26년 대한민국 대표 초음파 세척기 명가 · 전국 3만여 매장 설치 · 부품 원가 및 화물 실비 100% 투명 공개</p>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <a href="landing.html?id=topsonic" style="background:#0f766e;color:#ffffff;text-decoration:none;font-size:0.82rem;font-weight:800;padding:8px 14px;border-radius:8px;box-shadow:0 2px 6px rgba(15,118,110,0.2);white-space:nowrap;">
+                  탑소닉 전용관 >
+                </a>
+              </div>
             </div>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:#64748b;">
-              <span>탑소닉 26년 기술 노하우 초음파 식기세척기</span>
-              <a href="landing.html?id=topsonic" style="color:#0f766e;font-weight:800;text-decoration:none;">탑소닉 전용관 ></a>
+            <!-- 영상 플레이어 + 우측 탑소닉 대표 모델 스펙 카드 -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;align-items:start;margin-bottom:8px;">
+              <!-- 유튜브 영상 플레이어 -->
+              <div>
+                <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 3px 12px rgba(0,0,0,0.08);">
+                  <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/fD3e2rR8YmY" title="탑소닉 성공의 정석 꾼 방영 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:0.78rem;color:#64748b;">
+                  <span>영상: 26년 노하우로 만든 초음파 식기세척기 편</span>
+                  <a href="https://www.youtube.com/watch?v=fD3e2rR8YmY" target="_blank" rel="noopener noreferrer" style="color:#ea1917;font-weight:700;text-decoration:none;">유튜브 보기 ↗</a>
+                </div>
+              </div>
+
+              <!-- 대표 모델 및 역경매 안내 (회색 박스 없이 심플 라인 카드) -->
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                  <span style="font-size:0.74rem;font-weight:800;color:#991b1b;">외식업 업소용 대표 모델</span>
+                  <div style="font-size:0.92rem;font-weight:800;color:#0f172a;">스마트 초음파 세척기 [1200형 / 800형]</div>
+                  <div style="font-size:0.80rem;color:#64748b;margin-top:2px;">불판·뚝배기 3분 급속 세척, 수도세 50% 절감 특허 기술</div>
+                </div>
+
+                <div style="border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                  <span style="font-size:0.74rem;font-weight:800;color:#0369a1;">가정용 프리미엄 모델</span>
+                  <div style="font-size:0.92rem;font-weight:800;color:#0f172a;">싱크볼 매립 일체형 초음파 식세기</div>
+                  <div style="font-size:0.80rem;color:#64748b;margin-top:2px;">잔류 농약 99.9% 세척 및 젖병 살균, 초저소음 빌트인</div>
+                </div>
+
+                <div style="display:flex;gap:6px;margin-top:2px;">
+                  <a href="auction.html?target_dealer=topsonic" style="flex:1;text-align:center;background:#ea1917;color:#ffffff;text-decoration:none;padding:9px 10px;border-radius:8px;font-size:0.84rem;font-weight:800;box-shadow:0 2px 6px rgba(234,25,23,0.2);">
+                    탑소닉 모델 최저가 견적 의뢰
+                  </a>
+                  <a href="tel:1811-7038" style="background:#ffffff;color:#334155;border:1px solid #cbd5e1;text-decoration:none;padding:9px 12px;border-radius:8px;font-size:0.84rem;font-weight:700;display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                    1811-7038
+                  </a>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
 
-        <!-- 우측: 3분의 2 슬림 사이즈 & 미색 배경 콤팩트 접수 카드 -->
-        <div class="intake-col" style="background:#fcfbf8;border:1.5px solid #ebe7df;border-radius:18px;padding:16px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.04);max-width:440px;margin:0 auto;">
+        <!-- 우측: 유일한 단독 강조 라운드 박스 (주황/살구빛 포인트 미색 배경 수리 접수창, 전체의 약 1/3) -->
+        <div class="intake-col" style="background:#fff7ed;border:2px solid #fed7aa;border-radius:20px;padding:18px 20px;box-shadow:0 6px 24px rgba(234,88,12,0.08);max-width:440px;margin:0 auto;">
           <section class="form-section" aria-label="긴급 초음파 세척기 수리 접수" style="background:transparent;padding:0;">
-            <div class="intake-header-lg" id="intake-header-lg" style="margin-bottom:10px;">
-              <h2 class="intake-title-lg" style="font-size:1.24rem;font-weight:900;color:#0f172a;letter-spacing:-0.02em;margin:0 0 4px;">긴급 초음파 세척기 수리 접수</h2>
-              <p class="intake-sub-lg" style="font-size:0.82rem;color:#64748b;margin:0;">고장 부위 사진과 증상만 선택하시면 투명한 부품 실비와 공임을 즉시 안내해 드립니다.</p>
+            <div class="intake-header-lg" id="intake-header-lg" style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="background:#ea1917;color:#ffffff;font-size:0.74rem;font-weight:900;padding:2px 8px;border-radius:4px;">긴급 접수</span>
+                <span style="background:#ea580c;color:#ffffff;font-size:0.74rem;font-weight:800;padding:2px 8px;border-radius:4px;">1분 실비 안내</span>
+              </div>
+              <h2 class="intake-title-lg" style="font-size:1.32rem;font-weight:900;color:#9a3412;letter-spacing:-0.02em;margin:0 0 4px;">긴급 초음파 세척기 수리 접수</h2>
+              <p class="intake-sub-lg" style="font-size:0.82rem;color:#7c2d12;margin:0;">사진과 증상만 선택하시면 투명한 부품 실비와 공임을 즉시 안내해 드립니다.</p>
             </div>
 
             <form id="as-form" class="as-form" novalidate>
@@ -356,110 +400,55 @@
       </div>
     </section>
 
-    <!-- 카카오 비즈보드 스타일: 각 지역 건당 40 만원 설치 협력점 모집 & 3대 실비 약속 배너 -->
-    <section class="bizboard-container" style="background:#ffffff;padding:10px 0 20px;">
-      <div class="wrap" style="max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
-        
-        <!-- 비즈보드 배너 1: 각 지역 건당 40 만원 설치 협력점 모집 광고 -->
-        <a href="#b2b-inquiry-dialog" class="bizboard-ad-banner" id="banner-open-b2b" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);border:1.5px solid #fed7aa;border-radius:14px;padding:14px 20px;text-decoration:none;box-shadow:0 2px 10px rgba(234,88,12,0.08);transition:all 0.15s;">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <span style="background:#ea1917;color:#ffffff;font-size:0.76rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:-0.01em;">전국 모집</span>
-            <div>
-              <strong style="font-size:0.96rem;color:#9a3412;display:block;">각 지역 건당 40 만원 확정 공임 지급 · 설치 협력점(수리 닥터) 모집</strong>
-              <span style="font-size:0.82rem;color:#7c2d12;">기존 설비점·기술자 환영 · 본사 기술 교육 및 지역 전용 QR 영업권 부여</span>
-            </div>
-          </div>
-          <span style="background:#ea580c;color:#ffffff;font-size:0.82rem;font-weight:800;padding:8px 14px;border-radius:8px;white-space:nowrap;">
-            지원하기 >
-          </span>
-        </a>
-
-        <!-- 비즈보드 배너 2: 1, 2, 3 실비 수리 핵심 약속 -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:8px;">
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-weight:900;color:#ea1917;font-size:0.85rem;">01</span>
-            <div style="font-size:0.82rem;color:#1e293b;font-weight:700;">부품 원가 투명 공개<br><small style="color:#64748b;font-weight:500;">진동자·발진기 직접 지참 가능</small></div>
-          </div>
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-weight:900;color:#0f766e;font-size:0.85rem;">02</span>
-            <div style="font-size:0.82rem;color:#1e293b;font-weight:700;">합포장 화물 실비 정찰제<br><small style="color:#64748b;font-weight:500;">깜깜이 출장비 거품 완전 제거</small></div>
-          </div>
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-weight:900;color:#0369a1;font-size:0.85rem;">03</span>
-            <div style="font-size:0.82rem;color:#1e293b;font-weight:700;">본사 직할 팩토리 복원<br><small style="color:#64748b;font-weight:500;">전산 AS 보증 등록 완료</small></div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 국산 우수 브랜드관: (주)탑소닉 공식 파트너 & 성공의 정석 꾼 영상 배너 -->
-    <section class="topsonic-brand-section" id="topsonic-showcase" style="background:#ffffff;border-bottom:1px solid #e2e8f0;padding:36px 0;">
-      <div class="wrap">
-        <div style="background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);border:1px solid #e2e8f0;border-radius:20px;padding:26px 22px;box-shadow:0 4px 18px rgba(0,0,0,0.03);">
+    <!-- 4칸 핵심 안내 배너: 1, 2, 3 실비 수리 약속 + 건당 40 만원 설치 대리점 모집 -->
+    <section class="bizboard-container" style="background:#ffffff;padding:8px 0 24px;">
+      <div class="wrap" style="max-width:1120px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;">
           
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <!-- 01 부품 원가 공개 -->
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#ffffff;">
+            <span style="font-weight:900;color:#ea1917;font-size:1.05rem;">01</span>
             <div>
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-                <span style="background:#fee2e2;color:#991b1b;font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;">국산 우수 브랜드</span>
-                <span style="background:#e0f2fe;color:#0369a1;font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;">닥터119 기술 자문 파트너</span>
-                <span style="background:#f1f5f9;color:#334155;font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:6px;">SBS BIZ '성공의 정석, 꾼' 방영</span>
-              </div>
-              <h2 style="font-size:1.45rem;font-weight:900;color:#0f172a;margin:0 0 4px;letter-spacing:-0.02em;">(주)탑소닉 (Topsonic) 초음파 세척기</h2>
-              <p style="font-size:0.9rem;color:#475569;margin:0;">26년 전통의 대한민국 대표 초음파 세척기 명가 · 전국 3만여 외식업 매장 설치 및 닥터119 기술 자문</p>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <a href="landing.html?id=topsonic" style="background:#0f766e;color:#ffffff;text-decoration:none;font-size:0.86rem;font-weight:800;padding:9px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(15,118,110,0.25);white-space:nowrap;">
-                탑소닉 전용관 가기 →
-              </a>
+              <strong style="font-size:0.88rem;color:#0f172a;display:block;">부품 원가 투명 공개</strong>
+              <span style="font-size:0.80rem;color:#64748b;">진동자·발진기 직접 지참 가능</span>
             </div>
           </div>
 
-          <!-- 2단 그리드: 좌측 유튜브 영상 플레이어 + 우측 대표 모델/자문 안내 -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:20px;align-items:center;">
-            
-            <!-- 유튜브 영상 임베드 플레이어 -->
+          <!-- 02 합포장 화물 실비 -->
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#ffffff;">
+            <span style="font-weight:900;color:#0f766e;font-size:1.05rem;">02</span>
             <div>
-              <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 4px 14px rgba(0,0,0,0.1);">
-                <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/fD3e2rR8YmY" title="탑소닉 성공의 정석 꾼 방영 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:0.8rem;color:#64748b;">
-                <span>영상: 26년 노하우로 만든 초음파 식기세척기 편</span>
-                <a href="https://www.youtube.com/watch?v=fD3e2rR8YmY" target="_blank" rel="noopener noreferrer" style="color:#ea1917;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;">
-                  유튜브에서 보기 ↗
-                </a>
-              </div>
+              <strong style="font-size:0.88rem;color:#0f172a;display:block;">합포장 화물 실비 정찰제</strong>
+              <span style="font-size:0.80rem;color:#64748b;">깜깜이 출장비 거품 완전 제거</span>
             </div>
-
-            <!-- 우측 제품군 스펙 요약 & 역경매 연결 -->
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
-                <div style="font-size:0.75rem;font-weight:800;color:#991b1b;margin-bottom:2px;">외식업 업소용 대표 모델</div>
-                <div style="font-size:0.95rem;font-weight:800;color:#0f172a;">탑소닉 스마트 초음파 세척기 [1200형 / 800형]</div>
-                <div style="font-size:0.82rem;color:#64748b;margin-top:2px;">불판·뚝배기 3분 급속 세척, 수도요금 50% 및 세제 70% 절감 특허 기술</div>
-              </div>
-
-              <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
-                <div style="font-size:0.75rem;font-weight:800;color:#0369a1;margin-bottom:2px;">가정용 프리미엄 모델</div>
-                <div style="font-size:0.95rem;font-weight:800;color:#0f172a;">탑소닉 싱크볼 매립 일체형 초음파 식세기</div>
-                <div style="font-size:0.82rem;color:#64748b;margin-top:2px;">과일·채소 잔류 농약 99.9% 세척 및 젖병 살균, 초저소음 빌트인 설계</div>
-              </div>
-
-              <div style="display:flex;gap:8px;margin-top:4px;">
-                <a href="auction.html?target_dealer=topsonic" style="flex:1;text-align:center;background:#ea1917;color:#ffffff;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:0.86rem;font-weight:800;box-shadow:0 2px 6px rgba(234,25,23,0.25);">
-                  탑소닉 모델 최저가 역경매 의뢰
-                </a>
-                <a href="tel:1811-7038" style="background:#ffffff;color:#334155;border:1px solid #cbd5e1;text-decoration:none;padding:10px 14px;border-radius:8px;font-size:0.86rem;font-weight:700;display:flex;align-items:center;gap:4px;">
-                  전화 1811-7038
-                </a>
-              </div>
-            </div>
-
           </div>
+
+          <!-- 03 본사 전산 보증 -->
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#ffffff;">
+            <span style="font-weight:900;color:#0369a1;font-size:1.05rem;">03</span>
+            <div>
+              <strong style="font-size:0.88rem;color:#0f172a;display:block;">본사 직할 팩토리 복원</strong>
+              <span style="font-size:0.80rem;color:#64748b;">본사 전산 AS 보증 등록</span>
+            </div>
+          </div>
+
+          <!-- 04 건당 40 만원 설치 대리점(수리 닥터) 모집 -->
+          <a href="#b2b-inquiry-dialog" id="banner-open-b2b" style="border:1.5px solid #fed7aa;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:#fff7ed;text-decoration:none;transition:all 0.15s;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#ea1917;color:#ffffff;font-size:0.72rem;font-weight:900;padding:2px 6px;border-radius:4px;">모집</span>
+              <div>
+                <strong style="font-size:0.88rem;color:#9a3412;display:block;">건당 40 만원 설치 대리점 모집</strong>
+                <span style="font-size:0.78rem;color:#7c2d12;">지역 전용 기술 영업권 부여</span>
+              </div>
+            </div>
+            <span style="color:#ea580c;font-size:0.80rem;font-weight:800;white-space:nowrap;">지원 ></span>
+          </a>
 
         </div>
       </div>
     </section>
+
+
     <section class="ed-section" id="transparent-pricing" aria-labelledby="tp-title">
       <div class="wrap">
         <div class="sec-head">
