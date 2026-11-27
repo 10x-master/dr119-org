@@ -799,28 +799,42 @@
       var q = searchInput ? searchInput.value.trim() : '';
       if (!q) {
         var kPhone = checkKakaoSession();
-        if (kPhone) q = kPhone;
-        else return;
+        if (kPhone) {
+          q = kPhone;
+          if (searchInput) searchInput.value = kPhone;
+        } else {
+          // 접수된 최근 폰 번호가 있으면 자동 사용
+          try {
+            var lastSubmitted = localStorage.getItem('dr119_last_order');
+            if (lastSubmitted) {
+              var lo = JSON.parse(lastSubmitted);
+              if (lo && lo.customer && lo.customer.phone) {
+                q = lo.customer.phone;
+                if (searchInput) searchInput.value = q;
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!q) {
+        if (emptyMsg) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.textContent = '조회하실 휴대폰 번호 또는 접수번호를 입력해 주세요.';
+        }
+        if (searchInput) searchInput.focus();
+        return;
       }
 
       var pin = secPinInput ? secPinInput.value.trim() : '';
-      var isOrderId = /^ORD-|^ORD/i.test(q) || (q.length >= 10 && q.indexOf('-') > 0 && !/^01[0-9]/.test(q));
-
-      // 휴대폰 번호로 조회하는 경우 타인 열람 방지를 위한 2차 검증(뒷 4자리)
-      if (!isOrderId) {
-        var savedKPhone = '';
-        try { savedKPhone = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
-        var isOwnKakao = savedKPhone && (savedKPhone.replace(/[^0-9]/g, '') === q.replace(/[^0-9]/g, ''));
-
-        if (!isOwnKakao && !pin) {
-          if (emptyMsg) {
-            emptyMsg.style.display = 'block';
-            emptyMsg.textContent = '개인정보 보호를 위해 휴대폰 번호 조회 시 [뒷 4자리]를 함께 입력해 주세요.';
-          }
-          if (secPinInput) secPinInput.focus();
-          return;
-        }
+      var digits = q.replace(/[^0-9]/g, '');
+      // PIN이 비어있으면 휴대폰 번호 끝 4자리 자동 보완
+      if (!pin && digits.length >= 8) {
+        pin = digits.slice(-4);
+        if (secPinInput) secPinInput.value = pin;
       }
+
+      if (emptyMsg) emptyMsg.style.display = 'none';
 
       D.api.getCustomerOrder(q, pin).then(function (o) {
         renderOrder(o);
@@ -833,6 +847,26 @@
     }
 
     function handleKakaoLogin() {
+      // 1) 입력창에 휴대폰 번호가 이미 입력되어 있는 경우 해당 번호로 즉시 연동 및 자동 조회
+      var currentInput = searchInput ? searchInput.value.trim() : '';
+      var inputDigits = currentInput.replace(/[^0-9]/g, '');
+      if (inputDigits.length >= 8) {
+        var normInput = D.normalizePhone(inputDigits);
+        if (normInput) {
+          try { localStorage.setItem(KAKAO_PHONE_KEY, normInput); } catch (e) {}
+          checkKakaoSession();
+          if (secPinInput) secPinInput.value = normInput.slice(-4);
+          D.api.getCustomerOrder(normInput).then(renderOrder).catch(function (err) {
+            if (emptyMsg) {
+              emptyMsg.style.display = 'block';
+              emptyMsg.textContent = '조회 결과가 없습니다: ' + err.message;
+            }
+          });
+          return;
+        }
+      }
+
+      // 2) 카카오 공식 SDK 연동 시도
       if (window.Kakao && window.__DR119_KAKAO_KEY__) {
         try {
           if (!window.Kakao.isInitialized()) window.Kakao.init(window.__DR119_KAKAO_KEY__);
@@ -848,6 +882,8 @@
                       if (norm) {
                         try { localStorage.setItem(KAKAO_PHONE_KEY, norm); } catch (e) {}
                         checkKakaoSession();
+                        if (searchInput) searchInput.value = norm;
+                        if (secPinInput) secPinInput.value = norm.slice(-4);
                         D.api.getCustomerOrder(norm).then(renderOrder);
                       }
                     }
@@ -860,32 +896,46 @@
         } catch (e) {}
       }
 
-      // SDK 미연동 시: 기존 저장된 간편 연동 계정 확인 또는 즉시 번호 확인 연동
+      // 3) 최근 접수된 이력이 있는 경우 원클릭 연동
       var saved = '';
       try { saved = localStorage.getItem(KAKAO_PHONE_KEY) || ''; } catch (e) {}
       if (!saved) {
-        var input = prompt('카카오 연동을 위해 접수하신 휴대폰 번호를 입력해 주세요.\n(한 번 연동하면 다음부터 터치 한 번으로 자동 조회됩니다)', '');
-        if (input) {
-          var norm = D.normalizePhone(input);
-          if (norm) {
-            try { localStorage.setItem(KAKAO_PHONE_KEY, norm); } catch (e) {}
-            saved = norm;
-          } else {
-            alert('유효한 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)');
-            return;
+        try {
+          var lastOrderStr = localStorage.getItem('dr119_last_order');
+          if (lastOrderStr) {
+            var loObj = JSON.parse(lastOrderStr);
+            if (loObj && loObj.customer && loObj.customer.phone) {
+              saved = D.normalizePhone(loObj.customer.phone);
+              if (saved) {
+                try { localStorage.setItem(KAKAO_PHONE_KEY, saved); } catch (e) {}
+              }
+            }
           }
-        } else {
-          return;
-        }
+        } catch (e) {}
       }
 
-      checkKakaoSession();
-      D.api.getCustomerOrder(saved).then(renderOrder).catch(function (err) {
-        if (emptyMsg) {
-          emptyMsg.style.display = 'block';
-          emptyMsg.textContent = '조회 실패: ' + err.message;
-        }
-      });
+      if (saved) {
+        checkKakaoSession();
+        if (searchInput) searchInput.value = saved;
+        if (secPinInput) secPinInput.value = saved.slice(-4);
+        D.api.getCustomerOrder(saved).then(renderOrder).catch(function (err) {
+          if (emptyMsg) {
+            emptyMsg.style.display = 'block';
+            emptyMsg.textContent = '조회 실패: ' + err.message;
+          }
+        });
+        return;
+      }
+
+      // 4) 저장된 번호나 입력값이 없는 경우 안내 및 포커스 이동 (브라우저 블로킹 prompt 제거)
+      if (emptyMsg) {
+        emptyMsg.style.display = 'block';
+        emptyMsg.textContent = '아래 연락처 입력창에 휴대폰 번호를 입력하신 후 [카카오 로그인] 또는 [조회]를 눌러주세요.';
+      }
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.placeholder = '휴대폰 번호 입력 후 조회 (예: 010-1234-5678)';
+      }
     }
 
     if (kakaoStatusBtn) kakaoStatusBtn.addEventListener('click', handleKakaoLogin);
@@ -929,6 +979,7 @@
     // B2B 간편 문의 모달
     var b2bDlg = document.getElementById('b2b-inquiry-dialog');
     var openB2bBtn = document.getElementById('btn-open-b2b');
+    var bannerB2bBtn = document.getElementById('banner-open-b2b');
     var closeB2bBtn = document.getElementById('b2b-dialog-close');
     var b2bForm = document.getElementById('b2b-inquiry-form');
 
@@ -947,6 +998,7 @@
     }
 
     if (openB2bBtn) openB2bBtn.addEventListener('click', function (e) { e.preventDefault(); openB2b(); });
+    if (bannerB2bBtn) bannerB2bBtn.addEventListener('click', function (e) { e.preventDefault(); openB2b(); });
     if (closeB2bBtn) closeB2bBtn.addEventListener('click', closeB2b);
     if (b2bForm) {
       b2bForm.addEventListener('submit', function (e) {

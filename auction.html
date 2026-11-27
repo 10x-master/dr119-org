@@ -79,6 +79,35 @@
     .quick-tag-btn { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.15s; }
     .quick-tag-btn:hover { background: var(--auc-teal); color: #ffffff; border-color: var(--auc-teal); }
 
+    /* 10초 번개 폼 스타일 */
+    .region-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .region-chip:hover { border-color: var(--auc-teal); color: var(--auc-teal); }
+    .region-chip.active { background: #0f766e; color: #ffffff; border-color: #0f766e; }
+
+    .speed-tag-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .speed-tag-btn:hover { border-color: #ea1917; color: #ea1917; }
+    .speed-tag-btn.active { background: #ea1917; color: #ffffff; border-color: #ea1917; }
+
     .auc-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 16px 0 24px; max-width: 860px; margin-left: auto; margin-right: auto; }
     .auc-stat-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 10px; padding: 12px 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .auc-stat-num { font-size: 1.25rem; font-weight: 900; color: var(--auc-teal); margin-bottom: 2px; }
@@ -157,83 +186,98 @@
     <a href="index.html" class="auc-brand">
       <img src="icons/dr119-logo.svg" alt="Dr.119 로고">
       <div>
-        <h2 class="auc-brand-title">Dr.119 B2B 역경매관</h2>
+        <h2 class="auc-brand-title">Dr.119 전국 최저가 비교 견적</h2>
       </div>
-      <span class="auc-brand-badge">실시간 최저가 역경매</span>
+      <span class="auc-brand-badge" style="background:#dcfce7;color:#15803d;">실시간 최저가 비딩</span>
     </a>
-    <a href="index.html" class="auc-nav-back">119 AS 수리센터</a>
+    <a href="index.html" class="auc-nav-back">닥터119 수리센터</a>
   </header>
 
-  <!-- 히어로 배너 -->
-  <section class="auc-hero">
-    <h1>식당 주방기기 · 설비공사 · 인테리어<br>전국 검증 공급사 실시간 역경매</h1>
-    <p>식당 사장님이 요구 조건을 올리면 전국 제조사·유통사·시공사가 최저가로 실시간 입찰합니다.<br>플랫폼 낙찰 수수료 3% 정률제 · 안전 에스크로 보증</p>
+  <!-- 히어로 배너: 친숙한 카피 -->
+  <section class="auc-hero" style="background:linear-gradient(135deg, #064e3b 0%, #0f766e 100%);padding:32px 16px 42px;">
+    <h1 style="font-size:1.6rem;font-weight:900;margin:0 0 8px;line-height:1.3;">식당 주방기기 · 설비공사<br>전국 최저가 비교 견적 받기</h1>
+    <p style="font-size:0.95rem;color:#ccfbf1;margin:0 auto;line-height:1.5;">원하시거나 구매하시고 싶은 제품을 등록하면<br>등록되어 있는 전국 전문 업체들이 실시간 최저가를 적어드립니다.</p>
   </section>
 
-  <!-- 시각적 검색 배너 (어떤 물건을 찾고 계십니까?) -->
-  <div class="auc-search-hero-box">
-    <label for="auc-search-kw" class="auc-search-label">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--auc-teal)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <span>어떤 물건·공사를 찾고 계십니까?</span>
-    </label>
-    <div class="auc-search-input-wrap">
-      <input type="text" id="auc-search-kw" class="auc-search-input" placeholder="품목명, 공사종류, 또는 지역 검색 (예: 초음파 세척기, 닥트, 노원구, 식기세척기)">
-      <button type="button" id="btn-auc-search" class="auc-search-btn">검색</button>
-      <button type="button" class="auc-create-direct-btn" onclick="openDirectRegister('EQUIPMENT', '초음파 세척기 구매 및 설치', '서울 노원구')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        + 내 물건 역경매 등록
-      </button>
-    </div>
-
-    <!-- 신규 사장님 등록 유도 안내 스트립 -->
-    <div style="margin-top:14px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <div style="font-size:0.88rem;color:#0f766e;font-weight:700;display:flex;align-items:center;gap:6px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        <span><b>초음파 세척기·주방설비 찾으시나요?</b> 사장님의 희망 지역(예: 서울 노원구)과 스펙을 올리시면 전국 업체들이 실시간 최저가를 제시합니다.</span>
+  <!-- 최상단: 바쁜 사장님을 위한 10초 번개 접수창 -->
+  <div class="auc-search-hero-box" style="background:#ffffff;border:2px solid #0f766e;border-radius:18px;padding:22px 20px;box-shadow:0 6px 24px rgba(15,118,110,0.12);margin-top:-28px;">
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="background:#ea1917;color:#ffffff;font-size:0.78rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:-0.01em;">초간편 신청</span>
+        <h2 style="margin:0;font-size:1.25rem;font-weight:900;color:#0f172a;letter-spacing:-0.02em;">내 물건 찾아줘 (최저가 비교 견적)</h2>
       </div>
-      <button type="button" onclick="openDirectRegister('EQUIPMENT', '초음파 세척기 구매 및 설치', '서울 노원구')" style="background:#0f766e;color:#ffffff;border:none;border-radius:8px;padding:8px 16px;font-size:0.86rem;font-weight:800;cursor:pointer;white-space:nowrap;">
-        서울 노원구 초음파 세척기 등록하기 →
+      <span style="font-size:0.82rem;color:#0f766e;font-weight:700;">복잡한 예산 입력 없이 3개면 끝</span>
+    </div>
+
+    <!-- 10초 초간편 등록 폼: 1.지역 -> 2.제품 -> 3.연락처 -->
+    <form id="auc-speed-request-form" style="display:flex;flex-direction:column;gap:14px;">
+      
+      <!-- 1단계: 지역 먼저 선택 -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+        <label style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:6px;">
+          <span style="color:#ea1917;">1.</span> 설치·납품받으실 지역 *
+        </label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+          <button type="button" class="region-chip active" onclick="setSpeedRegion('서울')">서울</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('경기')">경기</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('인천')">인천</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('부산')">부산</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('대구')">대구</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('대전')">대전</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('광주')">광주</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('충청')">충청</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('전라')">전라</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('경상')">경상</button>
+          <button type="button" class="region-chip" onclick="setSpeedRegion('강원/제주')">강원/제주</button>
+        </div>
+        <input type="text" id="speed-region" placeholder="시/도 및 시·군·구 상세 입력 (예: 서울 노원구 상계동)" value="서울 노원구" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
+      </div>
+
+      <!-- 2단계: 필요한 제품 선택 -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+        <label style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:6px;">
+          <span style="color:#0f766e;">2.</span> 어떤 제품·공사가 필요하신가요? *
+        </label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+          <button type="button" class="speed-tag-btn active" onclick="setSpeedItem('초음파 세척기')">초음파 세척기</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('업소용 식기세척기')">업소용 식기세척기</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('닥트·후드 환기공사')">닥트·후드 환기</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('45박스 업소용 냉장고')">45박스 냉장고</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('그리스트랩·배관')">그리스트랩 배관</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('주방 바닥 방수')">주방 방수</button>
+          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('')">직접입력</button>
+        </div>
+        <input type="text" id="speed-item" placeholder="제품명 또는 공사명 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
+      </div>
+
+      <!-- 3단계: 연락처 -->
+      <div>
+        <label for="speed-phone" style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:4px;">
+          <span style="color:#0f766e;">3.</span> 최저가 견적을 안내받을 연락처 *
+        </label>
+        <input type="tel" id="speed-phone" placeholder="010-0000-0000 (안심번호 연결)" required style="width:100%;height:46px;padding:0 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.95rem;font-weight:700;box-sizing:border-box;">
+      </div>
+
+      <!-- 큰 빨간 제출 버튼 -->
+      <button type="submit" id="btn-speed-submit" style="width:100%;height:52px;background:#ea1917;color:#ffffff;border:none;border-radius:12px;font-size:1.05rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(234,25,23,0.3);margin-top:2px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span>전국 최저가 비교 견적 받기 (10초 무료 신청)</span>
       </button>
-    </div>
 
-    <div class="quick-tags">
-      <span class="quick-tag-label">추천 검색어:</span>
-      <button type="button" class="quick-tag-btn" data-kw="초음파 세척기">초음파 세척기 1000형</button>
-      <button type="button" class="quick-tag-btn" data-kw="식기세척기">식기세척기</button>
-      <button type="button" class="quick-tag-btn" data-kw="닥트">닥트·후드 환기</button>
-      <button type="button" class="quick-tag-btn" data-kw="그리스트랩">그리스트랩 배관</button>
-      <button type="button" class="quick-tag-btn" data-kw="방수">바닥 3중 방수</button>
-      <button type="button" class="quick-tag-btn" data-kw="냉장고">올스텐 45박스</button>
-      <button type="button" class="quick-tag-btn" data-kw="세제">친환경 전용세제</button>
-    </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#64748b;padding:0 2px;">
+        <span>✓ 등록되어 있는 전국 전문 업체들이 최저가를 실시간으로 적어드립니다.</span>
+        <span style="color:#0f766e;font-weight:700;">안전 직거래 보증</span>
+      </div>
+    </form>
   </div>
 
-  <!-- 투자자용 실시간 지표 요약 바 -->
-  <div class="auc-stats-bar">
-    <div class="auc-stat-card">
-      <div class="auc-stat-num" id="stat-total-count">100건+</div>
-      <div class="auc-stat-lbl">실시간 등록 역경매</div>
-    </div>
-    <div class="auc-stat-card">
-      <div class="auc-stat-num">350+곳</div>
-      <div class="auc-stat-lbl">검증 입점 공급사</div>
-    </div>
-    <div class="auc-stat-card">
-      <div class="auc-stat-num">24.8%</div>
-      <div class="auc-stat-lbl">평균 최저가 절감률</div>
-    </div>
-    <div class="auc-stat-card">
-      <div class="auc-stat-num">3.0%</div>
-      <div class="auc-stat-lbl">투명 에스크로 수수료</div>
-    </div>
-  </div>
-
-  <!-- 4단 네비게이션 탭 -->
-  <nav class="auc-tab-bar" aria-label="역경매 메뉴">
-    <button type="button" class="auc-tab-btn active" data-tab="tab-live">실시간 역경매장 (LIVE)</button>
-    <button type="button" class="auc-tab-btn" data-tab="tab-request">1분 구매·시공 요청</button>
+  <!-- 4단 네비게이션 탭 (친숙한 명칭) -->
+  <nav class="auc-tab-bar" aria-label="메뉴">
+    <button type="button" class="auc-tab-btn active" data-tab="tab-live">실시간 비교 견적 현황</button>
+    <button type="button" class="auc-tab-btn" data-tab="tab-request">상세 견적 신청서</button>
     <button type="button" class="auc-tab-btn" data-tab="tab-freight">전국 화물 운임 계산기</button>
-    <button type="button" class="auc-tab-btn" data-tab="tab-dealer">공급·시공사 10초 입점</button>
+    <button type="button" class="auc-tab-btn" data-tab="tab-dealer">공급사 입점 신청</button>
   </nav>
 
   <main class="auc-container">
@@ -303,55 +347,50 @@
       </button>
     </section>
 
-    <!-- TAB 2: 1분 구매·시공 요청 -->
+    <!-- TAB 2: 내 물건 찾아줘 상세 신청 -->
     <section id="tab-request" class="auc-tab-content" style="display:none;">
       <div class="auc-form-box">
-        <h3 style="margin:0 0 12px;font-size:1.15rem;color:#0f172a;">식당 사장님 1분 구매·시공 견적 요청서</h3>
-        <p style="margin:0 0 16px;font-size:0.86rem;color:var(--auc-muted);">원하시는 품목이나 공사 내용을 등록하시면, 전국 승인된 제조·유통·시공사가 48시간 동안 최저가로 경쟁 입찰을 진행합니다.</p>
+        <h3 style="margin:0 0 12px;font-size:1.15rem;color:#0f172a;">내 물건 찾아줘 (전국 최저가 비교 견적 신청)</h3>
+        <p style="margin:0 0 16px;font-size:0.86rem;color:var(--auc-muted);">원하시거나 구매하시고 싶은 제품을 등록하시면, 등록되어 있는 전국 전문 업체들이 실시간 최저가를 적어드립니다.</p>
 
         <form id="auc-request-form">
           <div class="auc-form-group">
             <label for="req-category">분야 선택 *</label>
             <select id="req-category" required>
-              <option value="EQUIPMENT">주방기기 (초음파 세척기, 업소용 식기세척기, 냉장고, 인덕션 등)</option>
-              <option value="FACILITY">주방설비 (닥트·후드 환기, 그리스트랩·배관, 가스·전기 증설)</option>
-              <option value="INTERIOR">주방인테리어 (맞춤 주방 시공, 바닥 타일·방수, 철거/원상복구)</option>
+              <option value="EQUIPMENT">주방기기 (초음파 세척기, 업소용 식기세척기, 냉장고 등)</option>
+              <option value="FACILITY">주방설비 (닥트·후드 환기, 그리스트랩·배관, 가스·전기)</option>
+              <option value="INTERIOR">주방인테리어 (맞춤 주방 시공, 바닥 타일·방수, 철거)</option>
               <option value="SUPPLIES">소모품·세제 (친환경 초음파 전용 세제, 세척제 대량 납품)</option>
             </select>
           </div>
 
           <div class="auc-form-group">
-            <label for="req-title">요청 품목 또는 공사명 *</label>
+            <label for="req-title">필요한 제품 또는 공사명 *</label>
             <input type="text" id="req-title" placeholder="예: 업소용 초음파 세척기 1000형 구매 및 설치" required>
           </div>
 
           <div class="auc-form-group">
-            <label for="req-specs">희망 규격 및 상세 사양</label>
-            <input type="text" id="req-specs" placeholder="예: 1000 x 700 x 850mm / 단상 220V / SUS304">
-          </div>
-
-          <div class="auc-form-group">
-            <label for="req-price">희망 구매 예산 (원)</label>
-            <input type="number" id="req-price" placeholder="예: 1800000 (미입력 시 딜러 자율 견적)">
-          </div>
-
-          <div class="auc-form-group">
             <label for="req-region">설치 / 납품 희망 지역 *</label>
-            <input type="text" id="req-region" placeholder="예: 서울 마포구 서교동 / 경기 수원시" required>
+            <input type="text" id="req-region" placeholder="예: 서울 노원구 / 경기 수원시" required>
           </div>
 
           <div class="auc-form-group">
-            <label for="req-phone">사장님 연락처 (비공개 안심 연동) *</label>
+            <label for="req-phone">사장님 연락처 (안심번호 연결) *</label>
             <input type="tel" id="req-phone" placeholder="010-0000-0000" required>
-            <p class="auc-form-hint">연락처는 입찰 중 공급사에게 노출되지 않으며, 최종 낙찰 시에만 해당 업체에 안전하게 연결됩니다.</p>
+            <p class="auc-form-hint">연락처는 입찰 중 공급사에게 노출되지 않으며, 최종 채택 시에만 해당 업체에 안전하게 연결됩니다.</p>
           </div>
 
           <div class="auc-form-group">
-            <label for="req-notes">요청 사항 및 현장 메모</label>
-            <textarea id="req-notes" placeholder="업종, 주방 층수, 엘리베이터 유무, 필요 일정 등을 자유롭게 적어주세요."></textarea>
+            <label for="req-specs">상세 사양 또는 특이사항 (선택)</label>
+            <input type="text" id="req-specs" placeholder="예: 1000형 / 단상 220V / SUS304 (선택 사항)">
           </div>
 
-          <button type="submit" class="auc-submit-btn">역경매 공고 등록하기 (무료)</button>
+          <div class="auc-form-group">
+            <label for="req-notes">요청 사항 및 현장 메모 (선택)</label>
+            <textarea id="req-notes" placeholder="주방 층수, 설치 희망 일정 등을 자유롭게 적어주세요."></textarea>
+          </div>
+
+          <button type="submit" class="auc-submit-btn">전국 최저가 비교 견적 신청하기 (무료)</button>
         </form>
       </div>
     </section>
@@ -830,6 +869,71 @@
         if (urlParams.get('category')) document.getElementById('req-category').value = urlParams.get('category');
         if (urlParams.get('item')) document.getElementById('req-title').value = urlParams.get('item');
         if (urlParams.get('region')) document.getElementById('req-region').value = urlParams.get('region');
+      }
+
+      // 10초 번개 역경매 폼 스크립트
+      window.setSpeedRegion = function (regionPrefix) {
+        var input = document.getElementById('speed-region');
+        if (input) {
+          input.value = regionPrefix + ' ';
+          input.focus();
+        }
+        var chips = document.querySelectorAll('.region-chip');
+        chips.forEach(function (c) {
+          if (c.textContent.trim() === regionPrefix) c.classList.add('active');
+          else c.classList.remove('active');
+        });
+      };
+
+      window.setSpeedItem = function (itemName) {
+        var input = document.getElementById('speed-item');
+        if (input) {
+          input.value = itemName;
+          input.focus();
+        }
+        var btns = document.querySelectorAll('.speed-tag-btn');
+        btns.forEach(function (b) {
+          if (itemName && b.textContent.trim() === itemName) b.classList.add('active');
+          else if (!itemName && b.textContent.trim() === '직접입력') b.classList.add('active');
+          else b.classList.remove('active');
+        });
+      };
+
+      var speedForm = document.getElementById('auc-speed-request-form');
+      if (speedForm) {
+        speedForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var item = document.getElementById('speed-item').value.trim();
+          var region = document.getElementById('speed-region').value.trim();
+          var phone = document.getElementById('speed-phone').value.trim();
+          if (!item || !region || !phone) {
+            alert('필수 정보를 모두 입력해 주세요.');
+            return;
+          }
+          var category = 'EQUIPMENT';
+          if (/닥트|후드|환기|배관|그리스트랩/.test(item)) category = 'FACILITY';
+          else if (/방수|타일|인테리어|철거/.test(item)) category = 'INTERIOR';
+          else if (/세제|소모품/.test(item)) category = 'SUPPLIES';
+
+          var data = {
+            category: category,
+            title: item + ' 구매·설치 견적 요청',
+            region: region,
+            customer_phone: phone,
+            desired_price: 0,
+            notes: '전국 최저가 비교 견적 신청 (지역: ' + region + ')'
+          };
+
+          D.api.createAuction(data).then(function () {
+            alert('전국 최저가 비교 견적 신청이 완료되었습니다!\n등록되어 있는 전국 전문 업체들이 실시간으로 최저가를 제시합니다.');
+            speedForm.reset();
+            renderAuctions();
+            var liveTab = document.querySelector('[data-tab="tab-live"]');
+            if (liveTab) liveTab.click();
+          }).catch(function (err) {
+            alert('신청 실패: ' + err.message);
+          });
+        });
       }
 
       // 초기 실행
