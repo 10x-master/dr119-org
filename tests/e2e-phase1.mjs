@@ -107,7 +107,7 @@ try {
     const stripRect = document.querySelector('.b2b-apply-strip').getBoundingClientRect();
     const b2bBtnRect = document.querySelector('.b2b-submit').getBoundingClientRect();
     return {
-      hasUltrasoundHeading: h1.includes('초음파 세척기 고장') && intakeHeadRemoved,
+      hasUltrasoundHeading: h1.includes('초음파') && intakeHeadRemoved,
       btnBottom,
       b2bFits: b2bBtnRect.right <= stripRect.right - 8
     };

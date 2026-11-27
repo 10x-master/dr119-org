@@ -1018,4 +1018,42 @@
       });
     }
   })();
+
+  /* ================================================================
+   * 10) 자주 묻는 질문(FAQ) 마우스 호버 시 즉시 열림 (빠른 탐색)
+   * ================================================================ */
+  (function () {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover)').matches) return;
+    var faqItems = document.querySelectorAll('#faq details');
+    faqItems.forEach(function (item) {
+      item.addEventListener('mouseenter', function () {
+        faqItems.forEach(function (other) {
+          if (other !== item && other.open) other.open = false;
+        });
+        item.open = true;
+      });
+    });
+  })();
+
+  /* ================================================================
+   * 11) 닥터119 아이콘 설치 완료 시 설치 버튼 자동 숨김
+   * ================================================================ */
+  (function () {
+    function hideInstallButtons() {
+      var dock = document.getElementById('floating-dock');
+      var mbarBtn = document.getElementById('mbar-install-btn');
+      if (dock) dock.style.display = 'none';
+      if (mbarBtn) mbarBtn.style.display = 'none';
+    }
+    var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    var wasInstalled = false;
+    try { wasInstalled = localStorage.getItem('dr119_app_installed') === '1'; } catch (e) {}
+    if (isStandalone || wasInstalled) {
+      hideInstallButtons();
+    }
+    window.addEventListener('appinstalled', function () {
+      try { localStorage.setItem('dr119_app_installed', '1'); } catch (e) {}
+      hideInstallButtons();
+    });
+  })();
 })();

@@ -1554,18 +1554,25 @@ body {
   .header-nav.is-open a { padding: 9px 8px; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
   .header-nav.is-open a:last-child { border-bottom: 0; margin-top: 6px; text-align: center; }
 
-  /* 첫 화면: 119 긴급 접수 카드가 스크롤 없이 한 화면에 꽉 차게 */
+  /* 첫 화면: 119 긴급 접수 카드 — 모바일에서는 라운드 박스 없이 깔끔한 직선형 풀폭 */
   .top-stage { padding: 4px 0 18px; background: #ffffff; }
   .hero-intake-grid { gap: 18px; }
-  .intake-col {
+  .intake-col,
+  .intake-col.phone-frame-card {
     order: -1;
-    padding: 12px 10px;
+    padding: 12px 10px !important;
     min-height: calc(100svh - 100px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     box-sizing: border-box;
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
   }
   .intake-col .form-section { display: flex; flex-direction: column; justify-content: center; flex: 1; }
   .intake-col .as-form {

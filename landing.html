@@ -567,7 +567,10 @@
         <a href="#topsonic-consult" class="lge-nav-link">상담 신청</a>
         <a href="auction.html" class="lge-nav-link">최저가 견적</a>
         <button type="button" class="lge-nav-link" onclick="copyLandingLink()">링크 복사</button>
-        <a href="tel:1811-7038" class="lge-nav-cta">1811-7038</a>
+        <a href="tel:1811-7038" class="lge-nav-cta" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>1811-7038</span>
+        </a>
       </div>
     </div>
   </header>
@@ -607,8 +610,8 @@
             </div>
 
             <div class="hero-cta-row">
-              <a href="auction.html?target_dealer=topsonic" class="btn-lge-primary" id="main-quote-cta">
-                탑소닉 최저가 비교 견적 요청
+              <a href="#topsonic-consult" class="btn-lge-primary" id="main-quote-cta">
+                탑소닉 본사 직접 견적 상담
               </a>
               <button type="button" class="btn-lge-outline" onclick="copyLandingLink()">링크 복사</button>
               <button type="button" class="btn-lge-outline" onclick="installOrSaveShortcut()">바로가기 저장</button>
@@ -623,6 +626,25 @@
               <span id="video-desc-txt">SBS BIZ '성공의 정석, 꾼' 방영 · 26년 노하우로 만든 초음파 식세기 편</span>
               <a href="https://www.youtube.com/watch?v=qupKrZxETnQ" target="_blank" rel="noopener noreferrer">유튜브 공식 영상 보기 ↗</a>
             </div>
+          </div>
+        </div>
+
+        <!-- 국내 생산 특수 진동소자 핵심 강점 배너 (LG 미니멀 에디토리얼 스타일) -->
+        <div style="margin-top:36px;padding-top:24px;border-top:2px solid #111111;display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:24px;">
+          <div>
+            <div style="font-size:0.78rem;font-weight:800;color:var(--lge-red);margin-bottom:4px;">CORE TECHNOLOGY 01</div>
+            <div style="font-size:1.05rem;font-weight:900;color:#111111;margin-bottom:4px;">100% 국내 생산 특수 진동소자</div>
+            <p style="font-size:0.86rem;color:#555555;margin:0;line-height:1.55;">저가 중국산 진동자 대비 원가가 최대 7배 높은 국산 24kHz 특수 진동소자를 자체 생산·적용하여 타협 없는 출력과 수명을 보장합니다.</p>
+          </div>
+          <div>
+            <div style="font-size:0.78rem;font-weight:800;color:var(--lge-teal);margin-bottom:4px;">CORE TECHNOLOGY 02</div>
+            <div style="font-size:1.05rem;font-weight:900;color:#111111;margin-bottom:4px;">3D 입체 초음파 정밀 세척</div>
+            <p style="font-size:0.86rem;color:#555555;margin:0;line-height:1.55;">사각지대 없는 3차원 입체 발진으로 불판·뚝배기·기름때를 애벌세척 없이 단시간에 분해하고 세제·수도요금을 대폭 절감합니다.</p>
+          </div>
+          <div>
+            <div style="font-size:0.78rem;font-weight:800;color:#111111;margin-bottom:4px;">CORE TECHNOLOGY 03</div>
+            <div style="font-size:1.05rem;font-weight:900;color:#111111;margin-bottom:4px;">핵심 부품 10년 보증 · 본사 직영 AS</div>
+            <p style="font-size:0.86rem;color:#555555;margin:0;line-height:1.55;">26년 제조 기술에 대한 자신감으로 3일 무료 체험과 본사 직영 엔지니어 전국 사후관리 시스템을 운영합니다.</p>
           </div>
         </div>
       </div>
@@ -716,12 +738,12 @@
       </div>
     </section>
 
-    <!-- 4. 탑소닉 직접 상담 신청 (관리자 대시보드 실시간 저장) -->
+    <!-- 4. 탑소닉 직접 상담·견적 신청 (관리자 대시보드 실시간 저장) -->
     <section class="cta-band" id="topsonic-consult">
       <div class="wrap" style="max-width:680px;">
-        <h3>(주)탑소닉 본사 직접 상담 신청</h3>
+        <h3>(주)탑소닉 본사 직접 견적·상담 신청</h3>
         <p>설치 희망 제품과 연락처를 남겨주시면 탑소닉 담당 매니저가 직접 연락드립니다.</p>
-        <form id="topsonic-direct-form" style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:20px;">
+        <form id="topsonic-direct-form" style="display:flex;flex-direction:column;gap:10px;text-align:left;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <select id="ts-product" style="height:46px;padding:0 14px;border:1px solid var(--lge-line-strong);border-radius:10px;font-size:0.9rem;font-family:inherit;background:#fff;">
               <option value="업소용 초음파 세척기 (600~1800)">업소용 초음파 세척기 (600~1800)</option>
@@ -729,17 +751,13 @@
               <option value="초음파 튀김봉">초음파 튀김봉</option>
               <option value="3일 무료 체험 신청">3일 무료 체험 신청</option>
             </select>
-            <input type="text" id="ts-region" placeholder="설치 지역 (예: 서울 강남구)" required style="height:46px;padding:0 14px;border:1px solid var(--lge-line-strong);border-radius:10px;font-size:0.9rem;font-family:inherit;">
+            <input type="text" id="ts-region" placeholder="설치 지역 (예: 서울 강남구 역삼동)" required style="height:46px;padding:0 14px;border:1px solid var(--lge-line-strong);border-radius:10px;font-size:0.9rem;font-family:inherit;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <input type="tel" id="ts-phone" placeholder="연락처 (010-0000-0000)" required style="height:46px;padding:0 14px;border:1px solid var(--lge-line-strong);border-radius:10px;font-size:0.9rem;font-family:inherit;">
-            <button type="submit" class="btn-lge-primary" style="width:100%;border-radius:10px;">탑소닉 직접 상담 신청</button>
+            <button type="submit" class="btn-lge-primary" style="width:100%;border-radius:10px;">탑소닉 직접 견적·상담 신청</button>
           </div>
         </form>
-        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-          <a href="auction.html?target_dealer=topsonic" class="btn-lge-outline">전국 최저가 비교 견적 받기</a>
-          <a href="tel:1811-7038" class="btn-lge-outline">탑소닉 고객센터 1811-7038</a>
-        </div>
       </div>
     </section>
   </main>
@@ -747,18 +765,47 @@
   <!-- Minimal Footer -->
   <footer class="site-footer">
     <div class="wrap">
-      <p id="footer-biz-txt" style="font-weight:700;color:var(--lge-black);margin-bottom:4px;">상호: (주)탑소닉 | 고객센터: <a href="tel:1811-7038" style="color:inherit;">1811-7038</a> | 닥터119 공식 기술 자문 파트너</p>
+      <p id="footer-biz-txt" style="font-weight:700;color:var(--lge-black);margin-bottom:4px;">상호: (주)탑소닉 | 닥터119 공식 기술 자문 파트너</p>
       <p>닥터119는 투명한 실비 수리 및 주방 설비 비교 견적 플랫폼을 제공하며, 모든 상담은 본사 통합 전산망으로 관리됩니다.</p>
+      <p style="margin-top:10px;font-size:1.05rem;font-weight:900;color:#ea1917;">
+        탑소닉 공식 고객센터: <a href="tel:1811-7038" style="color:#ea1917;text-decoration:underline;">1811-7038</a>
+      </p>
       <p class="footer-advisory-red">
         초음파 세척기 수리 견적은 주식회사 탑소닉(고객센터: <a href="tel:1811-7038">1811-7038</a>)의 기술 자문을 받습니다.
       </p>
       <div style="margin-top:16px;">
-        <button type="button" style="background:none;border:none;color:var(--lge-muted);font-size:0.78rem;text-decoration:underline;cursor:pointer;" onclick="editDealerInfo()">
+        <button type="button" style="background:none;border:none;color:var(--lge-muted);font-size:0.78rem;text-decoration:underline;cursor:pointer;" onclick="openPartnerEditModal()">
           [파트너 전용] 내 페이지 정보 수정
         </button>
       </div>
     </div>
   </footer>
+
+  <!-- 파트너 전용 페이지 정보 수정 모달 -->
+  <dialog id="partner-edit-dialog" style="border:none;border-radius:16px;padding:24px;max-width:440px;width:92%;box-shadow:0 16px 40px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:1.08rem;font-weight:800;">파트너 페이지 정보 수정</h3>
+      <button type="button" onclick="closePartnerEditModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666;">×</button>
+    </div>
+    <form id="partner-edit-form" style="display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <label style="display:block;font-size:0.8rem;font-weight:700;margin-bottom:4px;">업체 아이디 (영문/숫자)</label>
+        <input type="text" id="pe-id" required style="width:100%;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.8rem;font-weight:700;margin-bottom:4px;">업체명</label>
+        <input type="text" id="pe-name" required style="width:100%;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.8rem;font-weight:700;margin-bottom:4px;">대표 유튜브 영상 링크</label>
+        <input type="text" id="pe-youtube" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;height:40px;padding:0 10px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.88rem;">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" onclick="closePartnerEditModal()" style="flex:1;height:42px;border:1px solid #d4d4d4;background:#fff;border-radius:8px;font-weight:700;cursor:pointer;">취소</button>
+        <button type="submit" style="flex:1;height:42px;border:none;background:#111;color:#fff;border-radius:8px;font-weight:800;cursor:pointer;">저장 후 적용</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Mobile Sticky Action Bar -->
   <aside class="sticky-bottom-bar">
@@ -877,8 +924,8 @@
       document.getElementById('disp-loc').textContent = data.loc;
       document.getElementById('disp-warr').textContent = data.warr;
       document.getElementById('disp-bids').textContent = data.bids;
-      document.getElementById('main-quote-cta').href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId);
-      document.getElementById('bar-quote').href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId);
+      document.getElementById('main-quote-cta').href = '#topsonic-consult';
+      document.getElementById('bar-quote').href = '#topsonic-consult';
       document.getElementById('bar-phone').href = 'tel:' + (data.phone || '1811-7038');
 
       if (data.videoSrc) {
@@ -888,7 +935,32 @@
     }
 
     function orderModel(model) {
-      window.location.href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId) + '&model=' + encodeURIComponent(model);
+      const sel = document.getElementById('ts-product');
+      if (sel) {
+        let matched = false;
+        for (let i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value.includes(model) || model.includes(sel.options[i].value.split(' ')[0])) {
+            sel.selectedIndex = i;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          const opt = document.createElement('option');
+          opt.value = model;
+          opt.textContent = model;
+          sel.appendChild(opt);
+          sel.value = model;
+        }
+      }
+      const sec = document.getElementById('topsonic-consult');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          const reg = document.getElementById('ts-region');
+          if (reg) reg.focus();
+        }, 350);
+      }
     }
 
     function copyLandingLink() {
@@ -955,48 +1027,57 @@
       setTimeout(() => { t.style.display = 'none'; }, 2600);
     }
 
-    function editDealerInfo() {
-      const id = prompt('업체 아이디(영문/숫자):', dealerId);
-      if (!id) return;
-      const compName = prompt('업체명:', document.getElementById('disp-title').textContent);
-      if (!compName) return;
-      const youtube = prompt('유튜브 링크(watch?v= 또는 youtu.be/ 주소):', '');
+    function openPartnerEditModal() {
+      const dlg = document.getElementById('partner-edit-dialog');
+      if (!dlg) return;
+      document.getElementById('pe-id').value = dealerId;
+      document.getElementById('pe-name').value = document.getElementById('disp-title').textContent;
+      document.getElementById('pe-youtube').value = '';
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+    }
 
-      let finalEmbed = 'https://www.youtube.com/embed/qupKrZxETnQ';
-      if (youtube) {
-        if (youtube.includes('watch?v=')) {
-          finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('watch?v=')[1].split('&')[0];
-        } else if (youtube.includes('youtu.be/')) {
-          finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('youtu.be/')[1].split('?')[0];
-        } else if (youtube.startsWith('http')) {
-          finalEmbed = youtube;
-        } else {
-          finalEmbed = 'https://www.youtube.com/embed/' + youtube;
-        }
-      }
-
-      const obj = {
-        name: compName,
-        sub: compName + ' 공식 인증 파트너관',
-        category: '주방 설비·기기 전문',
-        story: compName + '은 닥터119 공식 인증 파트너로 최고의 품질과 신속한 설치를 보장합니다.',
-        loc: '전국 대응 가능',
-        warr: '품질 보증 책임제',
-        bids: '비교 견적 참여중',
-        videoSrc: finalEmbed,
-        videoDesc: compName + ' 공식 소개 영상',
-        phone: '1661-0783'
-      };
-
-      try {
-        localStorage.setItem('dr119_landing_' + id.toLowerCase(), JSON.stringify(obj));
-      } catch (e) {}
-
-      window.location.href = 'landing.html?id=' + encodeURIComponent(id.toLowerCase());
+    function closePartnerEditModal() {
+      const dlg = document.getElementById('partner-edit-dialog');
+      if (!dlg) return;
+      if (typeof dlg.close === 'function' && dlg.open) dlg.close();
+      else dlg.removeAttribute('open');
     }
 
     window.addEventListener('DOMContentLoaded', function () {
       init();
+      const peForm = document.getElementById('partner-edit-form');
+      if (peForm) {
+        peForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const id = document.getElementById('pe-id').value.trim();
+          const compName = document.getElementById('pe-name').value.trim();
+          const youtube = document.getElementById('pe-youtube').value.trim();
+          if (!id || !compName) return;
+          let finalEmbed = 'https://www.youtube.com/embed/qupKrZxETnQ';
+          if (youtube) {
+            if (youtube.includes('watch?v=')) finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('watch?v=')[1].split('&')[0];
+            else if (youtube.includes('youtu.be/')) finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('youtu.be/')[1].split('?')[0];
+            else if (youtube.startsWith('http')) finalEmbed = youtube;
+            else finalEmbed = 'https://www.youtube.com/embed/' + youtube;
+          }
+          const obj = {
+            name: compName,
+            sub: compName + ' 공식 인증 파트너관',
+            category: '주방 설비·기기 전문',
+            story: compName + '은 닥터119 공식 인증 파트너로 최고의 품질과 신속한 설치를 보장합니다.',
+            loc: '전국 대응 가능',
+            warr: '품질 보증 책임제',
+            bids: '비교 견적 참여중',
+            videoSrc: finalEmbed,
+            videoDesc: compName + ' 공식 소개 영상',
+            phone: '1811-7038'
+          };
+          try { localStorage.setItem('dr119_landing_' + id.toLowerCase(), JSON.stringify(obj)); } catch (err) {}
+          closePartnerEditModal();
+          window.location.href = 'landing.html?id=' + encodeURIComponent(id.toLowerCase());
+        });
+      }
       const tsForm = document.getElementById('topsonic-direct-form');
       if (tsForm) {
         tsForm.addEventListener('submit', function (e) {

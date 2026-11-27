@@ -9,39 +9,223 @@
   <link rel="stylesheet" href="style.css">
   <style>
     :root {
+      --auc-mint: #0d9488;
+      --auc-mint-soft: #f0fdfa;
+      --auc-mint-mid: #ccfbf1;
+      --auc-mint-border: #99f6e4;
       --auc-teal: #0f766e;
       --auc-teal-light: #f0fdfa;
       --auc-teal-dark: #115e59;
-      --auc-gray-bg: #f8fafc;
-      --auc-border: #e2e8f0;
-      --auc-text: #0f172a;
-      --auc-muted: #64748b;
-      --auc-gold: #d97706;
-      --auc-red: #dc2626;
+      --auc-gray-bg: #ffffff;
+      --auc-border: #e5e5e5;
+      --auc-text: #111111;
+      --auc-muted: #666666;
+      --auc-gold: #b45309;
+      --auc-red: #a50034;
     }
-    body { background-color: #f8fafc; color: var(--auc-text); font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; line-height: 1.5; }
-    .auc-header { position: sticky; top: 0; z-index: 100; background: #ffffff; border-bottom: 1px solid var(--auc-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .auc-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
-    .auc-brand img { width: 32px; height: 32px; }
-    .auc-brand-title { font-size: 1.05rem; font-weight: 800; color: #111; margin: 0; }
-    .auc-brand-badge { background: #fee2e2; color: #991b1b; font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .auc-nav-back { font-size: 0.85rem; color: var(--auc-teal); text-decoration: none; font-weight: 700; padding: 6px 12px; border: 1px solid var(--auc-teal); border-radius: 6px; }
-    .auc-nav-back:hover { background: var(--auc-teal-light); }
+    body {
+      background-color: #ffffff;
+      color: var(--auc-text);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.58;
+      letter-spacing: -0.02em;
+    }
+    /* LG전자 스타일 미니멀 헤더 */
+    .auc-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .auc-header-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      height: 58px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .auc-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .auc-brand img { width: 28px; height: 28px; }
+    .auc-brand-title { font-size: 1.08rem; font-weight: 900; color: #111111; margin: 0; letter-spacing: -0.03em; }
+    .auc-brand-badge {
+      background: #f0fdfa;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .auc-nav-back {
+      font-size: 0.84rem;
+      color: #111111;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 7px 16px;
+      border: 1px solid #d4d4d4;
+      border-radius: 999px;
+      transition: all 0.15s;
+    }
+    .auc-nav-back:hover { border-color: #0d9488; color: #0d9488; }
 
-    .auc-hero { background: linear-gradient(135deg, #042f2e 0%, #0f766e 100%); color: #ffffff; padding: 36px 16px 44px; text-align: center; }
-    .auc-hero h1 { font-size: 1.55rem; font-weight: 900; margin: 0 0 8px; line-height: 1.35; letter-spacing: -0.02em; }
-    .auc-hero p { font-size: 0.92rem; color: #ccfbf1; margin: 0 auto; max-width: 600px; }
+    /* 상단 2단 스테이지: 메인(index.html)과 정확히 동일한 위치·비율 (좌 2/3 홍보 + 우 1/3 갤럭시 S 울트라 프레임) */
+    .auc-top-stage {
+      background: #ffffff;
+      padding: 20px 0 28px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .auc-stage-grid {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (min-width: 960px) {
+      .auc-stage-grid {
+        grid-template-columns: 1fr 378px;
+        gap: 36px;
+      }
+      .auc-phone-frame {
+        width: 378px;
+        max-width: 378px;
+        padding: 10px 16px 14px !important;
+        border-radius: 18px !important;
+        border: 6px solid #2b2c30 !important;
+        outline: 2px solid #8a8d93;
+        background: linear-gradient(180deg, #f4fdfb 0%, #edfaf7 100%) !important;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+          0 22px 48px rgba(15, 23, 42, 0.18),
+          0 4px 12px rgba(15, 23, 42, 0.1) !important;
+        position: relative;
+      }
+      .auc-phone-frame::before {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 86px;
+        width: 4px;
+        height: 62px;
+        background: linear-gradient(180deg, #9ca3af 0%, #4b5563 50%, #9ca3af 100%);
+        border-radius: 0 3px 3px 0;
+      }
+      .auc-phone-frame::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 164px;
+        width: 4px;
+        height: 36px;
+        background: linear-gradient(180deg, #9ca3af 0%, #4b5563 50%, #9ca3af 100%);
+        border-radius: 0 3px 3px 0;
+      }
+      .auc-galaxy-bar {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px 8px;
+        font-size: 0.70rem;
+        font-weight: 700;
+        color: #334155;
+        position: relative;
+      }
+      .auc-galaxy-hole {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 38%, #2563eb 0%, #0f172a 45%, #000000 100%);
+        box-shadow: 0 0 0 2px #1e293b;
+        position: absolute;
+        left: 50%;
+        top: 1px;
+        transform: translateX(-50%);
+      }
+      .auc-galaxy-gesture {
+        display: block !important;
+        width: 108px;
+        height: 4px;
+        background: #94a3b8;
+        border-radius: 999px;
+        margin: 10px auto 0;
+        opacity: 0.7;
+      }
+    }
+    @media (max-width: 760px) {
+      .auc-header-inner { padding: 0 12px; height: 50px; }
+      .auc-stage-grid { padding: 0 12px; gap: 18px; }
+      .auc-phone-frame {
+        order: -1;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        padding: 8px 0 !important;
+      }
+    }
 
-    /* 시각적 검색 박스 (어떤 물건을 찾고 계십니까?) */
-    .auc-search-hero-box { max-width: 860px; margin: -26px auto 20px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 18px 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); position: relative; z-index: 10; }
-    .auc-search-label { display: block; font-size: 1.12rem; font-weight: 900; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-    .auc-search-input-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
-    .auc-search-input { flex: 1; min-width: 220px; height: 48px; padding: 0 16px; border: 2px solid var(--auc-teal); border-radius: 10px; font-size: 0.96rem; outline: none; box-sizing: border-box; }
-    .auc-search-btn { height: 48px; padding: 0 20px; background: var(--auc-teal); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
-    .auc-create-direct-btn { height: 48px; padding: 0 20px; background: #ea1917; color: #ffffff; border: none; border-radius: 10px; font-weight: 900; font-size: 0.95rem; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(234,25,23,0.25); transition: transform 0.15s; }
-    .auc-create-direct-btn:hover { background: #dc2626; transform: translateY(-1px); }
+    /* 좌측 국내 최초 역경매 홍보 영역 (LG 미니멀 여백 & 라인) */
+    .auc-left-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #0d9488;
+      margin-bottom: 10px;
+    }
+    .auc-left-title {
+      font-size: clamp(1.65rem, 2.8vw, 2.3rem);
+      font-weight: 900;
+      color: #111111;
+      line-height: 1.26;
+      letter-spacing: -0.04em;
+      margin: 0 0 12px;
+      word-break: keep-all;
+    }
+    .auc-left-title em { font-style: normal; color: #0d9488; }
+    .auc-left-desc {
+      font-size: 0.96rem;
+      color: #555555;
+      margin: 0 0 24px;
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+    .auc-process-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px 0;
+      border-top: 2px solid #111111;
+      border-bottom: 1px solid #e5e5e5;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 640px) {
+      .auc-process-list { grid-template-columns: 1fr; gap: 14px; }
+    }
+    .auc-proc-num { font-size: 0.78rem; font-weight: 900; color: #0d9488; display: block; margin-bottom: 4px; }
+    .auc-proc-title { font-size: 0.96rem; font-weight: 800; color: #111111; margin: 0 0 4px; }
+    .auc-proc-desc { font-size: 0.82rem; color: #666666; margin: 0; line-height: 1.5; }
+    .auc-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 0.84rem;
+      color: #444444;
+      font-weight: 600;
+    }
+    .auc-trust-row span strong { color: #0d9488; font-weight: 800; }
 
-    /* 모바일 하단 플로팅 역경매 등록 바 */
+    /* 모바일 하단 플로팅 바 */
     .auc-floating-bar {
       position: fixed;
       bottom: 0;
@@ -49,128 +233,140 @@
       right: 0;
       background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
       border-top: 1px solid var(--auc-border);
       padding: 10px 16px;
       z-index: 99;
       display: flex;
       justify-content: center;
-      box-shadow: 0 -3px 12px rgba(0,0,0,0.06);
     }
+    @media (min-width: 960px) { .auc-floating-bar { display: none; } }
     .auc-floating-btn {
       width: 100%;
-      max-width: 600px;
-      height: 48px;
-      background: #ea1917;
+      max-width: 560px;
+      height: 46px;
+      background: #0d9488;
       color: #ffffff;
       border: none;
-      border-radius: 12px;
-      font-size: 0.98rem;
-      font-weight: 900;
+      border-radius: 999px;
+      font-size: 0.94rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(234,25,23,0.3);
     }
-    .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
-    .quick-tag-label { font-size: 0.8rem; color: var(--auc-muted); font-weight: 700; }
-    .quick-tag-btn { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.15s; }
-    .quick-tag-btn:hover { background: var(--auc-teal); color: #ffffff; border-color: var(--auc-teal); }
 
-    /* 10초 번개 폼 스타일 */
+    /* 밝은 민트 톤 10초 폼 칩 */
     .region-chip {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 0.82rem;
+      padding: 4px 8px;
+      font-size: 0.76rem;
       font-weight: 700;
-      color: #334155;
+      color: #374151;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .region-chip:hover { border-color: var(--auc-teal); color: var(--auc-teal); }
-    .region-chip.active { background: #0f766e; color: #ffffff; border-color: #0f766e; }
+    .region-chip:hover { border-color: #0d9488; color: #0d9488; }
+    .region-chip.active { background: #0d9488; color: #ffffff; border-color: #0d9488; }
 
     .speed-tag-btn {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 0.84rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.76rem;
       font-weight: 700;
-      color: #1e293b;
+      color: #374151;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .speed-tag-btn:hover { border-color: #ea1917; color: #ea1917; }
-    .speed-tag-btn.active { background: #ea1917; color: #ffffff; border-color: #ea1917; }
+    .speed-tag-btn:hover { border-color: #0d9488; color: #0d9488; }
+    .speed-tag-btn.active { background: #0d9488; color: #ffffff; border-color: #0d9488; }
 
-    .auc-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 16px 0 24px; max-width: 860px; margin-left: auto; margin-right: auto; }
-    .auc-stat-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 10px; padding: 12px 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .auc-stat-num { font-size: 1.25rem; font-weight: 900; color: var(--auc-teal); margin-bottom: 2px; }
-    .auc-stat-lbl { font-size: 0.78rem; color: var(--auc-muted); font-weight: 600; }
+    /* 4단 메인 네비게이션 탭 (LG 미니멀 탭) */
+    .auc-tab-bar {
+      display: flex;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-width: 1180px;
+      margin: 12px auto 20px;
+      padding: 0 24px;
+    }
+    .auc-tab-btn {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 14px 8px;
+      border: none;
+      background: none;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #666666;
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .auc-tab-btn.active { color: #0d9488; border-bottom-color: #0d9488; font-weight: 800; }
 
-    /* 4단 메인 네비게이션 탭 */
-    .auc-tab-bar { display: flex; background: #ffffff; border-bottom: 2px solid var(--auc-border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 12px; max-width: 900px; margin: 0 auto 16px; border-radius: 10px 10px 0 0; }
-    .auc-tab-btn { flex: 1; min-width: 140px; text-align: center; padding: 14px 8px; border: none; background: none; font-size: 0.92rem; font-weight: 800; color: var(--auc-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
-    .auc-tab-btn.active { color: var(--auc-teal); border-bottom-color: var(--auc-teal); }
-
-    .auc-container { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
+    .auc-container { max-width: 1180px; margin: 0 auto; padding: 0 24px 60px; }
 
     /* 카테고리 필터 칩 */
-    .cat-filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; }
-    .cat-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--auc-border); background: #ffffff; font-size: 0.84rem; font-weight: 700; cursor: pointer; white-space: nowrap; color: #475569; }
-    .cat-chip.active { background: var(--auc-teal); color: #ffffff; border-color: var(--auc-teal); }
+    .cat-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; }
+    .cat-chip { padding: 7px 16px; border-radius: 999px; border: 1px solid #d4d4d4; background: #ffffff; font-size: 0.84rem; font-weight: 700; cursor: pointer; white-space: nowrap; color: #444444; }
+    .cat-chip.active { background: #0d9488; color: #ffffff; border-color: #0d9488; }
 
-    /* 실시간 역경매 비딩 카드 */
-    .auc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-    .auc-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 14px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: transform 0.15s, border-color 0.15s; }
-    .auc-card:hover { border-color: var(--auc-teal); transform: translateY(-2px); }
+    /* 실시간 역경매 비딩 카드 (LG 미니멀 클린 라인) */
+    .auc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+    .auc-card { background: #ffffff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: border-color 0.15s; }
+    .auc-card:hover { border-color: #0d9488; }
     .auc-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .auc-card-cat { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: #f1f5f9; color: #334155; }
-    .auc-card-cat.eq { background: #e0f2fe; color: #0369a1; }
-    .auc-card-cat.fa { background: #fef3c7; color: #b45309; }
-    .auc-card-cat.in { background: #f3e8ff; color: #7e22ce; }
-    .auc-timer { font-size: 0.78rem; font-weight: 700; color: #dc2626; display: flex; align-items: center; gap: 3px; }
-    .auc-cust-info { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; font-weight: 600; }
-    .auc-title { font-size: 1.02rem; font-weight: 800; margin: 0 0 6px; line-height: 1.35; color: #0f172a; }
-    .auc-specs { font-size: 0.82rem; color: var(--auc-muted); margin: 0 0 12px; line-height: 1.4; }
-    
-    .auc-price-box { background: var(--auc-gray-bg); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f1f5f9; }
-    .auc-price-label { font-size: 0.78rem; color: var(--auc-muted); }
-    .auc-price-val { font-size: 1.15rem; font-weight: 900; color: #dc2626; }
-    .auc-save-badge { font-size: 0.72rem; color: #16a34a; font-weight: 800; background: #dcfce7; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
-    .auc-bids-count { font-size: 0.82rem; font-weight: 800; color: var(--auc-teal); }
-    
-    .auc-dealer-preview { font-size: 0.75rem; color: #475569; margin-bottom: 10px; background: #fafafa; padding: 6px 8px; border-radius: 6px; }
+    .auc-card-cat { font-size: 0.74rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: #f0fdfa; color: #0f766e; }
+    .auc-card-cat.eq { background: #f0fdfa; color: #0f766e; }
+    .auc-card-cat.fa { background: #fefce8; color: #854d0e; }
+    .auc-card-cat.in { background: #f3f4f6; color: #374151; }
+    .auc-timer { font-size: 0.78rem; font-weight: 700; color: #0d9488; display: flex; align-items: center; gap: 3px; }
+    .auc-cust-info { font-size: 0.80rem; color: #666666; margin-bottom: 4px; font-weight: 600; }
+    .auc-title { font-size: 1.02rem; font-weight: 800; margin: 0 0 6px; line-height: 1.35; color: #111111; }
+    .auc-specs { font-size: 0.82rem; color: var(--auc-muted); margin: 0 0 12px; line-height: 1.45; }
+
+    .auc-price-box { background: #f8fdfc; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ccfbf1; }
+    .auc-price-label { font-size: 0.76rem; color: #555555; }
+    .auc-price-val { font-size: 1.12rem; font-weight: 900; color: #0f766e; }
+    .auc-save-badge { font-size: 0.72rem; color: #0f766e; font-weight: 800; background: #ccfbf1; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+    .auc-bids-count { font-size: 0.82rem; font-weight: 800; color: #111111; }
+
+    .auc-dealer-preview { font-size: 0.76rem; color: #555555; margin-bottom: 10px; border-top: 1px solid #f0f0f0; padding-top: 8px; }
 
     .auc-btn-group { display: flex; gap: 6px; }
-    .auc-btn { flex: 1; padding: 9px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; border: none; cursor: pointer; text-align: center; }
-    .auc-btn.primary { background: var(--auc-teal); color: #ffffff; }
-    .auc-btn.outline { background: #ffffff; border: 1px solid var(--auc-teal); color: var(--auc-teal); }
+    .auc-btn { flex: 1; padding: 9px 12px; border-radius: 999px; font-size: 0.84rem; font-weight: 700; border: none; cursor: pointer; text-align: center; }
+    .auc-btn.primary { background: #0d9488; color: #ffffff; }
+    .auc-btn.outline { background: #ffffff; border: 1px solid #d4d4d4; color: #111111; }
+    .auc-btn.outline:hover { border-color: #0d9488; color: #0d9488; }
 
-    /* 더보기 버튼 */
-    .auc-load-more-btn { width: 100%; height: 48px; background: #ffffff; border: 2px solid var(--auc-teal); color: var(--auc-teal); border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; margin-top: 20px; transition: all 0.15s; }
-    .auc-load-more-btn:hover { background: var(--auc-teal-light); }
+    .auc-load-more-btn { width: 100%; height: 48px; background: #ffffff; border: 1.5px solid #0d9488; color: #0d9488; border-radius: 999px; font-size: 0.94rem; font-weight: 800; cursor: pointer; margin-top: 20px; transition: all 0.15s; }
+    .auc-load-more-btn:hover { background: #f0fdfa; }
 
     /* 폼 공통 스타일 */
-    .auc-form-box { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .auc-form-box { background: #ffffff; border-top: 2px solid #111111; padding: 24px 0; }
     .auc-form-group { margin-bottom: 14px; }
-    .auc-form-group label { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; color: #1e293b; }
-    .auc-form-group input, .auc-form-group select, .auc-form-group textarea { width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px; border: 1px solid var(--auc-border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
+    .auc-form-group label { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; color: #111111; }
+    .auc-form-group input, .auc-form-group select, .auc-form-group textarea { width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px; border: 1px solid #d4d4d4; border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: #ffffff; }
     .auc-form-group textarea { height: 80px; padding: 10px 12px; }
     .auc-form-hint { font-size: 0.78rem; color: var(--auc-muted); margin-top: 4px; }
-    .auc-submit-btn { width: 100%; height: 46px; background: var(--auc-teal); color: #ffffff; border: none; border-radius: 10px; font-size: 0.96rem; font-weight: 800; cursor: pointer; }
+    .auc-submit-btn { width: 100%; height: 48px; background: #0d9488; color: #ffffff; border: none; border-radius: 999px; font-size: 0.96rem; font-weight: 800; cursor: pointer; }
 
-    /* 전국 화물 계산기 카드 */
-    .freight-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 18px; margin-top: 14px; }
-    .freight-result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
-    .freight-tag { font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
-    .freight-tag.cons { background: #dcfce7; color: #15803d; }
-    .freight-tag.char { background: #f1f5f9; color: #475569; }
+    /* 전국 화물 계산기 */
+    .freight-box { background: #ffffff; border-top: 2px solid #111111; padding: 18px 0; margin-top: 14px; }
+    .freight-result-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+    .freight-tag { font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+    .freight-tag.cons { background: #f0fdfa; color: #0f766e; }
+    .freight-tag.char { background: #f3f4f6; color: #4b5563; }
 
     /* 모달 */
     .auc-modal { border: none; border-radius: 14px; padding: 0; max-width: 560px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -181,114 +377,144 @@
 </head>
 <body>
 
-  <!-- 헤더 -->
+  <!-- LG 미니멀 헤더 -->
   <header class="auc-header">
-    <a href="index.html" class="auc-brand">
-      <img src="icons/dr119-logo.svg" alt="Dr.119 로고">
-      <div>
-        <h2 class="auc-brand-title">Dr.119 전국 최저가 비교 견적</h2>
-      </div>
-      <span class="auc-brand-badge" style="background:#dcfce7;color:#15803d;">실시간 최저가 비딩</span>
-    </a>
-    <a href="index.html" class="auc-nav-back">닥터119 수리센터</a>
+    <div class="auc-header-inner">
+      <a href="index.html" class="auc-brand">
+        <img src="icons/dr119-logo.svg" alt="Dr.119 로고">
+        <h2 class="auc-brand-title">Dr.119 주방설비 찾아줘</h2>
+        <span class="auc-brand-badge">전국 최저가 역경매</span>
+      </a>
+      <a href="index.html" class="auc-nav-back">초음파 수리 접수처</a>
+    </div>
   </header>
 
-  <!-- 히어로 배너: 친숙한 카피 -->
-  <section class="auc-hero" style="background:linear-gradient(135deg, #064e3b 0%, #0f766e 100%);padding:32px 16px 42px;">
-    <h1 style="font-size:1.6rem;font-weight:900;margin:0 0 8px;line-height:1.3;">식당 주방기기 · 설비공사<br>전국 최저가 비교 견적 받기</h1>
-    <p style="font-size:0.95rem;color:#ccfbf1;margin:0 auto;line-height:1.5;">원하시거나 구매하시고 싶은 제품을 등록하면<br>등록되어 있는 전국 전문 업체들이 실시간 최저가를 적어드립니다.</p>
-  </section>
+  <!-- 상단 2단 스테이지: 좌측 2/3 국내 최초 역경매 홍보 + 우측 1/3 갤럭시 S 울트라 스마트폰 입력창 (메인 index.html과 정확히 동일한 위치·규격) -->
+  <section class="auc-top-stage" aria-label="주방설비 전국 최저가 비교 견적">
+    <div class="auc-stage-grid">
 
-  <!-- 최상단: 바쁜 사장님을 위한 10초 번개 접수창 -->
-  <div class="auc-search-hero-box" style="background:#ffffff;border:2px solid #0f766e;border-radius:18px;padding:22px 20px;box-shadow:0 6px 24px rgba(15,118,110,0.12);margin-top:-28px;">
-    
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="background:#ea1917;color:#ffffff;font-size:0.78rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:-0.01em;">초간편 신청</span>
-        <h2 style="margin:0;font-size:1.25rem;font-weight:900;color:#0f172a;letter-spacing:-0.02em;">내 물건 찾아줘 (최저가 비교 견적)</h2>
+      <!-- 좌측 2/3: 국내 최초 전국 단위 주방설비 역경매 플랫폼 홍보 -->
+      <div style="padding-top:4px;">
+        <div class="auc-left-eyebrow">
+          <span>국내 최초</span>
+          <span style="color:#d4d4d4;">|</span>
+          <span>전국 단위 주방기기·설비공사 역경매 플랫폼</span>
+        </div>
+        <h1 class="auc-left-title">국내 최초 전국 단위<br><em>주방설비 최저가 역경매</em></h1>
+        <p class="auc-left-desc">
+          원하시는 주방기기나 설비공사를 10초 만에 등록하시면, 전국 각 지역에 등록된 검증 전문 업체들이 실시간으로 최저가를 경쟁 입찰합니다.
+        </p>
+
+        <div class="auc-process-list">
+          <div>
+            <span class="auc-proc-num">STEP 01</span>
+            <h3 class="auc-proc-title">지역·제품 10초 등록</h3>
+            <p class="auc-proc-desc">복잡한 구매 예산 없이 설치 지역과 필요한 기기·규격만 선택</p>
+          </div>
+          <div>
+            <span class="auc-proc-num">STEP 02</span>
+            <h3 class="auc-proc-title">전국 전문 업체 최저가 입찰</h3>
+            <p class="auc-proc-desc">제조사·총판·지역 시공사가 실시간으로 투명한 최저가 제시</p>
+          </div>
+          <div>
+            <span class="auc-proc-num">STEP 03</span>
+            <h3 class="auc-proc-title">비교 후 안심 직거래</h3>
+            <p class="auc-proc-desc">견적과 AS 조건을 한눈에 비교하고 원하는 업체와 직접 연결</p>
+          </div>
+        </div>
+
+        <div class="auc-trust-row">
+          <span><strong>전국 17개 시·도</strong> 실시간 대응</span>
+          <span><strong>중간 마진 0원</strong> 본사·총판 직거래</span>
+          <span><strong>100% 무료</strong> 비교 견적 신청</span>
+        </div>
       </div>
-      <span style="font-size:0.82rem;color:#0f766e;font-weight:700;">복잡한 예산 입력 없이 3개면 끝</span>
+
+      <!-- 우측 1/3: 최신 갤럭시 S 울트라 실사 스마트폰 입력창 (밝은 민트 톤) -->
+      <div class="auc-phone-frame">
+        <div class="auc-galaxy-bar" style="display:none;" aria-hidden="true">
+          <span>9:41</span>
+          <span class="auc-galaxy-hole"></span>
+          <span>5G 100%</span>
+        </div>
+
+        <div style="text-align:center;margin-bottom:10px;">
+          <h2 style="margin:0 0 2px;font-size:1.18rem;font-weight:900;color:#0f766e;letter-spacing:-0.025em;">내 물건 최저가 찾아줘</h2>
+          <p style="margin:0;font-size:0.78rem;color:#555555;">예산 입력 없이 지역·제품·연락처 3단계면 끝</p>
+        </div>
+
+        <form id="auc-speed-request-form" style="display:flex;flex-direction:column;gap:10px;">
+          <!-- 1단계: 설치·납품 지역 (상세 동·면 단위까지) -->
+          <div>
+            <label for="speed-region" style="display:block;font-size:0.78rem;font-weight:800;color:#111111;margin-bottom:4px;">
+              <span style="color:#0d9488;">1.</span> 설치·납품 지역 <span style="font-weight:600;color:#666666;">(상세 동·면 단위까지)</span>
+            </label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">
+              <button type="button" class="region-chip active" onclick="setSpeedRegion('서울')">서울</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('경기')">경기</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('인천')">인천</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('부산')">부산</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('대구')">대구</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('대전')">대전</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('광주')">광주</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('충청')">충청</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('전라')">전라</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('경상')">경상</button>
+              <button type="button" class="region-chip" onclick="setSpeedRegion('강원/제주')">강원·제주</button>
+            </div>
+            <input type="text" id="speed-region" placeholder="상세 동·면까지 입력 (예: 서울 노원구 상계동 / 화성시 봉담읍)" value="서울 노원구 상계동" required style="width:100%;height:38px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.84rem;font-weight:600;box-sizing:border-box;background:#ffffff;">
+          </div>
+
+          <!-- 2단계: 필요한 제품 및 규격 -->
+          <div>
+            <label for="speed-item" style="display:block;font-size:0.78rem;font-weight:800;color:#111111;margin-bottom:4px;">
+              <span style="color:#0d9488;">2.</span> 필요한 제품·공사 및 규격
+            </label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">
+              <button type="button" class="speed-tag-btn active" onclick="setSpeedItem('초음파 세척기')">초음파 세척기</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('업소용 식기세척기')">식기세척기</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('닥트·후드 환기공사')">닥트·환기</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('45박스 업소용 냉장고')">냉장고</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('그리스트랩·배관')">배관</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('주방 바닥 방수')">방수</button>
+              <button type="button" class="speed-tag-btn" onclick="setSpeedItem('')">직접입력</button>
+            </div>
+
+            <!-- 초음파 세척기 규격/사이즈 원클릭 칩 -->
+            <div id="ultrasonic-size-chips" style="background:#ffffff;border:1px solid #ccfbf1;border-radius:8px;padding:6px 8px;margin-bottom:6px;">
+              <div style="font-size:0.72rem;font-weight:700;color:#0f766e;margin-bottom:4px;">초음파 세척기 가로 규격 선택</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                <button type="button" class="size-chip active" onclick="setSpeedSize('600형 (소형/카페)')" style="background:#0d9488;color:#fff;border:none;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">600형</button>
+                <button type="button" class="size-chip" onclick="setSpeedSize('800형 (표준 1구)')" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">800형</button>
+                <button type="button" class="size-chip" onclick="setSpeedSize('1000형 (중형 식당)')" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">1000형</button>
+                <button type="button" class="size-chip" onclick="setSpeedSize('1200형 (대형/고기집)')" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">1200형</button>
+                <button type="button" class="size-chip" onclick="setSpeedSize('1500~1800형 (특대형)')" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">1500~1800형</button>
+                <button type="button" class="size-chip" onclick="setSpeedSize('가정용 싱크볼')" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:3px 7px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">가정용</button>
+              </div>
+            </div>
+
+            <input type="text" id="speed-item" placeholder="제품명·규격 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기 [600형 (소형/카페)]" required style="width:100%;height:38px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.84rem;font-weight:600;box-sizing:border-box;background:#ffffff;">
+          </div>
+
+          <!-- 3단계: 연락처 입력 + 오른쪽 크고 높은 제출 버튼 -->
+          <div>
+            <label for="speed-phone" style="display:block;font-size:0.78rem;font-weight:800;color:#111111;margin-bottom:4px;">
+              <span style="color:#0d9488;">3.</span> 최저가 받을 연락처
+            </label>
+            <div style="display:flex;gap:8px;align-items:stretch;">
+              <input type="tel" id="speed-phone" placeholder="010-0000-0000" required style="flex:1;min-width:0;height:54px;padding:0 12px;border:1.5px solid #99f6e4;border-radius:10px;font-size:0.92rem;font-weight:700;box-sizing:border-box;background:#ffffff;">
+              <button type="submit" id="btn-speed-submit" style="flex:0 0 132px;height:54px;background:#0d9488;color:#ffffff;border:none;border-radius:10px;font-size:0.92rem;font-weight:900;cursor:pointer;line-height:1.25;box-shadow:0 4px 12px rgba(13,148,136,0.25);">
+                최저가<br>견적 받기
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="auc-galaxy-gesture" style="display:none;" aria-hidden="true"></div>
+      </div>
+
     </div>
-
-    <!-- 10초 초간편 등록 폼: 1.지역 -> 2.제품 -> 3.연락처 -->
-    <form id="auc-speed-request-form" style="display:flex;flex-direction:column;gap:14px;">
-      
-      <!-- 1단계: 지역 먼저 선택 -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
-        <label style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:6px;">
-          <span style="color:#ea1917;">1.</span> 설치·납품받으실 지역 *
-        </label>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
-          <button type="button" class="region-chip active" onclick="setSpeedRegion('서울')">서울</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('경기')">경기</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('인천')">인천</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('부산')">부산</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('대구')">대구</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('대전')">대전</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('광주')">광주</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('충청')">충청</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('전라')">전라</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('경상')">경상</button>
-          <button type="button" class="region-chip" onclick="setSpeedRegion('강원/제주')">강원/제주</button>
-        </div>
-        <input type="text" id="speed-region" placeholder="시/도 및 시·군·구 상세 입력 (예: 서울 노원구 상계동)" value="서울 노원구" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
-      </div>
-
-      <!-- 2단계: 필요한 제품 및 규격/사이즈 선택 -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
-        <label style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:6px;">
-          <span style="color:#0f766e;">2.</span> 어떤 제품·공사가 필요하신가요? *
-        </label>
-        <!-- 제품 대분류 선택 칩 -->
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-          <button type="button" class="speed-tag-btn active" onclick="setSpeedItem('초음파 세척기')">초음파 세척기</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('업소용 식기세척기')">업소용 식기세척기</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('닥트·후드 환기공사')">닥트·후드 환기</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('45박스 업소용 냉장고')">45박스 냉장고</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('그리스트랩·배관')">그리스트랩 배관</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('주방 바닥 방수')">주방 방수</button>
-          <button type="button" class="speed-tag-btn" onclick="setSpeedItem('')">직접입력</button>
-        </div>
-
-        <!-- 초음파 세척기 규격/사이즈 원클릭 칩 (사장님 맞춤형) -->
-        <div id="ultrasonic-size-chips" style="background:#ffffff;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:0.76rem;font-weight:800;color:#0f766e;">초음파 세척기 규격(가로 사이즈) 선택:</span>
-            <span style="font-size:0.72rem;color:#64748b;">주방 싱크볼 길이에 맞춰 선택</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;">
-            <button type="button" class="size-chip active" onclick="setSpeedSize('600형 (소형/카페)')" style="background:#0f766e;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">600형 (소형/카페)</button>
-            <button type="button" class="size-chip" onclick="setSpeedSize('800형 (표준 1구)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">800형 (표준 1구)</button>
-            <button type="button" class="size-chip" onclick="setSpeedSize('1000형 (중형 식당)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1000형 (중형 식당)</button>
-            <button type="button" class="size-chip" onclick="setSpeedSize('1200형 (대형/고기집)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1200형 (대형/고기집)</button>
-            <button type="button" class="size-chip" onclick="setSpeedSize('1500형 이상 (특대형)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1500형 이상 (특대형)</button>
-            <button type="button" class="size-chip" onclick="setSpeedSize('가정용 빌트인 싱크볼')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">가정용 빌트인</button>
-          </div>
-        </div>
-
-        <input type="text" id="speed-item" placeholder="제품명 또는 공사명 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기 [600형 (소형/카페)]" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
-      </div>
-
-      <!-- 3단계: 연락처 -->
-      <div>
-        <label for="speed-phone" style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:4px;">
-          <span style="color:#0f766e;">3.</span> 최저가 견적을 안내받을 연락처 *
-        </label>
-        <input type="tel" id="speed-phone" placeholder="010-0000-0000 (안심번호 연결)" required style="width:100%;height:46px;padding:0 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.95rem;font-weight:700;box-sizing:border-box;">
-      </div>
-
-      <!-- 큰 빨간 제출 버튼 -->
-      <button type="submit" id="btn-speed-submit" style="width:100%;height:52px;background:#ea1917;color:#ffffff;border:none;border-radius:12px;font-size:1.05rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(234,25,23,0.3);margin-top:2px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        <span>전국 최저가 비교 견적 받기 (10초 무료 신청)</span>
-      </button>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#64748b;padding:0 2px;">
-        <span>✓ 등록되어 있는 전국 전문 업체들이 최저가를 실시간으로 적어드립니다.</span>
-        <span style="color:#0f766e;font-weight:700;">안전 직거래 보증</span>
-      </div>
-    </form>
-  </div>
+  </section>
 
   <!-- 4단 네비게이션 탭 (친숙한 명칭) -->
   <nav class="auc-tab-bar" aria-label="메뉴">
