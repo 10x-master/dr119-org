@@ -17,8 +17,9 @@
       --auc-text: #0f172a;
       --auc-muted: #64748b;
       --auc-gold: #d97706;
+      --auc-red: #dc2626;
     }
-    body { background-color: #ffffff; color: var(--auc-text); font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; line-height: 1.5; }
+    body { background-color: #f8fafc; color: var(--auc-text); font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; line-height: 1.5; }
     .auc-header { position: sticky; top: 0; z-index: 100; background: #ffffff; border-bottom: 1px solid var(--auc-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .auc-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
     .auc-brand img { width: 32px; height: 32px; }
@@ -27,47 +28,71 @@
     .auc-nav-back { font-size: 0.85rem; color: var(--auc-teal); text-decoration: none; font-weight: 700; padding: 6px 12px; border: 1px solid var(--auc-teal); border-radius: 6px; }
     .auc-nav-back:hover { background: var(--auc-teal-light); }
 
-    .auc-hero { background: linear-gradient(135deg, #042f2e 0%, #0f766e 100%); color: #ffffff; padding: 28px 16px; text-align: center; }
-    .auc-hero h1 { font-size: 1.45rem; font-weight: 900; margin: 0 0 8px; line-height: 1.35; letter-spacing: -0.02em; }
-    .auc-hero p { font-size: 0.9rem; color: #ccfbf1; margin: 0 auto; max-width: 600px; }
-    .auc-stats-bar { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 0.82rem; }
-    .auc-stats-bar span { background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 20px; }
+    .auc-hero { background: linear-gradient(135deg, #042f2e 0%, #0f766e 100%); color: #ffffff; padding: 36px 16px 44px; text-align: center; }
+    .auc-hero h1 { font-size: 1.55rem; font-weight: 900; margin: 0 0 8px; line-height: 1.35; letter-spacing: -0.02em; }
+    .auc-hero p { font-size: 0.92rem; color: #ccfbf1; margin: 0 auto; max-width: 600px; }
+
+    /* 시각적 검색 박스 (어떤 물건을 찾고 계십니까?) */
+    .auc-search-hero-box { max-width: 860px; margin: -26px auto 20px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 18px 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); position: relative; z-index: 10; }
+    .auc-search-label { display: block; font-size: 1.12rem; font-weight: 900; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .auc-search-input-wrap { display: flex; gap: 8px; }
+    .auc-search-input { flex: 1; height: 48px; padding: 0 16px; border: 2px solid var(--auc-teal); border-radius: 10px; font-size: 0.96rem; outline: none; box-sizing: border-box; }
+    .auc-search-btn { height: 48px; padding: 0 24px; background: var(--auc-teal); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+    .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
+    .quick-tag-label { font-size: 0.8rem; color: var(--auc-muted); font-weight: 700; }
+    .quick-tag-btn { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.15s; }
+    .quick-tag-btn:hover { background: var(--auc-teal); color: #ffffff; border-color: var(--auc-teal); }
+
+    .auc-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 16px 0 24px; max-width: 860px; margin-left: auto; margin-right: auto; }
+    .auc-stat-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 10px; padding: 12px 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .auc-stat-num { font-size: 1.25rem; font-weight: 900; color: var(--auc-teal); margin-bottom: 2px; }
+    .auc-stat-lbl { font-size: 0.78rem; color: var(--auc-muted); font-weight: 600; }
 
     /* 4단 메인 네비게이션 탭 */
-    .auc-tab-bar { display: flex; background: #ffffff; border-bottom: 2px solid var(--auc-border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 12px; max-width: 900px; margin: 0 auto; }
-    .auc-tab-btn { flex: 1; min-width: 130px; text-align: center; padding: 12px 8px; border: none; background: none; font-size: 0.9rem; font-weight: 700; color: var(--auc-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .auc-tab-bar { display: flex; background: #ffffff; border-bottom: 2px solid var(--auc-border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 12px; max-width: 900px; margin: 0 auto 16px; border-radius: 10px 10px 0 0; }
+    .auc-tab-btn { flex: 1; min-width: 140px; text-align: center; padding: 14px 8px; border: none; background: none; font-size: 0.92rem; font-weight: 800; color: var(--auc-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
     .auc-tab-btn.active { color: var(--auc-teal); border-bottom-color: var(--auc-teal); }
 
-    .auc-container { max-width: 900px; margin: 0 auto; padding: 16px; }
+    .auc-container { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
 
     /* 카테고리 필터 칩 */
     .cat-filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; }
-    .cat-chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--auc-border); background: #ffffff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .cat-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--auc-border); background: #ffffff; font-size: 0.84rem; font-weight: 700; cursor: pointer; white-space: nowrap; color: #475569; }
     .cat-chip.active { background: var(--auc-teal); color: #ffffff; border-color: var(--auc-teal); }
 
     /* 헤이딜러형 실시간 경매 카드 */
     .auc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-    .auc-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-    .auc-card:hover { border-color: var(--auc-teal); }
+    .auc-card { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 14px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: transform 0.15s, border-color 0.15s; }
+    .auc-card:hover { border-color: var(--auc-teal); transform: translateY(-2px); }
     .auc-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .auc-card-cat { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #f1f5f9; color: #334155; }
+    .auc-card-cat { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: #f1f5f9; color: #334155; }
     .auc-card-cat.eq { background: #e0f2fe; color: #0369a1; }
     .auc-card-cat.fa { background: #fef3c7; color: #b45309; }
     .auc-card-cat.in { background: #f3e8ff; color: #7e22ce; }
     .auc-timer { font-size: 0.78rem; font-weight: 700; color: #dc2626; display: flex; align-items: center; gap: 3px; }
+    .auc-cust-info { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; font-weight: 600; }
     .auc-title { font-size: 1.02rem; font-weight: 800; margin: 0 0 6px; line-height: 1.35; color: #0f172a; }
-    .auc-specs { font-size: 0.82rem; color: var(--auc-muted); margin: 0 0 12px; }
-    .auc-price-box { background: var(--auc-gray-bg); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .auc-price-label { font-size: 0.8rem; color: var(--auc-muted); }
+    .auc-specs { font-size: 0.82rem; color: var(--auc-muted); margin: 0 0 12px; line-height: 1.4; }
+    
+    .auc-price-box { background: var(--auc-gray-bg); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f1f5f9; }
+    .auc-price-label { font-size: 0.78rem; color: var(--auc-muted); }
     .auc-price-val { font-size: 1.15rem; font-weight: 900; color: #dc2626; }
-    .auc-bids-count { font-size: 0.82rem; font-weight: 700; color: var(--auc-teal); }
+    .auc-save-badge { font-size: 0.72rem; color: #16a34a; font-weight: 800; background: #dcfce7; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+    .auc-bids-count { font-size: 0.82rem; font-weight: 800; color: var(--auc-teal); }
+    
+    .auc-dealer-preview { font-size: 0.75rem; color: #475569; margin-bottom: 10px; background: #fafafa; padding: 6px 8px; border-radius: 6px; }
+
     .auc-btn-group { display: flex; gap: 6px; }
-    .auc-btn { flex: 1; padding: 8px 12px; border-radius: 8px; font-size: 0.84rem; font-weight: 700; border: none; cursor: pointer; text-align: center; }
+    .auc-btn { flex: 1; padding: 9px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; border: none; cursor: pointer; text-align: center; }
     .auc-btn.primary { background: var(--auc-teal); color: #ffffff; }
     .auc-btn.outline { background: #ffffff; border: 1px solid var(--auc-teal); color: var(--auc-teal); }
 
+    /* 더보기 버튼 */
+    .auc-load-more-btn { width: 100%; height: 48px; background: #ffffff; border: 2px solid var(--auc-teal); color: var(--auc-teal); border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; margin-top: 20px; transition: all 0.15s; }
+    .auc-load-more-btn:hover { background: var(--auc-teal-light); }
+
     /* 폼 공통 스타일 */
-    .auc-form-box { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .auc-form-box { background: #ffffff; border: 1px solid var(--auc-border); border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .auc-form-group { margin-bottom: 14px; }
     .auc-form-group label { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; color: #1e293b; }
     .auc-form-group input, .auc-form-group select, .auc-form-group textarea { width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px; border: 1px solid var(--auc-border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
@@ -83,10 +108,10 @@
     .freight-tag.char { background: #f1f5f9; color: #475569; }
 
     /* 모달 */
-    .auc-modal { border: none; border-radius: 14px; padding: 0; max-width: 540px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .auc-modal { border: none; border-radius: 14px; padding: 0; max-width: 560px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .auc-modal::backdrop { background: rgba(0,0,0,0.45); }
-    .auc-modal-head { padding: 14px 16px; border-bottom: 1px solid var(--auc-border); display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.05rem; }
-    .auc-modal-body { padding: 16px; max-height: 75vh; overflow-y: auto; }
+    .auc-modal-head { padding: 14px 18px; border-bottom: 1px solid var(--auc-border); display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.05rem; }
+    .auc-modal-body { padding: 18px; max-height: 75vh; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -107,12 +132,49 @@
   <section class="auc-hero">
     <h1>식당 주방기기 · 설비공사 · 인테리어<br>전국 검증 공급사 실시간 역경매</h1>
     <p>식당 사장님이 요구 조건을 올리면 전국 제조사·유통사·시공사가 최저가로 실시간 입찰합니다.<br>플랫폼 낙찰 수수료 3% 정률제 · 안전 에스크로 보증</p>
-    <div class="auc-stats-bar">
-      <span>참여 제조·유통사 <strong>120+곳</strong></span>
-      <span>평균 견적 절감률 <strong>24.8%</strong></span>
-      <span>전국 24시콜 화물망 <strong>실시간 연동</strong></span>
-    </div>
   </section>
+
+  <!-- 시각적 검색 배너 (어떤 물건을 찾고 계십니까?) -->
+  <div class="auc-search-hero-box">
+    <label for="auc-search-kw" class="auc-search-label">
+      <span>🔍</span>
+      <span>어떤 물건·공사를 찾고 계십니까?</span>
+    </label>
+    <div class="auc-search-input-wrap">
+      <input type="text" id="auc-search-kw" class="auc-search-input" placeholder="품목명, 공사종류, 또는 지역 검색 (예: 초음파 세척기, 닥트, 마포구, 식기세척기)">
+      <button type="button" id="btn-auc-search" class="auc-search-btn">검색</button>
+    </div>
+    <div class="quick-tags">
+      <span class="quick-tag-label">추천 검색어:</span>
+      <button type="button" class="quick-tag-btn" data-kw="초음파 세척기">🔥 초음파 세척기 1000형</button>
+      <button type="button" class="quick-tag-btn" data-kw="식기세척기">식기세척기</button>
+      <button type="button" class="quick-tag-btn" data-kw="닥트">닥트·후드 환기</button>
+      <button type="button" class="quick-tag-btn" data-kw="그리스트랩">그리스트랩 배관</button>
+      <button type="button" class="quick-tag-btn" data-kw="방수">바닥 3중 방수</button>
+      <button type="button" class="quick-tag-btn" data-kw="냉장고">올스텐 45박스</button>
+      <button type="button" class="quick-tag-btn" data-kw="세제">친환경 전용세제</button>
+    </div>
+  </div>
+
+  <!-- 투자자용 실시간 지표 요약 바 -->
+  <div class="auc-stats-bar">
+    <div class="auc-stat-card">
+      <div class="auc-stat-num" id="stat-total-count">100건+</div>
+      <div class="auc-stat-lbl">실시간 등록 역경매</div>
+    </div>
+    <div class="auc-stat-card">
+      <div class="auc-stat-num">350+곳</div>
+      <div class="auc-stat-lbl">검증 입점 공급사</div>
+    </div>
+    <div class="auc-stat-card">
+      <div class="auc-stat-num">24.8%</div>
+      <div class="auc-stat-lbl">평균 최저가 절감률</div>
+    </div>
+    <div class="auc-stat-card">
+      <div class="auc-stat-num">3.0%</div>
+      <div class="auc-stat-lbl">투명 에스크로 수수료</div>
+    </div>
+  </div>
 
   <!-- 4단 네비게이션 탭 -->
   <nav class="auc-tab-bar" aria-label="역경매 메뉴">
@@ -127,16 +189,26 @@
     <!-- TAB 1: 실시간 역경매장 -->
     <section id="tab-live" class="auc-tab-content">
       <div class="cat-filters">
-        <button type="button" class="cat-chip active" data-cat="ALL">전체 보기</button>
-        <button type="button" class="cat-chip" data-cat="EQUIPMENT">주방기기 (세척기·냉장고)</button>
-        <button type="button" class="cat-chip" data-cat="FACILITY">주방설비 (닥트·배관·전기)</button>
-        <button type="button" class="cat-chip" data-cat="INTERIOR">주방인테리어 (타일·방수·철거)</button>
-        <button type="button" class="cat-chip" data-cat="SUPPLIES">친환경세제·소모품</button>
+        <button type="button" class="cat-chip active" data-cat="ALL">전체 보기 (100)</button>
+        <button type="button" class="cat-chip" data-cat="EQUIPMENT">주방기기 (42)</button>
+        <button type="button" class="cat-chip" data-cat="FACILITY">주방설비 (30)</button>
+        <button type="button" class="cat-chip" data-cat="INTERIOR">주방인테리어 (20)</button>
+        <button type="button" class="cat-chip" data-cat="SUPPLIES">친환경세제·소모품 (8)</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.86rem;color:var(--auc-muted);">
+        <span id="auc-count-summary">전체 <strong>100건</strong> 중 실시간 매칭 진행 중</span>
+        <span style="font-weight:700;color:var(--auc-teal);">✓ 100% 안심 마스킹 보호</span>
       </div>
 
       <div id="auc-list" class="auc-grid">
         <!-- JS로 실시간 경매 카드 렌더링 -->
       </div>
+
+      <!-- 12개씩 더보기 버튼 -->
+      <button type="button" id="btn-load-more" class="auc-load-more-btn">
+        더 많은 실시간 경매 보기 (12 / 100) ▼
+      </button>
     </section>
 
     <!-- TAB 2: 1분 구매·시공 요청 -->
@@ -263,22 +335,22 @@
 
           <div class="auc-form-group">
             <label for="dlr-name">상호명 (업체명) *</label>
-            <input type="text" id="dlr-name" placeholder="예: 동양종합주방유통" required>
+            <input type="text" id="dlr-name" placeholder="예: 동대***** (앞 두글자 표기)" required>
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-biz">사업자등록번호 *</label>
-            <input type="text" id="dlr-biz" placeholder="예: 120-81-12345" required>
+            <input type="text" id="dlr-biz" placeholder="예: 120-81-*****" required>
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-rep">대표자명</label>
-            <input type="text" id="dlr-rep" placeholder="예: 홍길동">
+            <input type="text" id="dlr-rep" placeholder="예: 홍길*">
           </div>
 
           <div class="auc-form-group">
             <label for="dlr-phone">담당자 연락처 *</label>
-            <input type="tel" id="dlr-phone" placeholder="010-0000-0000" required>
+            <input type="tel" id="dlr-phone" placeholder="010-00**-00**" required>
           </div>
 
           <div class="auc-form-group">
@@ -311,7 +383,7 @@
       <h4 style="margin:0 0 8px;font-size:0.92rem;color:var(--auc-teal);">이 경매에 30초 실시간 입찰하기</h4>
       <form id="bid-submit-form" style="display:flex;flex-direction:column;gap:8px;font-size:0.84rem;">
         <input type="hidden" id="bid-auc-id">
-        <input type="text" id="bid-dlr-name" placeholder="입찰 업체명 (예: 동양종합주방유통)" required style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
+        <input type="text" id="bid-dlr-name" placeholder="입찰 업체명 (예: 동대***** (유통사))" required style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
         <div style="display:flex;gap:6px;">
           <input type="number" id="bid-price" placeholder="제안 견적가 (원) *" required style="flex:2;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
           <input type="number" id="bid-warranty" placeholder="무상 AS(개월)" value="12" style="flex:1;height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;">
@@ -327,6 +399,10 @@
     (function () {
       var D = window.Dr119Core;
       var currentCat = 'ALL';
+      var currentKw = '';
+      var pageSize = 12;
+      var currentLimit = 12;
+      var cachedAuctions = [];
 
       // 탭 전환
       var tabBtns = document.querySelectorAll('.auc-tab-btn');
@@ -349,19 +425,84 @@
           catChips.forEach(function (c) { c.classList.remove('active'); });
           chip.classList.add('active');
           currentCat = chip.getAttribute('data-cat');
+          currentLimit = pageSize;
           renderAuctions();
         });
       });
 
+      // 검색 인풋 및 추천 키워드 태그
+      var searchInput = document.getElementById('auc-search-kw');
+      var searchBtn = document.getElementById('btn-auc-search');
+      var quickTags = document.querySelectorAll('.quick-tag-btn');
+
+      function doSearch() {
+        currentKw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        currentLimit = pageSize;
+        renderAuctions();
+      }
+
+      if (searchBtn) searchBtn.addEventListener('click', doSearch);
+      if (searchInput) {
+        searchInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+        });
+      }
+
+      quickTags.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var kw = btn.getAttribute('data-kw');
+          if (searchInput) searchInput.value = kw;
+          currentKw = kw.toLowerCase();
+          currentLimit = pageSize;
+          renderAuctions();
+        });
+      });
+
+      // 더보기 버튼
+      var loadMoreBtn = document.getElementById('btn-load-more');
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function () {
+          currentLimit += pageSize;
+          renderAuctions();
+        });
+      }
+
+      // 시간 경과 포맷
+      function timeAgo(iso) {
+        if (!iso) return '방금 전';
+        var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+        if (diff < 60) return '방금 전';
+        if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+        if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+        return Math.floor(diff / 86400) + '일 전';
+      }
+
       // 경매 리스트 렌더링
       function renderAuctions() {
         D.api.getAuctions(currentCat).then(function (list) {
+          cachedAuctions = list || [];
           var container = document.getElementById('auc-list');
+          var countSummary = document.getElementById('auc-count-summary');
           if (!container) return;
-          if (!list || !list.length) {
-            container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:30px 0;">해당 카테고리의 진행 중인 역경매가 없습니다.</p>';
+
+          // 키워드 필터링
+          var filtered = cachedAuctions.filter(function (a) {
+            if (!currentKw) return true;
+            var text = (a.title + ' ' + (a.size_spec || '') + ' ' + (a.region || '') + ' ' + (a.notes || '')).toLowerCase();
+            return text.indexOf(currentKw) >= 0;
+          });
+
+          if (countSummary) {
+            countSummary.innerHTML = '총 <strong>' + filtered.length + '건</strong>의 실시간 역경매 진행 중';
+          }
+
+          if (!filtered.length) {
+            container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px 0;font-size:0.95rem;">검색 조건에 맞는 진행 중인 역경매가 없습니다.<br>상단에서 다른 키워드로 검색해 보세요.</p>';
+            if (loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
           }
+
+          var visible = filtered.slice(0, currentLimit);
 
           var catMap = {
             EQUIPMENT: { text: '주방기기', cls: 'eq' },
@@ -370,15 +511,19 @@
             SUPPLIES: { text: '소모품', cls: 'eq' }
           };
 
-          container.innerHTML = list.map(function (a) {
+          container.innerHTML = visible.map(function (a) {
             var cat = catMap[a.category] || { text: '기타', cls: 'eq' };
             var isAccepted = a.status === 'ACCEPTED';
+            var savedAmount = a.desired_price && a.lowest_bid && a.desired_price > a.lowest_bid ? (a.desired_price - a.lowest_bid) : 0;
+            var savedPct = savedAmount > 0 ? Math.round((savedAmount / a.desired_price) * 100) : 0;
+
             return '<div class="auc-card">' +
               '<div>' +
                 '<div class="auc-card-top">' +
                   '<span class="auc-card-cat ' + cat.cls + '">' + cat.text + ' · ' + (a.region || '전국') + '</span>' +
-                  '<span class="auc-timer">' + (isAccepted ? '<span style="color:#0f766e;">낙찰 완료</span>' : '⏱ 실시간 입찰 중') + '</span>' +
+                  '<span class="auc-timer">' + (isAccepted ? '<span style="color:#0f766e;">✓ 낙찰 완료</span>' : ('⏱ ' + timeAgo(a.created_at))) + '</span>' +
                 '</div>' +
+                '<div class="auc-cust-info">' + D.escapeHTML(a.customer_name || '사장님*') + ' (' + (a.region || '전국') + ')</div>' +
                 '<h3 class="auc-title">' + D.escapeHTML(a.title) + '</h3>' +
                 '<p class="auc-specs">' + D.escapeHTML(a.size_spec || '상세 사양 상담 후 조율') + '</p>' +
               '</div>' +
@@ -387,17 +532,31 @@
                   '<div>' +
                     '<span class="auc-price-label">현재 최저 입찰가</span><br>' +
                     '<strong class="auc-price-val">' + (a.lowest_bid ? Number(a.lowest_bid).toLocaleString('ko-KR') + '원' : '입찰 대기') + '</strong>' +
+                    (savedAmount > 0 ? '<br><span class="auc-save-badge">▼ ' + savedAmount.toLocaleString('ko-KR') + '원 절감 (' + savedPct + '%)</span>' : '') +
                   '</div>' +
                   '<div style="text-align:right;">' +
-                    '<span class="auc-bids-count">' + (a.bid_count || 0) + '개 업체 경쟁</span>' +
+                    '<span class="auc-bids-count">' + (a.bid_count || 0) + '개 사 경쟁</span>' +
                   '</div>' +
                 '</div>' +
+                '<div class="auc-dealer-preview">' +
+                  '참여업체: <strong>동대*****</strong>, <strong>탑소****</strong> 외 경쟁 중' +
+                '</div>' +
                 '<div class="auc-btn-group">' +
-                  '<button type="button" class="auc-btn primary" onclick="openAuctionDetail(\'' + a.auction_id + '\')">입찰 비교 및 참여</button>' +
+                  '<button type="button" class="auc-btn primary" onclick="openAuctionDetail(\'' + a.auction_id + '\')">입찰 비교 및 견적 참여</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
           }).join('');
+
+          // 더보기 버튼 노출 여부
+          if (loadMoreBtn) {
+            if (visible.length < filtered.length) {
+              loadMoreBtn.style.display = 'block';
+              loadMoreBtn.textContent = '더 많은 실시간 경매 보기 (' + visible.length + ' / ' + filtered.length + ') ▼';
+            } else {
+              loadMoreBtn.style.display = 'none';
+            }
+          }
         });
       }
 
@@ -421,6 +580,7 @@
 
           var infoBox = document.getElementById('dtl-info-box');
           infoBox.innerHTML =
+            '• <b>의뢰 고객:</b> ' + D.escapeHTML(auc.customer_name || '사장님*') + ' (' + D.escapeHTML(auc.customer_phone || '010-****-****') + ')<br>' +
             '• <b>규격/사양:</b> ' + D.escapeHTML(auc.size_spec || '-') + '<br>' +
             '• <b>희망지역:</b> ' + D.escapeHTML(auc.region) + ' · <b>희망예산:</b> ' + (auc.desired_price ? Number(auc.desired_price).toLocaleString('ko-KR') + '원' : '자율견적') + '<br>' +
             (auc.notes ? '• <b>사장님 요청 메모:</b> ' + D.escapeHTML(auc.notes) : '');
@@ -500,7 +660,6 @@
           D.api.createAuction(data).then(function () {
             alert('역경매 공고가 등록되었습니다! 전국 공급사들이 실시간으로 최저가 견적을 제안합니다.');
             reqForm.reset();
-            // 실시간 탭으로 이동
             tabBtns[0].click();
             renderAuctions();
           }).catch(function (err) { alert('등록 실패: ' + err.message); });

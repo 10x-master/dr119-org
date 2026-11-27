@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>닥터119 공식 인증 파트너사 전용관</title>
+  <meta name="description" content="닥터119 공식 인증 파트너사 - LG전자 스타일의 프리미엄 제품 소개 및 1:1 맞춤 역경매 최저가 조달">
+  <link rel="icon" type="image/svg+xml" href="icons/dr119-logo.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/dr119-logo.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    /* LG전자 LGE.COM 벤치마킹 프리미엄 쿨톤 팔레트 */
+    :root {
+      --lge-red: #ea1917;
+      --lge-dark: #000000;
+      --lge-text: #111111;
+      --lge-sub: #4b5563;
+      --lge-muted: #6b7280;
+      --lge-cool-bg: #f8fafc;
+      --lge-pure-white: #ffffff;
+      --lge-cool-border: #e2e8f0;
+      --lge-cool-surface: #f1f5f9;
+      --primary-teal: #0f766e;
+      --primary-teal-light: #f0fdfa;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--lge-cool-bg);
+      color: var(--lge-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      letter-spacing: -0.02em;
+      padding-bottom: 96px;
+    }
+
+    /* LG 스타일 슬릭 헤더 */
+    .lge-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--lge-cool-border);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .lge-header-left { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .lge-header-left img { width: 30px; height: 30px; }
+    .lge-brand-text { font-size: 1.02rem; font-weight: 800; color: #000; }
+    .lge-brand-text b { color: var(--lge-red); }
+    .lge-partner-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--lge-cool-surface);
+      color: #334155;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--lge-cool-border);
+    }
+    .lge-header-actions { display: flex; align-items: center; gap: 6px; }
+    .btn-header-action {
+      background: #ffffff;
+      border: 1px solid var(--lge-cool-border);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--lge-sub);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-header-action:hover { background: var(--lge-cool-surface); color: #000; }
+
+    /* 메인 컨테이너 */
+    .container { max-width: 720px; margin: 0 auto; padding: 18px 16px; }
+
+    /* LG 스타일 프리미엄 히어로 카드 */
+    .hero-panel {
+      background: var(--lge-pure-white);
+      border: 1px solid var(--lge-cool-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-top-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .chip {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: -0.01em;
+    }
+    .chip-red { background: #fee2e2; color: #991b1b; }
+    .chip-teal { background: #e0f2fe; color: #0369a1; }
+    .chip-gray { background: var(--lge-cool-surface); color: #475569; }
+
+    .hero-head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+    .company-title { font-size: 1.6rem; font-weight: 900; color: #000; line-height: 1.25; }
+    .company-sub { font-size: 0.98rem; font-weight: 600; color: var(--primary-teal); margin-top: 4px; }
+    .company-logo-badge {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #0f172a;
+      flex-shrink: 0;
+      border: 1px solid #cbd5e1;
+    }
+
+    .company-story {
+      font-size: 0.92rem;
+      color: var(--lge-sub);
+      line-height: 1.65;
+      background: var(--lge-cool-bg);
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--lge-cool-border);
+      margin-bottom: 20px;
+    }
+
+    /* 퀵 스펙 요약 바 */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      border-top: 1px solid var(--lge-cool-border);
+      padding-top: 16px;
+    }
+    .spec-item { text-align: center; }
+    .spec-label { font-size: 0.74rem; color: var(--lge-muted); font-weight: 600; }
+    .spec-val { font-size: 0.92rem; color: #000; font-weight: 800; margin-top: 2px; }
+
+    /* 고객 전송 & 바로가기 설치 액션 카드 */
+    .share-utility-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .btn-util {
+      background: var(--lge-pure-white);
+      border: 1px solid var(--lge-cool-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--lge-text);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: all 0.15s;
+    }
+    .btn-util:hover { border-color: #94a3b8; background: var(--lge-cool-surface); }
+    .btn-util svg { flex-shrink: 0; }
+
+    /* 영상 섹션 (LG 스타일 프리미엄 미디어) */
+    .media-card {
+      background: var(--lge-pure-white);
+      border: 1px solid var(--lge-cool-border);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      margin-bottom: 18px;
+    }
+    .section-title-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .section-heading { font-size: 1.15rem; font-weight: 900; color: #000; display: flex; align-items: center; gap: 8px; }
+    .section-tagline { font-size: 0.8rem; color: var(--lge-muted); font-weight: 600; }
+
+    .video-viewport {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 반응형 */
+      height: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      margin-bottom: 10px;
+    }
+    .video-viewport iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-info-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--lge-sub);
+    }
+
+    /* 제품 쇼케이스 (LG전자 제품 스펙 카드 스타일) */
+    .product-cards { display: flex; flex-direction: column; gap: 14px; }
+    .product-card {
+      background: var(--lge-pure-white);
+      border: 1px solid var(--lge-cool-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: all 0.2s;
+    }
+    .product-card:hover { border-color: var(--primary-teal); box-shadow: 0 6px 20px rgba(0,0,0,0.05); }
+    .product-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .tag-biz { background: #fee2e2; color: #991b1b; }
+    .tag-home { background: #e0f2fe; color: #0369a1; }
+
+    .product-name { font-size: 1.12rem; font-weight: 800; color: #000; margin-bottom: 6px; }
+    .product-summary { font-size: 0.86rem; color: var(--lge-sub); line-height: 1.5; margin-bottom: 12px; }
+    
+    .tech-specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+    }
+    .tech-specs-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--lge-cool-surface);
+    }
+    .tech-specs-table td.spec-k { color: var(--lge-muted); font-weight: 600; width: 35%; background: #fbfcfe; }
+    .tech-specs-table td.spec-v { color: var(--lge-text); font-weight: 700; }
+
+    .product-action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--lge-cool-surface);
+    }
+    .badge-price-policy { font-size: 0.82rem; font-weight: 800; color: var(--primary-teal); }
+    .btn-quote-item {
+      background: var(--primary-teal-light);
+      color: var(--primary-teal);
+      border: 1px solid #99f6e4;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-quote-item:hover { background: var(--primary-teal); color: #fff; }
+
+    /* 1:1 역경매 견적 직통 배너 (LG 서비스 센터 감성) */
+    .cta-banner {
+      background: linear-gradient(135deg, #09090b 0%, #1e293b 100%);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 26px 22px;
+      text-align: center;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    }
+    .cta-banner h3 { font-size: 1.3rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .cta-banner p { font-size: 0.88rem; color: #94a3b8; margin-bottom: 18px; }
+    .btn-cta-large {
+      display: block;
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
+      background: var(--lge-red);
+      color: #ffffff;
+      font-size: 1.02rem;
+      font-weight: 900;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(234, 25, 23, 0.3);
+      transition: transform 0.15s;
+    }
+    .btn-cta-large:active { transform: scale(0.98); }
+
+    /* 사업자 기본 정보 */
+    .biz-footer-card {
+      background: var(--lge-pure-white);
+      border: 1px solid var(--lge-cool-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      font-size: 0.8rem;
+      color: var(--lge-muted);
+      line-height: 1.6;
+    }
+
+    /* 하단 고정 액션바 */
+    .sticky-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--lge-cool-border);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      z-index: 99;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+    }
+    .sticky-inner {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-bar-phone {
+      flex: 1;
+      height: 46px;
+      background: var(--lge-cool-surface);
+      color: #1e293b;
+      font-weight: 800;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      gap: 6px;
+      border: 1px solid var(--lge-cool-border);
+    }
+    .btn-bar-quote {
+      flex: 2;
+      height: 46px;
+      background: var(--lge-red);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 0.95rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(234, 25, 23, 0.25);
+    }
+
+    /* 토스트 팝업 */
+    .toast-msg {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      z-index: 200;
+      display: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LG 스타일 헤더 -->
+  <header class="lge-header">
+    <a href="index.html" class="lge-header-left">
+      <img src="icons/dr119-logo.svg" alt="닥터119 로고">
+      <span class="lge-brand-text">Dr.<b>119</b></span>
+      <span class="lge-partner-pill">공식 인증관</span>
+    </a>
+    <div class="lge-header-actions">
+      <a href="auction.html" class="btn-header-action">
+        역경매관
+      </a>
+      <button class="btn-header-action" onclick="copyLandingLink()">
+        링크 복사
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 프리미엄 헤더 카드 -->
+    <article class="hero-panel" id="hero-panel">
+      <div class="hero-top-chips">
+        <span class="chip chip-red">닥터119 안심 보증 파트너</span>
+        <span class="chip chip-teal">공식 직영 공급사</span>
+        <span class="chip chip-gray" id="chip-category">초음파식기세척기 전문</span>
+      </div>
+
+      <div class="hero-head-row">
+        <div>
+          <h1 class="company-title" id="disp-title">(주)탑소닉 (Topsonic)</h1>
+          <p class="company-sub" id="disp-sub">26년 전통 대한민국 대표 초음파 식기세척기 명가</p>
+        </div>
+        <div class="company-logo-badge" id="disp-avatar">탑</div>
+      </div>
+
+      <p class="company-story" id="disp-story">
+        국내 최초 주방 맞춤형 디지털 초음파 세척기 개발 기업으로, SBS BIZ '성공의 정석, 꾼' 방영 및 전국 3만여 외식업 매장 설치 실적을 보유하고 있습니다. 독자적인 듀얼 진동자 기술로 식기 손상 없이 찌든 때를 완벽 세척합니다.
+      </p>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-label">공식 공급처</div>
+          <div class="spec-val" id="disp-loc">전국 직영 설치</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">무상 품질보증</div>
+          <div class="spec-val" id="disp-warr">본사 책임 3년</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">닥터119 조달</div>
+          <div class="spec-val" id="disp-bids">역경매 참여중</div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 유틸리티 바: 고객 전송 링크 복사 & 홈화면/바탕화면 저장 -->
+    <section class="share-utility-bar">
+      <button class="btn-util" onclick="copyLandingLink()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        고객 전송 링크 복사
+      </button>
+      <button class="btn-util" onclick="installOrSaveShortcut()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        홈 화면·바탕화면 저장
+      </button>
+    </section>
+
+    <!-- 미디어 섹션: 성공의 정석 꾼 유튜브 영상 임베드 -->
+    <section class="media-card" id="media-section">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--lge-red)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          공식 방송 & 제품 시연 영상
+        </h2>
+        <span class="section-tagline">SBS BIZ 성공의 정석, 꾼</span>
+      </div>
+
+      <div class="video-viewport">
+        <iframe id="video-frame" src="https://www.youtube.com/embed/fD3e2rR8YmY?enablejsapi=1" title="탑소닉 성공의 정석 꾼 방영 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="video-info-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span id="video-desc-txt">식당 식세기 오래 쓰는 방법? 26년 노하우로 만든 초음파 식세기 편</span>
+      </div>
+    </section>
+
+    <!-- 대표 라인업 (상업용 & 가정용) -->
+    <section class="media-card">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-teal)" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          추천 제품 라인업
+        </h2>
+        <span class="section-tagline">외식업 업소용 & 프리미엄 가정용</span>
+      </div>
+
+      <div class="product-cards">
+        <!-- 업소용 1 -->
+        <div class="product-card">
+          <span class="product-tag tag-biz">상업용 / 대형 외식업</span>
+          <h3 class="product-name">탑소닉 스마트 초음파 세척기 [1200형 대용량]</h3>
+          <p class="product-summary">불판·뚝배기·기름때 그릇을 3분 내 완전 세척. 수도요금 50% 및 세제비 70% 절감 보장.</p>
+          
+          <table class="tech-specs-table">
+            <tr>
+              <td class="spec-k">진동자 사양</td>
+              <td class="spec-v">듀얼 BLT 진동자 48개 고출력 일체형</td>
+            </tr>
+            <tr>
+              <td class="spec-k">재질 / 기능</td>
+              <td class="spec-v">SUS 304 스테인리스 / 자동 히팅 및 디지털 터치 제어</td>
+            </tr>
+          </table>
+
+          <div class="product-action-row">
+            <span class="badge-price-policy">닥터119 역경매 직거래 특가</span>
+            <button class="btn-quote-item" onclick="orderModel('탑소닉 1200형 대용량')">이 모델로 역경매 요청</button>
+          </div>
+        </div>
+
+        <!-- 업소용 2 -->
+        <div class="product-card">
+          <span class="product-tag tag-biz">상업용 / 중소형 매장·카페</span>
+          <h3 class="product-name">탑소닉 슬림 초음파 세척기 [800형 표준]</h3>
+          <p class="product-summary">좁은 주방 싱크대와 1:1 교체 가능한 최적의 공간 절약형 모델. 1인 운영 식당 및 카페에 최적화.</p>
+          
+          <table class="tech-specs-table">
+            <tr>
+              <td class="spec-k">진동자 사양</td>
+              <td class="spec-v">BLT 진동자 32개 정밀 제어</td>
+            </tr>
+            <tr>
+              <td class="spec-k">설치 편의성</td>
+              <td class="spec-v">당일 직영 설치 / 220V 단상 콘센트 즉시 사용</td>
+            </tr>
+          </table>
+
+          <div class="product-action-row">
+            <span class="badge-price-policy">렌탈 및 직구매 최저가</span>
+            <button class="btn-quote-item" onclick="orderModel('탑소닉 800형 표준')">이 모델로 역경매 요청</button>
+          </div>
+        </div>
+
+        <!-- 가정용 -->
+        <div class="product-card">
+          <span class="product-tag tag-home">가정용 / 프리미엄 빌트인</span>
+          <h3 class="product-name">탑소닉 싱크볼 매립형 초음파 식기세척기</h3>
+          <p class="product-summary">싱크볼 일체형으로 식기 세척뿐 아니라 과일·채소 잔류 농약 99.9% 제거 및 젖병 살균.</p>
+          
+          <table class="tech-specs-table">
+            <tr>
+              <td class="spec-k">소음 제어</td>
+              <td class="spec-v">초저소음 특허 댐퍼 기술 적용</td>
+            </tr>
+            <tr>
+              <td class="spec-k">품질 보증</td>
+              <td class="spec-v">가정용 프리미엄 무상 보증 5년</td>
+            </tr>
+          </table>
+
+          <div class="product-action-row">
+            <span class="badge-price-policy">신축·인테리어 특판 공급</span>
+            <button class="btn-quote-item" onclick="orderModel('탑소닉 가정용 싱크볼 일체형')">이 모델로 역경매 요청</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 역경매 견적 직통 배너 -->
+    <section class="cta-banner">
+      <h3>(주)탑소닉 본사 직영 단가 역경매 요청</h3>
+      <p>원하시는 설치 환경과 규격을 올리시면 닥터119 에스크로 보증으로 최저가 견적을 즉시 제시합니다.</p>
+      <a href="auction.html?target_dealer=topsonic" class="btn-cta-large" id="main-quote-cta">
+        1:1 맞춤 역경매 견적 요청하기
+      </a>
+    </section>
+
+    <!-- 사업자 정보 -->
+    <footer class="biz-footer-card">
+      <div style="font-weight:700; color:var(--lge-text); margin-bottom:4px;">공식 제휴사 안내</div>
+      <p id="footer-biz-txt">상호: (주)탑소닉 | 본사 직영 인증 파트너 | 고객지원: 1661-0783</p>
+      <p style="margin-top:4px;">닥터119는 안전한 B2B 직거래 역경매 플랫폼 시스템을 제공하며, 모든 대금은 에스크로 안전 결제로 보호됩니다.</p>
+    </footer>
+
+    <!-- 파트너 셀프 편집 버튼 -->
+    <div style="text-align:center; margin-top:14px;">
+      <button style="background:none; border:none; color:var(--lge-muted); font-size:0.78rem; text-decoration:underline; cursor:pointer;" onclick="editDealerInfo()">
+        [파트너 전용] 아이디·회사명으로 내 페이지 정보 수정하기
+      </button>
+    </div>
+  </main>
+
+  <!-- 모바일 하단 액션바 -->
+  <aside class="sticky-bottom-bar">
+    <div class="sticky-inner">
+      <a href="tel:1661-0783" class="btn-bar-phone" id="bar-phone">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        전화 상담
+      </a>
+      <a href="auction.html?target_dealer=topsonic" class="btn-bar-quote" id="bar-quote">
+        1:1 역경매 견적 요청
+      </a>
+    </div>
+  </aside>
+
+  <div class="toast-msg" id="toast">복사 완료되었습니다.</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const dealerId = (params.get('id') || 'topsonic').toLowerCase();
+    const customName = params.get('name') || '';
+    const incomingAgentId = params.get('agent_id') || params.get('ref') || '';
+
+    // First-Touch 추천인 귀속 보존
+    if (incomingAgentId) {
+      try {
+        if (!localStorage.getItem('dr119_first_agent_id')) {
+          localStorage.setItem('dr119_first_agent_id', JSON.stringify({
+            agent_id: incomingAgentId.toUpperCase(),
+            first_touch_at: new Date().toISOString()
+          }));
+        }
+      } catch (e) {}
+    }
+
+    const PRESETS = {
+      'topsonic': {
+        name: '(주)탑소닉 (Topsonic)',
+        sub: '26년 전통 대한민국 대표 초음파 식기세척기 명가',
+        category: '초음파식기세척기 제조',
+        avatar: '탑',
+        story: '국내 최초 주방 맞춤형 디지털 초음파 세척기 개발 기업으로, SBS BIZ "성공의 정석, 꾼" 방영 및 전국 3만여 외식업 매장 설치 실적을 보유하고 있습니다. 독자적인 듀얼 진동자 기술로 식기 손상 없이 찌든 때를 완벽 세척합니다.',
+        loc: '전국 직영 설치',
+        warr: '본사 책임 3년',
+        bids: '역경매 참여중',
+        videoSrc: 'https://www.youtube.com/embed/fD3e2rR8YmY?enablejsapi=1',
+        videoDesc: '식당 식세기 오래 쓰는 방법? 26년 노하우로 만든 초음파 식세기 편',
+        phone: '1661-0783'
+      },
+      'dongdae': {
+        name: '동대문종합주방',
+        sub: '수도권 최대 업소용 주방기기·설비 직거래 총판',
+        category: '업소용 냉장고·화구·간텍기',
+        avatar: '동',
+        story: '서울/수도권 및 충청권 식당 창업 및 설비 교체 전문. 45박스 냉장고, 간텍기, 튀김기, 스탠드 작업대 등 최저가 직거래 공급 및 닥터119 안심 설치 시공을 보장합니다.',
+        loc: '서울/경기/충청',
+        warr: '부품 1년 보증',
+        bids: '역경매 참여중',
+        videoSrc: 'https://www.youtube.com/embed/fD3e2rR8YmY?enablejsapi=1',
+        videoDesc: '업소용 주방기기 공장 직거래 및 최저가 시공 가이드',
+        phone: '1661-0783'
+      }
+    };
+
+    function init() {
+      let saved = null;
+      try {
+        const raw = localStorage.getItem('dr119_landing_' + dealerId);
+        if (raw) saved = JSON.parse(raw);
+      } catch (e) {}
+
+      const data = saved || PRESETS[dealerId] || {
+        name: customName || (dealerId.toUpperCase() + ' 파트너스'),
+        sub: '닥터119 공식 인증 주방·설비 전문 파트너',
+        category: '주방 설비·시공 전문',
+        avatar: (customName || dealerId).slice(0, 1),
+        story: (customName || dealerId) + '은 닥터119 공식 인증 파트너로 식당 사장님께 최적의 제품과 신속한 설치, 책임 AS를 보장합니다.',
+        loc: '전국 대응',
+        warr: '품질 보증 책임제',
+        bids: '역경매 참여중',
+        videoSrc: 'https://www.youtube.com/embed/fD3e2rR8YmY?enablejsapi=1',
+        videoDesc: '공식 시공 및 제품 설명 안내 영상',
+        phone: '1661-0783'
+      };
+
+      document.getElementById('disp-title').textContent = data.name;
+      document.getElementById('disp-sub').textContent = data.sub;
+      document.getElementById('chip-category').textContent = data.category;
+      document.getElementById('disp-avatar').textContent = data.avatar;
+      document.getElementById('disp-story').textContent = data.story;
+      document.getElementById('disp-loc').textContent = data.loc;
+      document.getElementById('disp-warr').textContent = data.warr;
+      document.getElementById('disp-bids').textContent = data.bids;
+      document.getElementById('main-quote-cta').href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId);
+      document.getElementById('bar-quote').href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId);
+      document.getElementById('bar-phone').href = 'tel:' + (data.phone || '1661-0783');
+
+      if (data.videoSrc) {
+        document.getElementById('video-frame').src = data.videoSrc;
+        document.getElementById('video-desc-txt').textContent = data.videoDesc || '공식 영상 안내';
+      }
+    }
+
+    function orderModel(model) {
+      window.location.href = 'auction.html?target_dealer=' + encodeURIComponent(dealerId) + '&model=' + encodeURIComponent(model);
+    }
+
+    // 1. 링크 복사 기능 (고객에게 전송하기 위함)
+    function copyLandingLink() {
+      let url = window.location.href;
+      try {
+        const stored = localStorage.getItem('dr119_first_agent_id');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.agent_id && !url.includes('agent_id=')) {
+            url += (url.includes('?') ? '&' : '?') + 'agent_id=' + encodeURIComponent(parsed.agent_id);
+          }
+        }
+      } catch (e) {}
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showToast('추천인 코드가 포함된 랜딩페이지 링크가 복사되었습니다!'));
+      } else {
+        const dummy = document.createElement('input');
+        dummy.value = url;
+        document.body.appendChild(dummy);
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        showToast('추천인 코드가 포함된 랜딩페이지 링크가 복사되었습니다!');
+      }
+    }
+
+    // 2. 홈화면 및 윈도우 바탕화면 저장
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function installOrSaveShortcut() {
+      // 1) PWA 앱 설치 지원 브라우저
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('홈 화면에 성공적으로 추가되었습니다.');
+          }
+          deferredPrompt = null;
+        });
+        return;
+      }
+
+      // 2) 데스크톱 윈도우 바탕화면 .url 바로가기 다운로드 생성
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        const title = document.getElementById('disp-title').textContent || '닥터119_파트너스';
+        const urlContent = `[InternetShortcut]\r\nURL=${window.location.href}\r\nIconIndex=0\r\nIconFile=${window.location.origin}/icons/dr119-logo.svg\r\n`;
+        const blob = new Blob([urlContent], { type: 'application/internet-shortcut' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${title}_바로가기.url`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('윈도우 바탕화면 바로가기 파일(.url)이 다운로드되었습니다.');
+      } else {
+        // 모바일 사파리/크롬 가이드
+        alert('스마트폰 홈 화면 추가 안내:\n- 아이폰(Safari): 하단 공유 아이콘 ⎋ 누른 후 [홈 화면에 추가]\n- 안드로이드(Chrome): 우측 상단 메뉴(⋮) 누른 후 [홈 화면에 추가] 또는 [앱 설치]를 선택하세요.');
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2600);
+    }
+
+    function editDealerInfo() {
+      const id = prompt('업체 아이디(영문/숫자):', dealerId);
+      if (!id) return;
+      const compName = prompt('업체명:', document.getElementById('disp-title').textContent);
+      if (!compName) return;
+      const youtube = prompt('유튜브 링크(watch?v= 또는 youtu.be/ 주소):', '');
+
+      let finalEmbed = 'https://www.youtube.com/embed/fD3e2rR8YmY';
+      if (youtube) {
+        if (youtube.includes('watch?v=')) {
+          finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('watch?v=')[1].split('&')[0];
+        } else if (youtube.includes('youtu.be/')) {
+          finalEmbed = 'https://www.youtube.com/embed/' + youtube.split('youtu.be/')[1].split('?')[0];
+        } else if (youtube.startsWith('http')) {
+          finalEmbed = youtube;
+        } else {
+          finalEmbed = 'https://www.youtube.com/embed/' + youtube;
+        }
+      }
+
+      const obj = {
+        name: compName,
+        sub: compName + ' 공식 인증 파트너관',
+        category: '주방 설비·기기 전문',
+        avatar: compName.slice(0, 1),
+        story: compName + '은 닥터119 공식 인증 파트너로 최고의 품질과 신속한 설치를 보장합니다.',
+        loc: '전국 대응 가능',
+        warr: '품질 보증 책임제',
+        bids: '신규 입찰 참여',
+        videoSrc: finalEmbed,
+        videoDesc: compName + ' 공식 소개 영상',
+        phone: '1661-0783'
+      };
+
+      try {
+        localStorage.setItem('dr119_landing_' + id.toLowerCase(), JSON.stringify(obj));
+      } catch (e) {}
+
+      window.location.href = 'landing.html?id=' + encodeURIComponent(id.toLowerCase());
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

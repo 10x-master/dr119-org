@@ -392,158 +392,173 @@
     }
   ];
 
+  /* ================================================================
+   * 7-B. 주방·설비·인테리어 B2B 실전 역경매 시드 데이터 (100건 + 실시간 입찰 270건)
+   *      - 지역: 전국 시·군·구 100% 공개
+   *      - 사람/고객명: 앞 2자리 + 별표 (예: 김정*, 이태*, 박성*)
+   *      - 회사/공급사명: 앞 2자리 + 별표 (예: 동대*****, 탑소****, 에어****)
+   *      - 연락처: 안심 번호 마스킹 (예: 010-55**-82**)
+   * ================================================================ */
   var SEED_AUCTION_DEALERS = [
-    {
-      dealer_id: 'DL_TOP',
-      company_name: '(주)탑소닉 테크놀로지',
-      dealer_type: 'MANUFACTURER',
-      biz_no: '214-86-98765',
-      rep_name: '김정훈',
-      phone: '010-4499-1122',
-      region: '수도권·충청',
-      rating: 4.9,
-      review_count: 38,
-      status: 'ACTIVE'
-    },
-    {
-      dealer_id: 'DL_DONGYANG',
-      company_name: '동양종합주방유통',
-      dealer_type: 'DISTRIBUTOR',
-      biz_no: '120-81-12345',
-      rep_name: '박동양',
-      phone: '010-3321-5544',
-      region: '전국',
-      rating: 4.8,
-      review_count: 52,
-      status: 'ACTIVE'
-    },
-    {
-      dealer_id: 'DL_AIRTECH',
-      company_name: '에어텍 닥트·공조설비',
-      dealer_type: 'FACILITY',
-      biz_no: '108-11-77889',
-      rep_name: '최환기',
-      phone: '010-5522-9988',
-      region: '수도권',
-      rating: 5.0,
-      review_count: 27,
-      status: 'ACTIVE'
-    },
-    {
-      dealer_id: 'DL_KITCHEN_DESIGN',
-      company_name: '주방디자인랩 인테리어',
-      dealer_type: 'INTERIOR',
-      biz_no: '211-09-54321',
-      rep_name: '정공간',
-      phone: '010-7766-3344',
-      region: '전국',
-      rating: 4.9,
-      review_count: 41,
-      status: 'ACTIVE'
-    }
+    { dealer_id: 'DL_01', company_name: '동대***** (유통사)', dealer_type: 'DISTRIBUTOR', biz_no: '120-81-*****', rep_name: '박동*', phone: '010-33**-55**', region: '전국', rating: 4.9, review_count: 52, status: 'ACTIVE' },
+    { dealer_id: 'DL_02', company_name: '탑소**** (제조사)', dealer_type: 'MANUFACTURER', biz_no: '214-86-*****', rep_name: '김정*', phone: '010-44**-11**', region: '수도권·충청', rating: 4.9, review_count: 38, status: 'ACTIVE' },
+    { dealer_id: 'DL_03', company_name: '에어**** (설비시공)', dealer_type: 'FACILITY', biz_no: '108-11-*****', rep_name: '최환*', phone: '010-55**-99**', region: '수도권', rating: 5.0, review_count: 27, status: 'ACTIVE' },
+    { dealer_id: 'DL_04', company_name: '한일***** (인테리어)', dealer_type: 'INTERIOR', biz_no: '211-09-*****', rep_name: '정공*', phone: '010-77**-33**', region: '전국', rating: 4.9, review_count: 41, status: 'ACTIVE' },
+    { dealer_id: 'DL_05', company_name: '신흥**** (유통사)', dealer_type: 'DISTRIBUTOR', biz_no: '134-88-*****', rep_name: '이승*', phone: '010-88**-22**', region: '영남권', rating: 4.8, review_count: 33, status: 'ACTIVE' },
+    { dealer_id: 'DL_06', company_name: '대성**** (제조사)', dealer_type: 'MANUFACTURER', biz_no: '305-81-*****', rep_name: '강태*', phone: '010-66**-44**', region: '호남권', rating: 4.9, review_count: 29, status: 'ACTIVE' }
   ];
 
-  var SEED_AUCTIONS = [
-    {
-      auction_id: 'AUC-202611-001',
-      customer_phone: '010-5544-2233',
-      title: '업소용 초음파 세척기 1000형 구매 및 설치',
-      category: 'EQUIPMENT',
-      size_spec: '1000 x 700 x 850mm (단상 220V)',
-      desired_price: 1800000,
-      region: '서울 마포구',
-      notes: '삼겹살 구이전문점 개업 예정. 기름때 세척력 우수하고 소음 적은 제품 희망.',
-      status: 'OPEN',
-      selected_bid_id: null,
-      bid_count: 2,
-      lowest_bid: 1580000,
-      deadline: '2026-12-05T18:00:00Z',
-      created_at: '2026-11-26T10:00:00Z'
-    },
-    {
-      auction_id: 'AUC-202611-002',
-      customer_phone: '010-9988-7766',
-      title: '주방 닥트 후드 환기설비 신설 공사 (시로코팬 2마력 포함)',
-      category: 'FACILITY',
-      size_spec: '후드 길이 3600mm / 배기라인 15m',
-      desired_price: 2400000,
-      region: '경기 수원시 팔달구',
-      notes: '중식당 주방 환기 개선. 화력 높은 웍 2개 사용 예정으로 흡입력 필수.',
-      status: 'OPEN',
-      selected_bid_id: null,
-      bid_count: 2,
-      lowest_bid: 2150000,
-      deadline: '2026-12-07T18:00:00Z',
-      created_at: '2026-11-26T12:00:00Z'
-    },
-    {
-      auction_id: 'AUC-202611-003',
-      customer_phone: '010-1122-3344',
-      title: '주방 트렌치·그리스트랩 배관 이설 및 미끄럼방지 타일 방수',
-      category: 'INTERIOR',
-      size_spec: '주방 면적 약 12평 / 그리스트랩 1개 이설',
-      desired_price: 3200000,
-      region: '인천 남동구 구월동',
-      notes: '기존 배수 트렌치 물고임 심함. 악취 방지 트랩 및 방수 공사 필요.',
-      status: 'OPEN',
-      selected_bid_id: null,
-      bid_count: 1,
-      lowest_bid: 2900000,
-      deadline: '2026-12-10T18:00:00Z',
-      created_at: '2026-11-26T15:00:00Z'
+  var SEED_AUCTIONS = (function () {
+    var regions = [
+      '서울 강남구 역삼동', '서울 마포구 서교동', '서울 영등포구 여의도동', '서울 종로구 관철동', '서울 송파구 잠실동',
+      '서울 서초구 방배동', '서울 광진구 화양동', '서울 중구 을지로', '서울 은평구 불광동', '서울 강동구 천호동',
+      '경기 수원시 팔달구', '경기 화성시 반월동', '경기 성남시 분당구', '경기 고양시 일산동구', '경기 부천시 원미구',
+      '경기 용인시 수지구', '경기 안양시 동안구', '경기 평택시 비전동', '경기 파주시 야당동', '경기 남양주시 다산동',
+      '인천 남동구 구월동', '인천 연수구 송도동', '인천 부평구 부평동', '인천 서구 청라동',
+      '부산 해운대구 우동', '부산 부산진구 전포동', '부산 수영구 민락동', '부산 동래구 온천동', '부산 사하구 하단동',
+      '대구 수성구 범어동', '대구 중구 삼덕동', '대구 달서구 두류동', '대구 동구 신천동',
+      '대전 유성구 봉명동', '대전 서구 둔산동', '대전 중구 은행동',
+      '광주 서구 치평동', '광주 북구 용봉동', '광주 동구 불로동',
+      '경남 진주시 평거동', '경남 창원시 성산구 상남동', '경남 김해시 내외동', '경남 양산시 물금읍',
+      '경북 포항시 남구 이동', '경북 구미시 원평동', '경북 경주시 황남동',
+      '충남 천안시 서북구 불당동', '충남 아산시 배방읍', '충북 청주시 흥덕구 복대동',
+      '전북 전주시 완산구 효자동', '전남 여수시 학동', '전남 순천시 조례동',
+      '강원 원주시 무실동', '강원 춘천시 퇴계동', '강원 강릉시 교동',
+      '제주 제주시 연동', '제주 서귀포시 서귀동'
+    ];
+    var familyNames = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임', '한', '오', '서', '신', '권', '황', '안', '송', '전', '홍'];
+    var secondNames = ['정', '민', '승', '진', '우', '동', '현', '서', '태', '재', '호', '훈', '석', '준', '원', '혁', '수', '광', '용', '성'];
+    function maskName(idx) {
+      return familyNames[idx % familyNames.length] + secondNames[(idx * 3 + 7) % secondNames.length] + '*';
     }
-  ];
 
-  var SEED_AUCTION_BIDS = [
-    {
-      bid_id: 'BID-001-1',
-      auction_id: 'AUC-202611-001',
-      dealer_id: 'DL_DONGYANG',
-      dealer_name: '동양종합주방유통 (유통사)',
-      bid_price: 1650000,
-      warranty_months: 12,
-      delivery_days: 2,
-      benefits: '수도권 무료 배송·설치 지원, 전용 친환경 활성세제 3통(10L) 무상 증정',
-      status: 'BIDDING',
-      created_at: '2026-11-26T11:00:00Z'
-    },
-    {
-      bid_id: 'BID-001-2',
-      auction_id: 'AUC-202611-001',
-      dealer_id: 'DL_TOP',
-      dealer_name: '(주)탑소닉 테크놀로지 (제조사)',
-      bid_price: 1580000,
-      warranty_months: 24,
-      delivery_days: 1,
-      benefits: '제조사 본사 직영 2년 무상 보증, 진동자 파손 시 1:1 즉시 맞교환 보장',
-      status: 'BIDDING',
-      created_at: '2026-11-26T11:30:00Z'
-    },
-    {
-      bid_id: 'BID-002-1',
-      auction_id: 'AUC-202611-002',
-      dealer_id: 'DL_AIRTECH',
-      dealer_name: '에어텍 닥트·공조설비 (설비시공사)',
-      bid_price: 2150000,
-      warranty_months: 24,
-      delivery_days: 2,
-      benefits: '저소음 고효율 시로코팬 2마력 정품 시공, 소음 진동 방지 방진스프링 무료 시공',
-      status: 'BIDDING',
-      created_at: '2026-11-26T13:00:00Z'
-    },
-    {
-      bid_id: 'BID-003-1',
-      auction_id: 'AUC-202611-003',
-      dealer_id: 'DL_KITCHEN_DESIGN',
-      dealer_name: '주방디자인랩 인테리어 (시공사)',
-      bid_price: 2900000,
-      warranty_months: 36,
-      delivery_days: 3,
-      benefits: '우레탄 도막 3중 방수 시공, SUS304 고급 그리스트랩 교체, 야간 시공 가능',
-      status: 'BIDDING',
-      created_at: '2026-11-26T16:00:00Z'
+    var equipmentTemplates = [
+      { title: '업소용 초음파 세척기 {size} 구매 및 설치', specs: '{size} · 단상 220V · BLT 진동자 40kHz', price: 1750000 },
+      { title: '도어타입 업소용 식기세척기 급배수 배관 세트', specs: '시간당 1500접시 세척 · 린스 펌프 내장 · 세제 자동 투입기', price: 2300000 },
+      { title: '올스텐 45박스 업소용 냉장·냉동고 (간랭식)', specs: '1260 x 800 x 1900mm · 디지털 온도 제어 · 인버터 컴프레서', price: 1950000 },
+      { title: '대용량 상업용 인덕션 렌지 2구/3구 교체', specs: '구당 3.5kW 고화력 · 자석 감지 과열 차단 · 평면 세라믹 상판', price: 1600000 },
+      { title: '업소용 공랭식 제빙기 50kg/100kg 납품', specs: '일일 제빙량 80kg · 노즐 분사식 큐브 얼음 · 저소음 컴프레서', price: 1400000 },
+      { title: '전기 튀김기 2구 36L 및 정유기 세트', specs: '각 18L 독립 유조 · 마이콤 온도 조절 · 쿨존 잔류 찌꺼기 분리', price: 1550000 },
+      { title: 'SUS304 올스텐 2단 작업대 및 잔반처리대 주문 제작', specs: '1800 x 700 x 800mm · 두께 1.2T · 하부 선반 보강형', price: 850000 },
+      { title: '업소용 가스 3구 테이블렌지 (LNG/LPG)', specs: '1200 x 600 x 800mm · 고효율 터보 버너 · 황동 노즐', price: 920000 }
+    ];
+    var facilityTemplates = [
+      { title: '식당 주방 닥트 후드 환기설비 신설 (시로코팬 {hp} 포함)', specs: '후드 길이 {len}mm / 배기 관경 250파이 / 시로코팬 {hp}', price: 2200000 },
+      { title: '주방 그리스트랩(유수분리기) 배관 이설 및 트렌치 교체', specs: 'SUS304 4단 유수분리기 100L / 배수관 100A 코어 천공', price: 1850000 },
+      { title: '주방 전기 15kW 증설 및 분전함 차단기 교체 공사', specs: '메인 75A / 누전차단기 10회로 분기 / 접지 공사 포함', price: 1900000 },
+      { title: '업소용 가스 배관 변경 및 가스 누출 자동차단기 설치', specs: '도시가스 배관 32A 이설 12m / 누출 감지부 및 제어부 신설', price: 1300000 },
+      { title: '주방 급수 가압펌프 증설 및 온수기 급배수 배관 공사', specs: '인버터 가압펌프 1마력 / 50L 전기온수기 온냉수 라인 신설', price: 1450000 },
+      { title: '주방 후드 옥상 배기 입상 닥트 3층 입상 연장 공사', specs: '스파이럴 300파이 15m / 방진 스프링 행거 / 풍량 3500CMH', price: 2800000 }
+    ];
+    var interiorTemplates = [
+      { title: '주방 바닥 3중 우레탄 도막 방수 및 논슬립 타일 시공', specs: '면적 {area}평 · 프라이머-중도-상도 방수 · 미끄럼방지 타일 200x200', price: 3100000 },
+      { title: '오픈형 주방 배식구·퇴식구 가벽 목공 및 SUS 마감', specs: '가벽 길이 5.5m / SUS304 인조대리석 카운터 상판 마감', price: 2400000 },
+      { title: '기존 식당 주방 전면 철거 및 폐기물 반출, 바닥 샌딩', specs: '주방 12평 내 조적벽 및 기존 타일 할석 철거 / 폐기물 2.5톤', price: 2100000 },
+      { title: '주방 벽면 백색 유광 위생타일 300x600 덧방 시공', specs: '벽면적 45m² · 아덱스 탄성 줄눈 · 곰팡이 방지 바이오 실리콘 마감', price: 1650000 },
+      { title: '신규 창업 식당 주방 레이아웃 맞춤 인테리어 일괄 시공', specs: '주방 15평 바닥 방수, 벽체 타일, 천장 SMC 위생 마감 일괄', price: 5800000 }
+    ];
+    var suppliesTemplates = [
+      { title: 'Dr.119 친환경 초음파 세척기 전용 활성세제 (20L x 10통)', specs: '보건복지부 1종 주방세제 인증 · 침착 유분 10초 분해 활성제 배합', price: 420000 },
+      { title: '업소용 식기세척기 린스 및 고농축 세척제 6개월 정기배송', specs: '세척제 20L 6통 + 건조 린스 20L 2통 + 정량 자동 투입기 무상 점검', price: 380000 },
+      { title: '멜라민 업소용 한식기 및 뚝배기 받침 대량 일괄 납품', specs: '공기 200개, 대접 200개, 반찬찬기 5종 각 100개 올블랙 무광', price: 780000 }
+    ];
+
+    var sizes = ['800형 소형', '1000형 표준', '1200형 대형', '1500형 특대형'];
+    var hps = ['1.5마력', '2마력', '3마력'];
+    var lens = ['2400', '3000', '3600', '4200'];
+    var areas = ['8', '10', '12', '15', '20'];
+
+    var res = [];
+    for (var i = 1; i <= 100; i++) {
+      var aucId = 'AUC-202611-' + ('000' + i).slice(-3);
+      var reg = regions[(i * 3 + 5) % regions.length];
+      var custName = maskName(i);
+      var phone = '010-' + String((i * 137) % 9000 + 1000).slice(0, 2) + '**-' + String((i * 391) % 9000 + 1000).slice(0, 2) + '**';
+
+      var cat = 'EQUIPMENT';
+      var tpl;
+      if (i <= 42) { cat = 'EQUIPMENT'; tpl = equipmentTemplates[(i - 1) % equipmentTemplates.length]; }
+      else if (i <= 72) { cat = 'FACILITY'; tpl = facilityTemplates[(i - 43) % facilityTemplates.length]; }
+      else if (i <= 92) { cat = 'INTERIOR'; tpl = interiorTemplates[(i - 73) % interiorTemplates.length]; }
+      else { cat = 'SUPPLIES'; tpl = suppliesTemplates[(i - 93) % suppliesTemplates.length]; }
+
+      var size = sizes[i % sizes.length];
+      var hp = hps[i % hps.length];
+      var len = lens[i % lens.length];
+      var area = areas[i % areas.length];
+
+      var title = tpl.title.replace('{size}', size).replace('{hp}', hp).replace('{len}', len).replace('{area}', area);
+      var specs = tpl.specs.replace('{size}', size).replace('{hp}', hp).replace('{len}', len).replace('{area}', area);
+      var desired = Math.round(tpl.price * (0.9 + ((i % 5) * 0.05)));
+      var bidCount = (i % 3) + 2;
+      var lowest = Math.round((desired * (0.82 + ((i % 3) * 0.02))) / 10000) * 10000;
+      var isAccepted = (i % 7 === 0);
+
+      res.push({
+        auction_id: aucId,
+        customer_name: custName,
+        customer_phone: phone,
+        title: title,
+        category: cat,
+        size_spec: specs,
+        desired_price: desired,
+        region: reg,
+        notes: custName + ' 사장님 현장 요청: 신속한 배송/시공 희망 및 AS 확실한 검증 업체 우선 채택',
+        status: isAccepted ? 'ACCEPTED' : 'OPEN',
+        selected_bid_id: isAccepted ? ('BID-' + aucId.slice(4) + '-1') : null,
+        bid_count: bidCount,
+        lowest_bid: lowest,
+        deadline: new Date(Date.now() + ((i * 2) % 7 + 3) * 24 * 3600 * 1000).toISOString(),
+        created_at: new Date(Date.now() - ((100 - i) * 3600 * 1000)).toISOString()
+      });
     }
-  ];
+    return res;
+  })();
+
+  var SEED_AUCTION_BIDS = (function () {
+    var dealerPrefixes = ['동대', '탑소', '에어', '신흥', '한일', '대성', '한국', '미래', '제일', '삼성', '태양', '동양', '대한', '영남', '현대', '중앙', '삼보', '우성', '고려', '신라'];
+    function maskDealerName(idx, type) {
+      var p = dealerPrefixes[idx % dealerPrefixes.length];
+      var typeStr = type === 'MANUFACTURER' ? '(제조사)' : (type === 'FACILITY' ? '(설비시공)' : (type === 'INTERIOR' ? '(인테리어)' : '(유통사)'));
+      return p + '***** ' + typeStr;
+    }
+    var warranties = [12, 24, 36];
+    var deliveryDays = [1, 2, 3, 5, 7];
+    var benefitsList = [
+      '수도권 무료 배송 및 설치 지원, 소모품 3개월 무상 증정',
+      '제조사 본사 직영 2년 무상 보증, 진동자 1:1 즉시 맞교환 보장',
+      '저소음 모터 무상 업그레이드 및 야간/주말 무료 시공 연계',
+      '친환경 활성세제 20L 2통 증정, 배관 소독 세척 무료 서비스',
+      'SUS304 고급 배수 트랩 무료 교체, 3년 하자 책임 보증서 발급'
+    ];
+
+    var allBids = [];
+    for (var i = 0; i < SEED_AUCTIONS.length; i++) {
+      var a = SEED_AUCTIONS[i];
+      for (var b = 0; b < a.bid_count; b++) {
+        var bidId = 'BID-' + a.auction_id.slice(4) + '-' + (b + 1);
+        var dType = a.category === 'FACILITY' ? 'FACILITY' : (a.category === 'INTERIOR' ? 'INTERIOR' : ((b % 2 === 0) ? 'DISTRIBUTOR' : 'MANUFACTURER'));
+        var dName = maskDealerName(i * 4 + b, dType);
+        var discountFactor = 0.82 + (b * 0.04) + ((i % 3) * 0.02);
+        var bidPrice = Math.round((a.desired_price * discountFactor) / 10000) * 10000;
+        var isAccepted = (a.status === 'ACCEPTED' && b === 0);
+
+        allBids.push({
+          bid_id: bidId,
+          auction_id: a.auction_id,
+          dealer_id: 'DL_' + ('0' + ((i * 4 + b) % 20 + 1)).slice(-2),
+          dealer_name: dName,
+          bid_price: bidPrice,
+          warranty_months: warranties[(i + b) % warranties.length],
+          delivery_days: deliveryDays[(i + b) % deliveryDays.length],
+          benefits: benefitsList[(i + b) % benefitsList.length],
+          status: isAccepted ? 'ACCEPTED' : 'BIDDING',
+          created_at: new Date(Date.now() - ((100 - i) * 3600 * 1000) + (b * 600 * 1000)).toISOString()
+        });
+      }
+    }
+    return allBids;
+  })();
 
   /* ================================================================
    * 8. API 계층 (배포: Supabase PostgreSQL REST / 로컬·테스트: localStorage Mock)
