@@ -234,11 +234,12 @@
         <input type="text" id="speed-region" placeholder="시/도 및 시·군·구 상세 입력 (예: 서울 노원구 상계동)" value="서울 노원구" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
       </div>
 
-      <!-- 2단계: 필요한 제품 선택 -->
+      <!-- 2단계: 필요한 제품 및 규격/사이즈 선택 -->
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
         <label style="display:block;font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:6px;">
           <span style="color:#0f766e;">2.</span> 어떤 제품·공사가 필요하신가요? *
         </label>
+        <!-- 제품 대분류 선택 칩 -->
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
           <button type="button" class="speed-tag-btn active" onclick="setSpeedItem('초음파 세척기')">초음파 세척기</button>
           <button type="button" class="speed-tag-btn" onclick="setSpeedItem('업소용 식기세척기')">업소용 식기세척기</button>
@@ -248,7 +249,24 @@
           <button type="button" class="speed-tag-btn" onclick="setSpeedItem('주방 바닥 방수')">주방 방수</button>
           <button type="button" class="speed-tag-btn" onclick="setSpeedItem('')">직접입력</button>
         </div>
-        <input type="text" id="speed-item" placeholder="제품명 또는 공사명 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
+
+        <!-- 초음파 세척기 규격/사이즈 원클릭 칩 (사장님 맞춤형) -->
+        <div id="ultrasonic-size-chips" style="background:#ffffff;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:0.76rem;font-weight:800;color:#0f766e;">초음파 세척기 규격(가로 사이즈) 선택:</span>
+            <span style="font-size:0.72rem;color:#64748b;">주방 싱크볼 길이에 맞춰 선택</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            <button type="button" class="size-chip active" onclick="setSpeedSize('600형 (소형/카페)')" style="background:#0f766e;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">600형 (소형/카페)</button>
+            <button type="button" class="size-chip" onclick="setSpeedSize('800형 (표준 1구)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">800형 (표준 1구)</button>
+            <button type="button" class="size-chip" onclick="setSpeedSize('1000형 (중형 식당)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1000형 (중형 식당)</button>
+            <button type="button" class="size-chip" onclick="setSpeedSize('1200형 (대형/고기집)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1200형 (대형/고기집)</button>
+            <button type="button" class="size-chip" onclick="setSpeedSize('1500형 이상 (특대형)')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">1500형 이상 (특대형)</button>
+            <button type="button" class="size-chip" onclick="setSpeedSize('가정용 빌트인 싱크볼')" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 9px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">가정용 빌트인</button>
+          </div>
+        </div>
+
+        <input type="text" id="speed-item" placeholder="제품명 또는 공사명 입력 (예: 초음파 세척기 1000형)" value="초음파 세척기 [600형 (소형/카페)]" required style="width:100%;height:44px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:700;box-sizing:border-box;">
       </div>
 
       <!-- 3단계: 연락처 -->
