@@ -755,33 +755,81 @@ body {
 @media (min-width: 960px) {
   .top-stage { padding: 18px 0 26px; }
   .hero-intake-grid {
-    grid-template-columns: 1fr 375px;
+    grid-template-columns: 1fr 378px;
     gap: 36px;
     align-items: start;
   }
-  /* PC 우측 수리 접수창: 스마트폰 규격 프레임 (375px 폭) */
+  /* PC 우측 수리 접수창: 최신 삼성 갤럭시 S 울트라 실사 프레임 (각진 티타늄 메탈 베젤 + 중앙 펀치홀 + 측면 물리 버튼) */
   .intake-col.phone-frame-card {
-    width: 375px;
-    max-width: 375px;
+    width: 378px;
+    max-width: 378px;
     margin: 0;
-    padding: 14px 16px 18px !important;
-    border-radius: 34px !important;
-    border: 7px solid #18181b !important;
-    background: #fff7ed !important;
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
+    padding: 10px 16px 14px !important;
+    border-radius: 18px !important;
+    border: 6px solid #2b2c30 !important;
+    outline: 2px solid #8a8d93;
+    background: linear-gradient(180deg, #fff9f2 0%, #fff7ed 100%) !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.35) inset,
+      0 22px 48px rgba(15, 23, 42, 0.22),
+      0 4px 12px rgba(15, 23, 42, 0.12) !important;
     position: relative;
   }
-  .phone-notch-bar {
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    margin: 0 0 10px;
+  /* 우측 측면 갤럭시 볼륨 키 */
+  .intake-col.phone-frame-card::before {
+    content: "";
+    position: absolute;
+    right: -10px;
+    top: 86px;
+    width: 4px;
+    height: 62px;
+    background: linear-gradient(180deg, #9ca3af 0%, #4b5563 50%, #9ca3af 100%);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 1px 0 2px rgba(0,0,0,0.25);
   }
-  .phone-notch-pill {
-    width: 84px;
-    height: 16px;
-    background: #18181b;
+  /* 우측 측면 갤럭시 전원 버튼 */
+  .intake-col.phone-frame-card::after {
+    content: "";
+    position: absolute;
+    right: -10px;
+    top: 164px;
+    width: 4px;
+    height: 36px;
+    background: linear-gradient(180deg, #9ca3af 0%, #4b5563 50%, #9ca3af 100%);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 1px 0 2px rgba(0,0,0,0.25);
+  }
+  /* 상단 갤럭시 상태바 + 중앙 원형 펀치홀 카메라 */
+  .galaxy-status-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 8px;
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #334155;
+    position: relative;
+  }
+  .galaxy-punch-hole {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #2563eb 0%, #0f172a 45%, #000000 100%);
+    box-shadow: 0 0 0 2px #1e293b;
+    position: absolute;
+    left: 50%;
+    top: 1px;
+    transform: translateX(-50%);
+  }
+  /* 하단 One UI 제스처 바 */
+  .galaxy-gesture-bar {
+    display: block !important;
+    width: 108px;
+    height: 4px;
+    background: #94a3b8;
     border-radius: 999px;
+    margin: 12px auto 0;
+    opacity: 0.7;
   }
 }
 
