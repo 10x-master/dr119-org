@@ -35,9 +35,45 @@
     /* 시각적 검색 박스 (어떤 물건을 찾고 계십니까?) */
     .auc-search-hero-box { max-width: 860px; margin: -26px auto 20px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 18px 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); position: relative; z-index: 10; }
     .auc-search-label { display: block; font-size: 1.12rem; font-weight: 900; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-    .auc-search-input-wrap { display: flex; gap: 8px; }
-    .auc-search-input { flex: 1; height: 48px; padding: 0 16px; border: 2px solid var(--auc-teal); border-radius: 10px; font-size: 0.96rem; outline: none; box-sizing: border-box; }
-    .auc-search-btn { height: 48px; padding: 0 24px; background: var(--auc-teal); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+    .auc-search-input-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+    .auc-search-input { flex: 1; min-width: 220px; height: 48px; padding: 0 16px; border: 2px solid var(--auc-teal); border-radius: 10px; font-size: 0.96rem; outline: none; box-sizing: border-box; }
+    .auc-search-btn { height: 48px; padding: 0 20px; background: var(--auc-teal); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+    .auc-create-direct-btn { height: 48px; padding: 0 20px; background: #ea1917; color: #ffffff; border: none; border-radius: 10px; font-weight: 900; font-size: 0.95rem; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(234,25,23,0.25); transition: transform 0.15s; }
+    .auc-create-direct-btn:hover { background: #dc2626; transform: translateY(-1px); }
+
+    /* 모바일 하단 플로팅 역경매 등록 바 */
+    .auc-floating-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-top: 1px solid var(--auc-border);
+      padding: 10px 16px;
+      z-index: 99;
+      display: flex;
+      justify-content: center;
+      box-shadow: 0 -3px 12px rgba(0,0,0,0.06);
+    }
+    .auc-floating-btn {
+      width: 100%;
+      max-width: 600px;
+      height: 48px;
+      background: #ea1917;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(234,25,23,0.3);
+    }
     .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
     .quick-tag-label { font-size: 0.8rem; color: var(--auc-muted); font-weight: 700; }
     .quick-tag-btn { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.15s; }
@@ -137,16 +173,32 @@
   <!-- 시각적 검색 배너 (어떤 물건을 찾고 계십니까?) -->
   <div class="auc-search-hero-box">
     <label for="auc-search-kw" class="auc-search-label">
-      <span>🔍</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--auc-teal)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <span>어떤 물건·공사를 찾고 계십니까?</span>
     </label>
     <div class="auc-search-input-wrap">
-      <input type="text" id="auc-search-kw" class="auc-search-input" placeholder="품목명, 공사종류, 또는 지역 검색 (예: 초음파 세척기, 닥트, 마포구, 식기세척기)">
+      <input type="text" id="auc-search-kw" class="auc-search-input" placeholder="품목명, 공사종류, 또는 지역 검색 (예: 초음파 세척기, 닥트, 노원구, 식기세척기)">
       <button type="button" id="btn-auc-search" class="auc-search-btn">검색</button>
+      <button type="button" class="auc-create-direct-btn" onclick="openDirectRegister('EQUIPMENT', '초음파 세척기 구매 및 설치', '서울 노원구')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        + 내 물건 역경매 등록
+      </button>
     </div>
+
+    <!-- 신규 사장님 등록 유도 안내 스트립 -->
+    <div style="margin-top:14px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:0.88rem;color:#0f766e;font-weight:700;display:flex;align-items:center;gap:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <span><b>초음파 세척기·주방설비 찾으시나요?</b> 사장님의 희망 지역(예: 서울 노원구)과 스펙을 올리시면 전국 업체들이 실시간 최저가를 제시합니다.</span>
+      </div>
+      <button type="button" onclick="openDirectRegister('EQUIPMENT', '초음파 세척기 구매 및 설치', '서울 노원구')" style="background:#0f766e;color:#ffffff;border:none;border-radius:8px;padding:8px 16px;font-size:0.86rem;font-weight:800;cursor:pointer;white-space:nowrap;">
+        서울 노원구 초음파 세척기 등록하기 →
+      </button>
+    </div>
+
     <div class="quick-tags">
       <span class="quick-tag-label">추천 검색어:</span>
-      <button type="button" class="quick-tag-btn" data-kw="초음파 세척기">🔥 초음파 세척기 1000형</button>
+      <button type="button" class="quick-tag-btn" data-kw="초음파 세척기">초음파 세척기 1000형</button>
       <button type="button" class="quick-tag-btn" data-kw="식기세척기">식기세척기</button>
       <button type="button" class="quick-tag-btn" data-kw="닥트">닥트·후드 환기</button>
       <button type="button" class="quick-tag-btn" data-kw="그리스트랩">그리스트랩 배관</button>
@@ -705,10 +757,46 @@
       }
       if (frKmInput) frKmInput.addEventListener('input', updateFreight);
 
+      // 원클릭 역경매 요청 탭 이동 및 필드 사전 입력 함수
+      window.openDirectRegister = function (category, title, region) {
+        var reqBtn = document.querySelector('[data-tab="tab-request"]');
+        if (reqBtn) reqBtn.click();
+        if (category && document.getElementById('req-category')) document.getElementById('req-category').value = category;
+        if (title && document.getElementById('req-title')) document.getElementById('req-title').value = title;
+        if (region && document.getElementById('req-region')) document.getElementById('req-region').value = region;
+        
+        var formBox = document.getElementById('auc-request-form');
+        if (formBox) {
+          formBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(function () {
+            var targetInput = document.getElementById('req-phone') || document.getElementById('req-title');
+            if (targetInput) targetInput.focus();
+          }, 400);
+        }
+      };
+
+      // URL 파라미터로 즉시 등록 화면 진입 지원 (?action=request)
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'request' || urlParams.get('target_dealer')) {
+        var reqBtn = document.querySelector('[data-tab="tab-request"]');
+        if (reqBtn) reqBtn.click();
+        if (urlParams.get('category')) document.getElementById('req-category').value = urlParams.get('category');
+        if (urlParams.get('item')) document.getElementById('req-title').value = urlParams.get('item');
+        if (urlParams.get('region')) document.getElementById('req-region').value = urlParams.get('region');
+      }
+
       // 초기 실행
       renderAuctions();
       updateFreight();
     })();
   </script>
+
+  <!-- 모바일 하단 플로팅 역경매 등록 바로가기 바 -->
+  <aside class="auc-floating-bar">
+    <button type="button" class="auc-floating-btn" onclick="openDirectRegister('EQUIPMENT', '초음파 세척기 구매 및 설치', '서울 노원구')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <span>내가 필요한 설비 역경매 등록하기 (1분 소요)</span>
+    </button>
+  </aside>
 </body>
 </html>
