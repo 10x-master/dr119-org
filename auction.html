@@ -576,15 +576,15 @@
         </div>
       </div>
       <div class="cat-filters">
-        <button type="button" class="cat-chip active" data-cat="ALL">전체 보기 (100)</button>
-        <button type="button" class="cat-chip" data-cat="EQUIPMENT">주방기기 (42)</button>
-        <button type="button" class="cat-chip" data-cat="FACILITY">주방설비 (30)</button>
-        <button type="button" class="cat-chip" data-cat="INTERIOR">주방인테리어 (20)</button>
-        <button type="button" class="cat-chip" data-cat="SUPPLIES">친환경세제·소모품 (8)</button>
+        <button type="button" class="cat-chip active" data-cat="ALL">전체 보기</button>
+        <button type="button" class="cat-chip" data-cat="EQUIPMENT">주방기기</button>
+        <button type="button" class="cat-chip" data-cat="FACILITY">주방설비</button>
+        <button type="button" class="cat-chip" data-cat="INTERIOR">주방인테리어</button>
+        <button type="button" class="cat-chip" data-cat="SUPPLIES">친환경세제·소모품</button>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.86rem;color:var(--auc-muted);">
-        <span id="auc-count-summary">전체 <strong>100건</strong> 중 실시간 매칭 진행 중</span>
+        <span id="auc-count-summary">실시간 역경매 내역을 불러오는 중…</span>
         <span style="font-weight:700;color:var(--auc-teal);">✓ 100% 안심 마스킹 보호</span>
       </div>
 
@@ -593,8 +593,8 @@
       </div>
 
       <!-- 12개씩 더보기 버튼 -->
-      <button type="button" id="btn-load-more" class="auc-load-more-btn">
-        더 많은 실시간 경매 보기 (12 / 100) ▼
+      <button type="button" id="btn-load-more" class="auc-load-more-btn" style="display:none;">
+        더 많은 실시간 경매 보기 ▼
       </button>
     </section>
 
@@ -952,7 +952,7 @@
           }
 
           if (!filtered.length) {
-            container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px 0;font-size:0.95rem;">검색 조건에 맞는 진행 중인 역경매가 없습니다.<br>상단에서 다른 키워드로 검색해 보세요.</p>';
+            container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px 0;font-size:0.95rem;">현재 등록된 실시간 역경매가 없습니다.<br>상단에서 첫 번째 최저가 비교 견적을 신청해 보세요.</p>';
             if (loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
           }
@@ -994,7 +994,7 @@
                   '</div>' +
                 '</div>' +
                 '<div class="auc-dealer-preview">' +
-                  '참여업체: <strong>동대*****</strong>, <strong>탑소****</strong> 외 경쟁 중' +
+                  ((a.bid_count || 0) > 0 ? ('승인 공급사 <strong>' + a.bid_count + '개 사</strong> 입찰 참여 중') : '승인 공급사 첫 입찰 대기 중') +
                 '</div>' +
                 '<div class="auc-btn-group">' +
                   '<button type="button" class="auc-btn primary" onclick="openAuctionDetail(\'' + a.auction_id + '\')">입찰 비교 및 견적 참여</button>' +
