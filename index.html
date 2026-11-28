@@ -668,12 +668,66 @@
           </article>
         </div>
 
+        <!-- 영업담당자 전용 QR 스티커 · 카톡 추천 링크 수익 쉐어링 구조 & 즉시 체험 -->
+        <div id="sales-qr-studio" style="margin:28px 0 32px;padding:24px 0;border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;">
+          <div style="text-align:center;margin-bottom:20px;">
+            <span style="display:inline-block;font-size:0.78rem;font-weight:800;color:#ea1917;letter-spacing:0.04em;margin-bottom:6px;">무자본 창업 · 고수익 부업 영업조직 확대 프로그램</span>
+            <h3 style="margin:0 0 8px;font-size:clamp(1.28rem,2.3vw,1.65rem);font-weight:900;color:#111111;letter-spacing:-0.03em;">
+              내 QR 스티커 한 장 · 카톡 링크 하나로 <span style="color:#ea1917;">평생 추가 사업 수익 쉐어링</span>
+            </h3>
+            <p style="margin:0 auto;max-width:740px;font-size:0.92rem;color:#555555;line-height:1.55;">
+              영업담당자가 본인 전용 QR 스티커를 매장에 부착하거나 카톡으로 링크를 보내면, 고객이 수리 접수하는 순간 <strong>추천인(영업) 코드가 자동 귀속</strong>되어 수리 공임부터 신품 교체·세제 구독·주방설비 역경매·인테리어까지 추가 사업 수익을 지속적으로 배분받습니다.
+            </p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:22px;">
+            <div style="border-top:2px solid #ea1917;padding-top:12px;">
+              <strong style="display:block;font-size:0.98rem;color:#111111;margin-bottom:4px;">01. 내 QR 스티커 제작 · 카톡 링크 발송</strong>
+              <p style="margin:0;font-size:0.84rem;color:#555555;line-height:1.5;">본인 영업코드로 인쇄용 QR 스티커를 만들어 식당 세척기에 부착하거나, 사장님 카톡으로 추천 링크를 바로 보냅니다.</p>
+            </div>
+            <div style="border-top:2px solid #ea1917;padding-top:12px;">
+              <strong style="display:block;font-size:0.98rem;color:#111111;margin-bottom:4px;">02. 입장 즉시 추천인 코드 자동 귀속</strong>
+              <p style="margin:0;font-size:0.84rem;color:#555555;line-height:1.5;">고객이 QR 스캔이나 카톡 링크로 들어와 수리 접수하면 별도 입력 없이 영업코드가 자동 기록(First-Touch 영구 귀속)됩니다.</p>
+            </div>
+            <div style="border-top:2px solid #ea1917;padding-top:12px;">
+              <strong style="display:block;font-size:0.98rem;color:#111111;margin-bottom:4px;">03. 수리 → 신품·세제·역경매·인테리어 수익 공유</strong>
+              <p style="margin:0;font-size:0.84rem;color:#555555;line-height:1.5;">1회성 수리로 끝나지 않고 해당 매장에서 발생하는 신품 교체, 친환경 세제 정기구독, 주방설비 역경매, 인테리어 계약까지 수익을 쉐어링합니다.</p>
+            </div>
+          </div>
+
+          <!-- 영업코드 QR 스티커 & 카톡 추천 링크 즉시 생성기 -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:center;padding:18px 20px;border:1px solid #e5e5e5;border-radius:14px;background:#ffffff;">
+            <div>
+              <label for="sales-code-input" style="display:block;font-size:0.84rem;font-weight:800;color:#111111;margin-bottom:6px;">내 영업코드(추천인 코드) 미리 만들기</label>
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <input type="text" id="sales-code-input" value="SEOUL_01" placeholder="영문/숫자 코드 (예: PARK01)" maxlength="24" style="flex:1;min-width:0;height:40px;padding:0 12px;border:1px solid #d4d4d4;border-radius:8px;font-size:0.9rem;font-weight:700;text-transform:uppercase;">
+                <button type="button" id="btn-gen-sales-qr" style="height:40px;padding:0 14px;background:#111111;color:#ffffff;border:none;border-radius:8px;font-size:0.84rem;font-weight:800;cursor:pointer;white-space:nowrap;">스티커 생성</button>
+              </div>
+              <div style="font-size:0.8rem;color:#555555;margin-bottom:6px;">카톡 공유용 전용 추천 링크:</div>
+              <div id="sales-ref-link" style="font-family:ui-monospace,monospace;font-size:0.82rem;color:#0f766e;font-weight:700;padding:8px 10px;border:1px solid #ccfbf1;border-radius:8px;background:#f0fdfa;word-break:break-all;margin-bottom:10px;">https://dr119.org/?agent_id=SEOUL_01</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" id="btn-copy-sales-kakao" style="height:38px;padding:0 14px;background:#fee500;color:#191919;border:none;border-radius:8px;font-size:0.82rem;font-weight:800;cursor:pointer;">카톡 추천 문구·링크 복사</button>
+                <button type="button" id="btn-print-sales-sticker" style="height:38px;padding:0 14px;background:#ffffff;color:#111111;border:1px solid #d4d4d4;border-radius:8px;font-size:0.82rem;font-weight:800;cursor:pointer;">방문 부착용 QR 스티커 인쇄</button>
+              </div>
+              <p id="sales-qr-msg" style="margin:8px 0 0;font-size:0.78rem;color:#0f766e;font-weight:700;" aria-live="polite"></p>
+            </div>
+            <div id="sales-sticker-card" style="border:2px solid #111111;border-radius:12px;padding:14px 16px;text-align:center;max-width:280px;margin:0 auto;background:#ffffff;">
+              <div style="font-size:0.74rem;font-weight:800;color:#ea1917;margin-bottom:2px;">모든 초음파 세척기 긴급 AS</div>
+              <div style="font-size:1.12rem;font-weight:900;color:#111111;margin-bottom:8px;">Dr.<span style="color:#ea1917;">119</span> · (주)탑소닉</div>
+              <img id="sales-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=https%3A%2F%2Fdr119.org%2F%3Fagent_id%3DSEOUL_01" alt="영업 파트너 전용 QR 스티커" width="136" height="136" style="display:block;margin:0 auto 8px;border:1px solid #e5e5e5;border-radius:6px;padding:4px;background:#ffffff;" loading="lazy">
+              <div style="font-size:0.78rem;font-weight:800;color:#111111;">카메라로 스캔 → 10초 수리 접수</div>
+              <div style="font-size:0.74rem;color:#64748b;margin-top:3px;">담당 영업코드: <strong id="sales-sticker-code" style="color:#ea1917;">SEOUL_01</strong></div>
+            </div>
+          </div>
+        </div>
+
         <div class="b2b-apply-strip" style="background:#ea1917;color:#ffffff;border:none;">
-          <h3 class="b2b-apply-title" style="color:#ffffff;font-size:clamp(1.85rem, 3vw, 2.35rem);font-weight:400;text-align:center;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.25;">지역 설치 대리점 · 수리 닥터 가입 상담</h3>
-          <p class="b2b-apply-sub" style="color:rgba(255,255,255,0.9);text-align:center;margin:0 0 18px;">트랙과 희망 지역을 남기시면 담당팀이 교육 일정과 정산 기준을 안내해 드립니다.</p>
+          <h3 class="b2b-apply-title" style="color:#ffffff;font-size:clamp(1.85rem, 3vw, 2.35rem);font-weight:400;text-align:center;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.25;">무자본 창업·부업 영업 파트너 · 지역 대리점 가입 상담</h3>
+          <p class="b2b-apply-sub" style="color:rgba(255,255,255,0.9);text-align:center;margin:0 0 18px;">영업코드 발급, QR 스티커 영업, 수익 쉐어링 구조를 본사 및 영업대행(중소기업사업전환지원단)이 1:1 안내해 드립니다.</p>
           <form id="partner-apply-form" class="b2b-apply-form" novalidate>
             <label class="b2b-field" style="color:#ffffff;">가입 구분
               <select id="pa-role" name="role" required style="background:#ffffff;color:#111111;">
+                <option value="SALES_PARTNER">무자본 창업·부업 영업 파트너 (QR 스티커·카톡 영업)</option>
                 <option value="REPAIR_DOCTOR">수리 닥터 (설치점·기술자)</option>
                 <option value="LOCAL_CENTER">지역 설치 대리점 (대리점·총판)</option>
               </select>
@@ -768,19 +822,18 @@
           <span class="brand-text">Dr.<strong>119</strong></span>
         </a>
         <div class="footer-orgs-row">
-          <span class="footer-org-item"><strong>중소기업사업지원단</strong></span>
+          <span class="footer-org-item"><strong>주식회사 탑소닉 (메인 운영·기술 자문)</strong></span>
           <span class="footer-org-divider" aria-hidden="true">|</span>
-          <span class="footer-org-item"><strong>주식회사 웰글로벌</strong></span>
+          <span class="footer-org-item"><strong>영업대행: 중소기업사업전환지원단</strong></span>
         </div>
         <div class="footer-company-info">
-          <p>상호: 주식회사 웰글로벌 (Well Global) · CEO: 최광웅 · 사업자등록번호: 217-88-03660</p>
-          <p>대표전화: <a href="tel:1661-0783">1661-0783</a> · <a href="tel:02-6402-5100">02-6402-5100</a> · 핫라인: <a href="tel:010-5553-8250">010-5553-8250</a> (평일 10:00~17:00, 점심 12:00~13:00)</p>
-          <p>제1공장(본사): (11486) 경기도 양주시 삼숭로58번길 84-9 (삼숭동) D동 1층</p>
-          <p>제2공장(리본팩토리): 경기도 화성시 동탄지성로412번길 12-10 (반월동) · 개인정보보호책임자: 웰글로벌 (cyshop@naver.com)</p>
+          <p>메인 주관사: <strong>주식회사 탑소닉 (Topsonic)</strong> · 고객센터: <a href="tel:1811-7038">1811-7038</a></p>
+          <p>영업대행: <strong>중소기업사업전환지원단</strong> · 수리 접수 및 파트너 상담: <a href="tel:1661-0783">1661-0783</a> · <a href="tel:010-5553-8250">010-5553-8250</a> (평일 10:00~17:00)</p>
+          <p>전국 초음파 세척기 실비 수리 · 무자본 창업/부업 영업조직 확대 · 주방설비 역경매 통합 플랫폼</p>
         </div>
-        <p class="footer-copy">© <span id="year"></span> Dr.119 · 주식회사 웰글로벌. All rights reserved.</p>
+        <p class="footer-copy">© <span id="year"></span> Dr.119 · 주식회사 탑소닉. All rights reserved.</p>
         <p style="margin:6px 0 0;font-size:0.86rem;color:#ea1917;font-weight:400;letter-spacing:-0.02em;background:transparent;">
-          초음파 세척기 수리 견적은 주식회사 탑소닉(고객센터: <a href="tel:1811-7038" style="color:#ea1917;text-decoration:underline;">1811-7038</a>)의 기술 자문을 받습니다.
+          초음파 세척기 수리 견적 및 핵심 부품 기술은 주식회사 탑소닉(고객센터: <a href="tel:1811-7038" style="color:#ea1917;text-decoration:underline;">1811-7038</a>)이 주관합니다.
         </p>
       </div>
       <div class="footer-side">

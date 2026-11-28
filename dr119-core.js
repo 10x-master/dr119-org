@@ -75,11 +75,11 @@
     return /^[A-Z0-9_-]{2,32}$/.test(v) ? v : null;
   }
 
-  /** URL 쿼리스트링에서 agent_id 파싱 */
+  /** URL 쿼리스트링에서 agent_id / ref / code 파싱 */
   function parseAgentId(search) {
     try {
       var params = new URLSearchParams(search || '');
-      return sanitizeAgentId(params.get('agent_id'));
+      return sanitizeAgentId(params.get('agent_id') || params.get('ref') || params.get('code'));
     } catch (e) {
       return null;
     }

@@ -557,10 +557,13 @@
         paMsg.hidden = false;
         return;
       }
+      var roleLabel = role === 'LOCAL_CENTER'
+        ? '지역 오프라인 수리 센터(대리점·총판)'
+        : (role === 'SALES_PARTNER' ? '무자본 창업·부업 영업 파트너(QR·카톡 영업)' : '수리 닥터(설치점·기술자)');
       var lead = {
         id: 'LEAD-' + Date.now().toString(36).toUpperCase(),
         role: role,
-        role_label: role === 'LOCAL_CENTER' ? '지역 오프라인 수리 센터(대리점·총판)' : '수리 닥터(설치점·기술자)',
+        role_label: roleLabel,
         name: name,
         region: region,
         phone: normPhone,
@@ -1042,5 +1045,58 @@
       try { localStorage.setItem('dr119_app_installed', '1'); } catch (e) {}
       hideInstallButtons();
     });
+  })();
+
+  /* ================================================================
+   * 12) 영업 파트너 전용 QR 스티커 · 카톡 추천 링크 즉시 생성기
+   * ================================================================ */
+  (function initSalesQrStudio() {
+    var codeInput = document.getElementById('sales-code-input');
+    var genBtn = document.getElementById('btn-gen-sales-qr');
+    var linkEl = document.getElementById('sales-ref-link');
+    var qrImg = document.getElementById('sales-qr-img');
+    var stickerCodeEl = document.getElementById('sales-sticker-code');
+    var copyBtn = document.getElementById('btn-copy-sales-kakao');
+    var printBtn = document.getElementById('btn-print-sales-sticker');
+    var msgEl = document.getElementById('sales-qr-msg');
+    if (!codeInput || !linkEl) return;
+
+    function updateSticker() {
+      var clean = D.sanitizeAgentId(codeInput.value) || 'SEOUL_01';
+      codeInput.value = clean;
+      var url = 'https://dr119.org/?agent_id=' + encodeURIComponent(clean);
+      linkEl.textContent = url;
+      if (stickerCodeEl) stickerCodeEl.textContent = clean;
+      if (qrImg) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=' + encodeURIComponent(url);
+      if (msgEl) msgEl.textContent = '✓ 영업코드 [' + clean + '] QR 스티커 및 추천 링크가 준비되었습니다.';
+      return { code: clean, url: url };
+    }
+
+    if (genBtn) genBtn.addEventListener('click', updateSticker);
+    codeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); updateSticker(); } });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var info = updateSticker();
+        var kakaoText = '[Dr.119 · (주)탑소닉 초음파 세척기 긴급 수리]\n모든 브랜드 초음파 세척기 부품 실비·투명 공임 수리 접수!\n아래 링크로 바로 접수하시면 담당 영업파트너(' + info.code + ')가 우선 안내해 드립니다.\n' + info.url;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(kakaoText).then(function () {
+            if (msgEl) msgEl.textContent = '✓ 카톡 공유용 추천 문구와 링크가 복사되었습니다. 사장님 카톡방에 바로 붙여넣으세요!';
+          });
+        } else {
+          if (msgEl) msgEl.textContent = '복사할 링크: ' + info.url;
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        var info = updateSticker();
+        var w = window.open('', '_blank', 'width=420,height=520');
+        if (!w) return;
+        w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>Dr.119 QR 스티커 - ' + info.code + '</title></head><body style="font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;"><div style="border:3px solid #111;border-radius:14px;padding:24px;text-align:center;width:280px;"><div style="color:#ea1917;font-weight:800;font-size:13px;">모든 초음파 세척기 긴급 AS</div><div style="font-size:22px;font-weight:900;margin:4px 0 12px;">Dr.<span style="color:#ea1917;">119</span> · (주)탑소닉</div><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(info.url) + '" width="180" height="180"><div style="font-size:14px;font-weight:800;margin-top:10px;">카메라 스캔 → 10초 수리 접수</div><div style="font-size:12px;color:#555;margin-top:4px;">영업코드: <strong style="color:#ea1917;">' + info.code + '</strong> · 1811-7038</div></div><script>setTimeout(function(){window.print();},400);</script></body></html>');
+        w.document.close();
+      });
+    }
   })();
 })();

@@ -30,13 +30,13 @@ try {
       bgHead: getComputedStyle(document.querySelector('.site-header')).backgroundColor,
       priceLeak: /40만|400,000|착불/.test(t),
       banners: t.includes('한국AI인테리어공간협회') && t.includes('중소기업사업전환지원단') && t.includes('투데이 플랫폼'),
-      excludesOrion: t.includes('삼숭로58번길') && t.includes('1661-0783'),
+      excludesOrion: t.includes('탑소닉') && t.includes('1661-0783'),
       noAiLabels: !/Transparent Cost|HQ Quality|Customer Protection|Answer Engine|SYSTEM 01|POLICY 01|PARTNER TRACK|COOPERATIVE & SUPPORT/i.test(t),
       noEmojis: !/[📸🖼️🎙️⏹️]/.test(t),
       hasBlueprint: !!document.querySelector('.washer-blueprint'),
       controls: !!(document.getElementById('camera-media') && document.getElementById('symptom_note') && document.getElementById('voice-btn') && document.getElementById('kakao-sync-btn') && document.getElementById('region') && !document.querySelector('input[name="service_type"]') && document.getElementById('floating-install-btn') && document.querySelector('link[rel="manifest"]')),
-      footerOrgs: t.includes('중소기업사업지원단') && t.includes('주식회사 웰글로벌'),
-      companyInfo: t.includes('최광웅') && t.includes('217-88-03660') && t.includes('삼숭로58번길 84-9') && t.includes('1661-0783') && t.includes('010-5553-8250'),
+      footerOrgs: t.includes('중소기업사업전환지원단') && t.includes('주식회사 탑소닉') && !t.includes('웰글로벌'),
+      companyInfo: t.includes('영업대행') && t.includes('1811-7038') && t.includes('1661-0783') && t.includes('010-5553-8250'),
       mobileHeader: (() => {
         const logo = document.querySelector('.site-header .brand')?.getBoundingClientRect();
         const mTitle = document.querySelector('.mobile-header-title')?.getBoundingClientRect();

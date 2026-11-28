@@ -768,12 +768,23 @@ body {
     border-radius: 18px !important;
     border: 6px solid #2b2c30 !important;
     outline: 2px solid #8a8d93;
-    background: linear-gradient(180deg, #fff9f2 0%, #fff7ed 100%) !important;
+    background: linear-gradient(180deg, #fdf3e4 0%, #f8e8d0 100%) !important;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.35) inset,
       0 22px 48px rgba(15, 23, 42, 0.22),
       0 4px 12px rgba(15, 23, 42, 0.12) !important;
     position: relative;
+  }
+  .intake-col.phone-frame-card .form-section,
+  .intake-col.phone-frame-card .as-form,
+  .intake-col.phone-frame-card .step {
+    background: transparent !important;
+  }
+  .intake-col.phone-frame-card .upload-btn,
+  .intake-col.phone-frame-card .symptom-chip,
+  .intake-col.phone-frame-card .symptom-input-wrap,
+  .intake-col.phone-frame-card .phone-input {
+    background: #ffffff;
   }
   /* 우측 측면 갤럭시 볼륨 키 */
   .intake-col.phone-frame-card::before {
